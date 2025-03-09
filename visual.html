@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Bracket</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0px;
+            background-color: #f4f4f9;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .bracket-container {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+        .round {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            width: 180px;
+        }
+        .match {
+            width: 120px;
+            height: 40px;
+            padding: 10px;
+            margin: 30px 0; /* Controls spacing between matches */
+            background: #ddd;
+            border-radius: 5px;
+            text-align: center;
+            position: relative;
+        }
+        .champMatch{
+            width: 120px;
+            height: 40px;
+            padding: 10px;
+            margin: 30px 0; /* Controls spacing between matches */
+            background: #ddd;
+            border-radius: 5px;
+            text-align: center;
+            position: relative;
+        }
+        .champMatch::before{
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 100%;
+            width: 40px;
+            height: 2px;
+            background: black;
+        }
+        /* Horizontal Line */
+        .match::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 40px;
+            height: 2px;
+            background: black;
+        }
+        /* Vertical Line */
+        .match:nth-child(odd)::before {
+            content: "";
+            position: absolute;
+            left: 180px;
+            bottom: 30px;
+            width: 2px;
+            height: 200%;
+            background: black;
+        }
+    </style>
+</head>
+<body>
+    <script src = 'dataStorage.js'></script>
+    <a href="index.html" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Main Page
+    </a>
+    <h1>Tournament Bracket</h1>
+    <div id="bracketContainer" class="bracket-container"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const bracketsData = fetchBrackets();
+            const matches = fetchMatches();
+
+            const container = document.getElementById("bracketContainer");
+
+            function createBracket(tierName, bracket) {
+                const tierDiv = document.createElement("div");
+                tierDiv.classList.add("tier");
+
+                const title = document.createElement("h2");
+                title.textContent = tierName;
+                tierDiv.appendChild(title);
+
+                const bracketContainer = document.createElement("div");
+                bracketContainer.classList.add("bracket-container");
+
+                bracket.roundMatchIds.forEach((round, roundIndex) => {
+                    const roundDiv = document.createElement("div");
+                    roundDiv.classList.add("round");
+
+                    const roundTitle = document.createElement("h3");
+                    roundTitle.textContent = `Round ${roundIndex + 1}`;
+                    roundDiv.appendChild(roundTitle);
+
+                    round.forEach(matchId => {
+                        const match = matches.find(m => m.id == matchId) || {};
+                        const matchDiv = document.createElement("div");
+                        if(match.nextMatch !== null){
+                            matchDiv.classList.add("match");
+                        }else{
+                            matchDiv.classList.add("champMatch")
+                        }
+                        
+                        matchDiv.textContent = match.teamAID !== match.teamBID ? `${match.teamAID ?? 'TBD'} vs ${match.teamBID ?? 'TBD'}` : match.teamAID ?? 'TBD';
+                        roundDiv.appendChild(matchDiv);
+                    });
+
+                    bracketContainer.appendChild(roundDiv);
+                });
+
+                tierDiv.appendChild(bracketContainer);
+                container.appendChild(tierDiv);
+            }
+
+            Object.entries(bracketsData).forEach(([tier, bracket]) => {
+                createBracket(tier, bracket);
+            });
+        });
+    </script>
+</body>
+</html>

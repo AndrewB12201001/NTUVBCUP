@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTU Cup System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .navigation {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            text-decoration: none;
+            padding: 12px 24px;
+            background: white;
+            color: #2c3e50;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            background: #f8f9fa;
+        }
+
+        .nav-link i {
+            font-size: 1.2em;
+        }
+
+        /* Basic styles for the popup */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .popup-title {
+            color: #2c3e50;
+            margin: 0 0 25px 0;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .match-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+
+        .scrollable-matches {
+            max-height: calc(8 * 40px); /* Assuming each match row is 40px tall */
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Optional: Style for each match item */
+        .match-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .match-item:hover {
+            background: #f0f0f0;
+        }
+
+        .match-item-dated{
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            background: #e2e2e2;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .match-item-dated:hover {
+            background: #818181;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn-primary, .btn-secondary {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary{
+            background: red;
+            color: white;
+        }
+
+        .group-label, .team-label {
+            flex: 1 1 120px; /* Grow and shrink, min width 120px */
+            text-align: center;
+        }
+
+        .set-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .date-official-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .official-search {
+            min-width: 150px;
+            flex: 1;
+        }
+        .delete-match {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #cf4d4d;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        /* Make the layout adjust for smaller screens */
+        @media (max-width: 768px) {
+            .match-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .group-label, .team-label, .set-container, .date-official-container {
+                width: 100%;
+            }
+
+            .set-container {
+                justify-content: center;
+            }
+
+            .delete-match {
+                align-self: center;
+                width: 100%;
+            }
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .btn-secondary:hover {
+            background: rgb(222, 1, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .popup {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        /* Calendar Styles */
+        .calendar-container {
+            margin-top: 20px;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .weekday-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 10px;
+            background: #f0f0f0;
+        }
+
+        .calendar-day {
+            min-height: 100px;
+            border: 1px solid #ddd;
+            padding: 5px;
+            background: white;
+        }
+
+        .calendar-day.other-month {
+            background: #f5f5f5;
+            color: #999;
+        }
+
+        .calendar-date {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .calendar-matches {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .calendar-match {
+            background: #e0e0e0;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .calendar-match:hover{
+            background: #b7b7b7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .calendar-match:dragging{
+            opacity: 50%;
+        }
+
+        #calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* second popup */
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .match-search {
+            padding: 8px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 200px;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            color: #888;
+            cursor: pointer;
+        }
+
+        /* Make it more responsive */
+        @media (max-width: 768px) {
+            .action-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-container {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .match-search {
+                width: 100%;
+            }
+        }
+
+    </style>
+
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <script src = 'dataStorage.js'></script>
+    <h1>Welcome to the NTU Cup System</h1>
+    <p>Double click calender to add matches</p>
+    <div class = "navigation">
+        <a href="sortMatchings.html" class="nav-link">
+            <i class="fas fa-sort"></i>
+            Sort Matchings
+        </a>
+    </div>
+    <div class="navigation">
+        <a href="inputPlayGroups.html" class="nav-link">
+            <i class="fas fa-users"></i>
+            Input Playgroups
+        </a>
+        <a href="matchList.html" class="nav-link">
+            <i class="fas fa-calendar-alt"></i>
+            Matches List
+        </a>
+        <a href="visual.html" class="nav-link">
+            <i class="fas fa-chart-bar"></i>
+            Visual Matches
+        </a>
+        <a href="teamProfiles.html" class="nav-link">
+            <i class="fas fa-user-group"></i>
+            Team Profiles
+        </a>
+    </div>
+    <!-- Popup structure -->
+    <div class="popup-overlay hidden" id="popup-overlay"></div>
+    <div class="popup hidden" id="popup">
+        <div class="popup-content" id="popup-content"></div>
+    </div>
+
+    <!-- Add Calendar View -->
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <button id="prev-month" class="action-btn">Previous Month</button>
+            <h2 id="current-month"></h2>
+            <button id="next-month" class="action-btn">Next Month</button>
+        </div>
+        <div class="calendar-grid">
+            <div class="weekday-header">Sun</div>
+            <div class="weekday-header">Mon</div>
+            <div class="weekday-header">Tue</div>
+            <div class="weekday-header">Wed</div>
+            <div class="weekday-header">Thu</div>
+            <div class="weekday-header">Fri</div>
+            <div class="weekday-header">Sat</div>
+        </div>
+        <div id="calendar-days"></div>
+    </div>
+
+    <script>
+
+        let currentDate = new Date();
+
+        function renderCalendar() {
+            const matches = fetchMatches();
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Update header
+            document.getElementById('current-month').textContent = 
+                new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysContainer = document.getElementById('calendar-days');
+            daysContainer.innerHTML = '';   
+            
+            // Add padding days from previous month
+            const firstDayOfWeek = firstDay.getDay();
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            const prevMonth = month === 0 ? 11 : month - 1;
+            const prevMonthYear = month === 0 ? year - 1 : year;
+            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                const day = prevMonthLastDay - i;
+                const dayDiv = createDayDiv(prevMonthLastDay - i, true);
+                const dateStr = `${prevMonthYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                // Add matches for this day
+                const dayMatches = matches.filter(match => match.date === dateStr);
+                const matchesContainer = dayDiv.querySelector('.calendar-matches');
+                dayMatches.forEach(match => {
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = 'calendar-match';
+                    matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
+                    matchDiv.draggable = true;
+                    matchDiv.addEventListener('dragstart', () => {
+                        selectedMatch = match;
+                        matchDiv.classList.add('dragging');
+                    });
+                    
+                    matchDiv.addEventListener('dragend', () => {
+                        matchDiv.classList.remove('dragging');
+                    });
+                    matchesContainer.appendChild(matchDiv);
+                    //show the popup
+                    showMatchinfo(matchDiv, dateStr, match);
+                });
+                dayDiv.addEventListener("dblclick", async () => {
+                    showPopup(dateStr);  //for add match to date
+                });
+                dayDiv.addEventListener('dragend', () => {
+                    const matchIndex = matches.findIndex(m => 
+                        m.id === selectedMatch.id
+                    );
+                    matches[matchIndex].date = dateStr;
+                    saveMatches(matches);
+                    renderCalendar();
+                });
+                daysContainer.appendChild(dayDiv);
+            }
+            
+            // Add current month days
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayDiv = createDayDiv(day, false);
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                // Add matches for this day
+                const dayMatches = matches.filter(match => match.date === dateStr);
+                const matchesContainer = dayDiv.querySelector('.calendar-matches');
+                dayMatches.forEach(match => {
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = 'calendar-match';
+                    matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
+                    matchDiv.draggable = true;
+                    matchDiv.addEventListener('dragstart', () => {
+                        selectedMatch = match;
+                        console.log(selectedMatch);
+                        matchDiv.classList.add('dragging');
+                    });
+                    
+                    matchDiv.addEventListener('dragend', () => {
+                        matchDiv.classList.remove('dragging');
+                    });
+                    matchesContainer.appendChild(matchDiv);
+                    //show the popup
+                    showMatchinfo(matchDiv, dateStr, match);
+                });
+                dayDiv.addEventListener("dblclick", async () => {
+                    showPopup(dateStr);  //for add match to date
+                });
+                dayDiv.addEventListener('dragend', () => {
+                    const matchIndex = matches.findIndex(m => 
+                        m.id === selectedMatch.id
+                    );
+                    matches[matchIndex].date = dateStr;
+                    saveMatches(matches);
+                    renderCalendar();
+                });
+                daysContainer.appendChild(dayDiv);
+            }
+            
+            // Add padding days from next month
+            const lastDayOfWeek = lastDay.getDay();
+            const nextMonthYear = (month + 1 > 11) ? year + 1 : year;
+            for (let i = 1; i < 7 - lastDayOfWeek; i++) {
+                const dayDiv = createDayDiv(i, true);
+                const dateStr = `${nextMonthYear}-${String((month + 2)%12).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+                // Add matches for this day
+                const dayMatches = matches.filter(match => match.date === dateStr);
+                const matchesContainer = dayDiv.querySelector('.calendar-matches');
+                dayMatches.forEach(match => {
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = 'calendar-match';
+                    matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
+                    matchDiv.draggable = true;
+                    matchDiv.addEventListener('dragstart', () => {
+                        selectedMatch = match;
+                        matchDiv.classList.add('dragging');
+                    });
+                    
+                    matchDiv.addEventListener('dragend', () => {
+                        matchDiv.classList.remove('dragging');
+                    });
+                    matchesContainer.appendChild(matchDiv);
+                    //show the popup
+                    showMatchinfo(matchDiv, dateStr, match);
+                });
+                dayDiv.addEventListener("dblclick", async () => {
+                    showPopup(dateStr);  //for add match to date
+                });
+                dayDiv.addEventListener('dragend', () => {
+                    const matchIndex = matches.findIndex(m => 
+                        m.id === selectedMatch.id
+                    );
+                    matches[matchIndex].date = dateStr;
+                    saveMatches(matches);
+                    renderCalendar();
+                });
+                daysContainer.appendChild(dayDiv);
+            }
+        }
+
+        function createDayDiv(day, isOtherMonth) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = `calendar-day${isOtherMonth ? ' other-month' : ''}`;
+            dayDiv.innerHTML = `
+                <div class="calendar-date">${day}</div>
+                <div class="calendar-matches"></div>
+            `;
+            return dayDiv;
+        }
+
+        function showMatchinfo(matchDiv, dateStr, match){
+            const matches = fetchMatches();
+            matchDiv.addEventListener("click", () => {
+                document.getElementById("popup-overlay").style.display = 'block';
+                document.getElementById("popup").style.display = 'block';
+                document.getElementById('popup-content').innerHTML = `
+                    <h3 class="popup-title">Game Info</h3>
+                    <div class="match-container">
+                        <label>Game ID: ${match.id}</label>
+                        <label class="group-label">${match.group}</label>
+
+                        <div class="set-container">
+                            <label class="team-label">Team A: ${match.teamAID} Team B: ${match.teamBID}</label>
+                        </div>
+                        
+                        <div class="set-container">
+                            <label>Set 1:</label>
+                            <input type="text" maxlength="2" class="score-input" data-set="set1" data-team="0" value="${match.set1[0] || ''}">
+                            <span>:</span>
+                            <input type="text" maxlength="2" class="score-input" data-set="set1" data-team="1" value="${match.set1[1] || ''}">
+                        </div>
+
+                        <div class="set-container">
+                            <label>Set 2:</label>
+                            <input type="text" maxlength="2" class="score-input" data-set="set2" data-team="0" value="${match.set2[0] || ''}">
+                            <span>:</span>
+                            <input type="text" maxlength="2" class="score-input" data-set="set2" data-team="1" value="${match.set2[1] || ''}">
+                        </div>
+
+                        <div class="set-container">
+                            <label>Set 3:</label>
+                            <input type="text" maxlength="2" class="score-input" data-set="set3" data-team="0" value="${match.set3[0] || ''}">
+                            <span>:</span>
+                            <input type="text" maxlength="2" class="score-input" data-set="set3" data-team="1" value="${match.set3[1] || ''}">
+                        </div>
+
+                        <div class="date-official-container">
+                            <label>Official: </label>
+                            <div class="official-dropdown">
+                                <input type="text" class="official-search" value="${match.official || ''}" data-field="official" placeholder="Search official...">
+                                <div class="official-list"></div>
+                            </div>
+                        </div>
+                        <button id="save-match" class="btn-primary">Save</Button>
+                        <button id="delete-match" class="btn-secondary">UnDate</button>
+                    </div>
+                `;
+                setupOfficialDropdowns();
+
+                // Attach event listener after the popup is created
+                document.getElementById('save-match').addEventListener('click', () => {
+                    console.log('Saving match:', match.id);
+                    
+                    const matches = fetchMatches();
+                    const teams = fetchTeams();
+                    let updated = false;
+
+                    // Find the current match in the stored data
+                    const matchIndex = matches.findIndex(m => m.id === match.id);
+                    if (matchIndex === -1) return;
+
+                    // Get inputs from the popup
+                    const inputs = popup.querySelectorAll('input');
+                    inputs.forEach(input => {
+                        const field = input.getAttribute('data-field');
+                        const set = input.getAttribute('data-set');
+                        const team = input.getAttribute('data-team');
+
+                        if (field) {
+                            matches[matchIndex][field] = input.value;
+                            updated = true;
+                        } else if (set && team) {
+                            if (!matches[matchIndex][set]) matches[matchIndex][set] = [0, 0];
+                            matches[matchIndex][set][team] = parseInt(input.value) || 0;
+                            updated = true;
+                        }
+                    });
+
+                    // Calculate scores and update status
+                    matches[matchIndex] = updateMatchStatus(matches[matchIndex]);
+
+                    if (matches[matchIndex].status) {
+                        const previousWinner = matches[matchIndex].winner;
+                        let teamASets = 0, teamBSets = 0;
+
+                        // Count sets won
+                        ['set1', 'set2', 'set3'].forEach(set => {
+                            if (matches[matchIndex][set]) {
+                                if (matches[matchIndex][set][0] > matches[matchIndex][set][1]) teamASets++;
+                                else if (matches[matchIndex][set][1] > matches[matchIndex][set][0]) teamBSets++;
+                            }
+                        });
+
+                        // Update winner
+                        matches[matchIndex].winner = (teamASets >= 2) ? matches[matchIndex].teamAID : matches[matchIndex].teamBID;
+
+                        // Handle next match
+                        if (matches[matchIndex].nextMatch !== null) {
+                            const nextMatchId = matches[matchIndex].nextMatch;
+                            const nextMatch = matches.find(m => m.id === nextMatchId);
+
+                            if (nextMatch && previousWinner !== matches[matchIndex].winner) {
+                                if (nextMatch.teamAID === previousWinner) {
+                                    if (teams[previousWinner]?.games) {
+                                        teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
+                                    }
+                                    nextMatch.teamAID = matches[matchIndex].winner;
+                                } else if (nextMatch.teamBID === previousWinner) {
+                                    if (teams[previousWinner]?.games) {
+                                        teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
+                                    }
+                                    nextMatch.teamBID = matches[matchIndex].winner;
+                                }
+                            }
+                        }
+                    } else {
+                        matches[matchIndex].winner = null;
+                    }
+
+                    // Save match Save teams
+                    saveMatches(matches);
+                    saveTeams(teams);
+                    // Debug
+                    console.log('Match saved:', matches[matchIndex]);
+                    // close the popup
+                    document.getElementById("popup-overlay").style.display = 'none';
+                    document.getElementById("popup").style.display = 'none';
+                    //rerender the callender
+                    renderCalendar();
+                });
+
+                document.getElementById('delete-match').addEventListener('click', () => {
+                    // Find the current match in the stored data
+                    const matchIndex = matches.findIndex(m => m.id === match.id);
+                    if (matchIndex === -1) return;
+                    matches[matchIndex].date = null;
+                    saveMatches(matches);
+                    console.log('Match saved:', matches[matchIndex]);
+                    // close the popup
+                    document.getElementById("popup-overlay").style.display = 'none';
+                    document.getElementById("popup").style.display = 'none';
+                    renderCalendar();
+                });
+
+                // **popup**
+                // Close the popup by clicking outside the popup
+                document.getElementById("popup-overlay").addEventListener("click", () => {
+                    document.getElementById('save-match').click();
+                    document.getElementById("popup-overlay").style.display = 'none';
+                    document.getElementById("popup").style.display = 'none';
+                })
+
+                function recalculateOfficialStats() {
+                    const matches = fetchMatches();
+                    const officialStats = {};
+                    
+                    // Count officials from all matches
+                    matches.forEach(match => {
+                        if (match.official) {
+                            officialStats[match.official] = (officialStats[match.official] || 0) + 1;
+                        }
+                    });
+
+                    // Save updated stats
+                    saveOfficialStats(officialStats);
+                    return officialStats;
+                }
+
+                // Add these new functions to handle the official dropdown functionality
+
+                function setupOfficialDropdowns() {
+                    const searchInputs = document.querySelectorAll('.official-search');
+                    
+                    searchInputs.forEach(input => {
+                        const dropdownList = input.nextElementSibling;
+                        const officialStats = fetchOfficialStats();
+
+                        // Show dropdown on focus
+                        input.addEventListener('click', () => {
+                            updateOfficialList(dropdownList, input.value, officialStats);
+                            dropdownList.style.display = 'block';
+                        });
+
+                        // Handle input changes
+                        input.addEventListener('input', () => {
+                            updateOfficialList(dropdownList, input.value, officialStats);
+                            console.log('updatedOfficialList from here');
+                        });
+
+                        // Add change event handler
+                        input.addEventListener('change', () => {
+                            const matches = fetchMatches();
+                            const matchIndex = matches.findIndex(m => m.id === match.id);
+                            const previousOfficial = matches[matchIndex].official;
+                            const newOfficial = input.value;
+                            
+                            // Update match official
+                            matches[matchIndex].official = newOfficial;
+                            
+                            saveMatches(matches);
+                            // Recalculate stats
+                            recalculateOfficialStats();
+                            
+                        });
+                    });
+                }
+
+                function updateOfficialList(dropdownList, searchText, officialStats) {
+                    const matches = fetchMatches();
+                    dropdownList.innerHTML = '';
+                    const officials = Object.keys(officialStats);
+                    
+                    const filteredOfficials = officials.filter(official => 
+                        official.toLowerCase().includes(searchText.toLowerCase())
+                    );
+                    console.log(filteredOfficials);
+
+                    filteredOfficials.forEach(official => {
+                        const div = document.createElement('div');
+                        div.textContent = `${official} (${officialStats[official]} games)`;
+                        // Add CSS styles directly to the element
+                        div.style.cursor = 'default';  // Prevents cursor from changing
+                        div.style.transition = 'background-color 0.2s';  // Smooth transition
+                        
+                        // Add hover event listeners
+                        div.addEventListener('mouseenter', () => {
+                            div.style.backgroundColor = '#e0e0e0';  // Darker background on hover
+                        });
+                        div.addEventListener('mouseleave', () => {
+                            div.style.backgroundColor = '';  // Reset background
+                        });
+                        
+                        div.addEventListener('click', () => {
+                            const input = dropdownList.previousElementSibling;
+                            const matchIndex = matches.findIndex(m => m.id === match.id);
+                            const previousOfficial = matches[matchIndex].official;
+                            
+                            // Update input and match
+                            input.value = official;
+                            matches[matchIndex].official = official;
+
+                            // Save matches
+                            saveMatches(matches);
+
+                            // Recalculate stats 
+                            const updatedStats = recalculateOfficialStats();
+                            
+                            // Refresh the dropdown with updated stats
+                            updateOfficialList(dropdownList, official, updatedStats);
+                            console.log('updatedOfficialList from here');
+                            
+                            dropdownList.style.display = 'none';
+                            console.log(`Updated official from ${previousOfficial} to ${official}`);
+                        });
+                        dropdownList.appendChild(div);
+                    });
+
+                    // Add option for new official
+                    if (!filteredOfficials.includes(searchText) && searchText.trim() !== '') {
+                        const div = document.createElement('div');
+                        div.textContent = `Add new: ${searchText}`;
+                        div.style.cursor = 'pointer';
+                        div.addEventListener('click', () => {
+                            const input = dropdownList.previousElementSibling;
+                            const matchIndex = matches.findIndex(m => m.id === match.id);
+                            const previousOfficial = matches[matchIndex].official;
+                            
+                            // Update input and match
+                            input.value = searchText;
+                            matches[matchIndex].official = searchText;
+                            // save match
+                            saveMatches(matches);
+                            // Recalculate stats 
+                            const updatedStats = recalculateOfficialStats();
+                            // Refresh all dropdowns with updated stats
+                            document.querySelectorAll('.official-search').forEach(searchInput => {
+                                const list = searchInput.nextElementSibling;
+                                updateOfficialList(list, searchInput.value, updatedStats);
+                                console.log('updatedOfficialList from here');
+                            });
+                            
+                            dropdownList.style.display = 'none';
+                            console.log(`Added new official: ${searchText}`);
+                        });
+                        dropdownList.appendChild(div);
+                    }
+
+                    dropdownList.style.display = (filteredOfficials.length > 0 || searchText.trim() === '') ? 'block' : 'none';
+                    dropdownList.addEventListener('mousedown', (event) => {
+                        event.stopPropagation();
+                    });
+                }
+                document.querySelectorAll('.score-input').forEach(input => {
+                    input.addEventListener('input', function(e) {
+                        // Only allow numbers
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                        
+                        // Auto-advance when two digits are entered
+                        if (this.value.length === 2) {
+                            const allInputs = Array.from(document.querySelectorAll('.score-input'));
+                            const currentIndex = allInputs.indexOf(this);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();console.log('here');
+                            }
+                        }
+                    });
+
+                    // Add keyboard navigation
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Backspace' && this.value.length === 0) {
+                            const allInputs = Array.from(document.querySelectorAll('.score-input'));
+                            const currentIndex = allInputs.indexOf(this);
+                            if (currentIndex > 0) {
+                                e.preventDefault();
+                                allInputs[currentIndex - 1].focus();
+                            }
+                        }
+                    });
+                });
+            });
+        }
+
+        function showPopup(dateStr) {
+            const matches = fetchMatches();
+            document.getElementById("popup-overlay").style.display = 'block';
+            document.getElementById("popup").style.display = 'block';
+            document.getElementById('popup-content').innerHTML = `
+            <div class='search-container'>
+                <input type="text" id="match-search" class="match-search" placeholder="Search matches...">
+            </div>
+            <div id="match-list" class = 'scrollable-matches'>
+                <!-- Matches will be inserted here -->
+            </div>
+            
+            <div id="selected-matches" class = 'scrollable-matches'>
+                <!-- Selected matches will appear here -->
+            </div>
+
+            <button id="save-match" class="btn-primary">Save</button>
+            `;
+            const matchList = document.getElementById("match-list");
+            
+            
+            renderFilteredUndatedMatches(dateStr, '');
+
+            // Close the popup by clicking outside the popup
+            document.getElementById("popup-overlay").addEventListener("click", () => {
+                selectedMatches.clear();
+                document.getElementById("popup-overlay").style.display = 'none';
+                document.getElementById("popup").style.display = 'none';
+            })
+
+            // Save btn
+            document.getElementById('save-match').addEventListener('click' ,() => {
+                selectedMatches.forEach((assignment, key) => {
+                    const matchIndex = matches.findIndex(m => 
+                    m.teamAID === assignment.match.teamAID && 
+                    m.teamBID === assignment.match.teamBID
+                );
+
+                if (matchIndex !== -1) {
+                    matches[matchIndex].date = assignment.date;
+                    console.log('savedMatchDate', matches[matchIndex].date);
+                }
+                });
+                selectedMatches.clear();
+                saveMatches(matches);
+                renderCalendar();
+                document.getElementById("popup-overlay").style.display = 'none';
+                document.getElementById("popup").style.display = 'none';
+            });
+            document.querySelector('.match-search').addEventListener('input', (event) => {
+                const searchText = event.target.value.toLowerCase();
+                renderFilteredUndatedMatches(dateStr, searchText);
+            });
+        }
+
+        
+        // For match selection Popup
+        const selectedMatches = new Map();
+        // For date dragging 
+        let selectedMatch = null;
+
+        function renderFilteredUndatedMatches(dateStr, searchText){
+            const matchList = document.getElementById("match-list");
+            matchList.innerHTML = ``; // Clear previous matches
+            const matches = fetchMatches();
+            const keywords = searchText.toLowerCase().trim().split(/\s+/); // Split by spaces
+            // undated match
+            const undatedMatches = matches.filter(match => {
+                const key = `${match.teamAID}-${match.teamBID}`;
+                return !match.date && !selectedMatches.has(key);
+            });
+            const filteredUndatedMatches = undatedMatches.filter(m => 
+                keywords.every(keyword => 
+                    m.teamAID.toLowerCase().includes(keyword) || 
+                    m.teamBID.toLowerCase().includes(keyword)
+                )
+            );
+            filteredUndatedMatches.forEach(match => {
+                const matchDiv = document.createElement("div");
+                matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
+                matchDiv.classList.add("match-item");
+                // Add click event to select match
+                matchDiv.addEventListener("click", () => addMatchToSelection(match, dateStr));
+                matchList.appendChild(matchDiv);
+            });
+            // now append dated match
+            const datedMatches = matches.filter(match => {
+                const key = `${match.teamAID}-${match.teamBID}`;
+                return match.date && !selectedMatches.has(key);
+            });
+            const filteredDatedMatches = datedMatches.filter(m => 
+                keywords.every(keyword => 
+                    m.teamAID.toLowerCase().includes(keyword) || 
+                    m.teamBID.toLowerCase().includes(keyword)
+                )
+            );
+            filteredDatedMatches.forEach(match => {
+                const matchDiv = document.createElement("div");
+                matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
+                matchDiv.classList.add("match-item-dated");
+                // Add click event to select match
+                matchDiv.addEventListener("click", () => addMatchToSelection(match, dateStr));
+                matchList.appendChild(matchDiv);
+            });
+        }
+
+        function addMatchToSelection(match, dateStr) {
+            match.date = dateStr; // Set the date
+            const key = `${match.teamAID}-${match.teamBID}`;
+            selectedMatches.set(key, {
+                match: match,
+                date: dateStr
+            });
+            renderFilteredUndatedMatches(dateStr, '');
+            renderSelectedMatches();
+        }
+
+        function renderSelectedMatches() {
+            const selectedList = document.getElementById("selected-matches");
+            selectedList.innerHTML = "";
+            selectedMatches.forEach((assignment, key) => {
+                const div = document.createElement("div");
+                div.textContent = `${assignment.match.teamAID} vs ${assignment.match.teamBID} on ${assignment.match.date}`;
+                selectedList.appendChild(div);
+            });
+        }
+
+        function updateMatchStatus(match) {
+            // Check for special case where two teams are the same name
+            if(match.teamAID == match.teamBID) match.status = true;
+            else {
+                // Check if all sets have valid scores
+                const hasAllScores = 
+                    (match.set1[0] !== 0 || match.set1[1] !== 0) &&  // At least one team scored in set 1
+                    (match.set2[0] !== 0 || match.set2[1] !== 0);    // At least one team scored in set 2
+                
+                // For set 3, we only check if it's needed (when each team won one set)
+                const needsSet3 = 
+                    ((match.set1[0] > match.set1[1] && match.set2[0] < match.set2[1]) ||
+                    (match.set1[0] < match.set1[1] && match.set2[0] > match.set2[1]));
+                
+                const set3Valid = !needsSet3 || (match.set3[0] !== 0 || match.set3[1] !== 0);
+
+                // Update status if all required sets have scores
+                match.status = hasAllScores && set3Valid;
+            }
+            return match;
+        }
+        // Modified function to recalculate all official stats
+        
+
+
+        // Add event listeners
+        document.getElementById('prev-month').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        document.getElementById('next-month').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        // Initialize calendar
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCalendar();
+        });
+    </script>
+</body>
+</html>

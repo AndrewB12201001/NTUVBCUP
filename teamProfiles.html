@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Profiles</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .page-header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 2.5em;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 12px 24px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .search-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .dropdown-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            flex: 3;
+        }
+
+        select, input {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            background: white;
+            flex: 1;
+            min-width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        select:hover, input:hover {
+            border-color: #3498db;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        .profile-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .team-info h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .team-info p {
+            margin: 10px 0;
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .team-stats {
+            background: #f8f9fa;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .team-stats p {
+            margin: 5px 0;
+            font-weight: 500;
+        }
+
+        .game-list {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .game-list h3 {
+            color: #2c3e50;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .game-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .game-item:hover {
+            transform: translateX(10px);
+            background: #f0f2f5;
+        }
+
+        .game-item p {
+            margin: 8px 0;
+            color: #34495e;
+        }
+
+        .game-item .score {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .game-item .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .search-controls {
+                flex-direction: column;
+            }
+
+            .dropdown-container {
+                flex-direction: column;
+            }
+
+            select, input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script src = 'dataStorage.js'></script>
+    <div class="page-header">
+        <h1>Team Profiles</h1>
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Main Page
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="search-section">
+            <div class="search-controls">
+                <div class="dropdown-container">
+                    <select id="tier-select">
+                        <option value="">Select Tier</option>
+                    </select>
+                    <select id="group-select">
+                        <option value="">Select Group</option>
+                    </select>
+                    <select id="team-select">
+                        <option value="">Select Team</option>
+                    </select>
+                </div>
+                <input type="text" id="search-input" placeholder="Search team...">
+            </div>
+        </div>
+        
+        <div id="profile-section" class="profile-section hidden">
+            <!-- Profile content will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // Initialize data
+        let teams = {};
+        let matches = [];
+
+        // Load data on page load
+        window.addEventListener('load', () => {
+            teams = fetchTeams()
+            matches = fetchMatches();
+            initializeDropdowns();
+        });
+
+        function initializeDropdowns() {
+            // Predefined tier structure
+            const tierStructure = {
+                'Tier1': ['A', 'B'],
+                'Tier2': ['A', 'B', 'C'],
+                'Tier3': ['A', 'B', 'C', 'D', 'E', 'F']
+                // Tier4 groups will be determined dynamically
+            };
+
+            // Populate tier dropdown
+            const tierSelect = document.getElementById('tier-select');
+            tierSelect.innerHTML = '<option value="">Select Tier</option>';
+            for (let i = 1; i <= 4; i++) {
+                const option = document.createElement('option');
+                option.value = `Tier${i}`;
+                option.textContent = `Tier ${i}`;
+                tierSelect.appendChild(option);
+            }
+
+            // Populate group dropdown based on tier selection
+            const groupSelect = document.getElementById('group-select');
+            tierSelect.addEventListener('change', () => {
+                const selectedTier = tierSelect.value;
+                groupSelect.innerHTML = '<option value="">Select Group</option>';
+                
+                if (selectedTier) {
+                    let groups;
+                    if (tierStructure[selectedTier]) {
+                        // Use predefined structure for Tiers 1-3
+                        groups = tierStructure[selectedTier];
+                    } else {
+                        // Dynamically get groups for Tier4
+                        groups = [...new Set(Object.values(teams)
+                            .filter(team => team.preliminaryGroup.startsWith(selectedTier))
+                            .map(team => team.preliminaryGroup.split('-')[1]))];
+                    }
+
+                    groups.forEach(group => {
+                        const option = document.createElement('option');
+                        option.value = `${selectedTier}-${group}`;
+                        option.textContent = `${selectedTier}-${group}`;
+                        groupSelect.appendChild(option);
+                    });
+                }
+                
+                // Update team list
+                filterTeams();
+            });
+
+            // Populate initial team select
+            const teamSelect = document.getElementById('team-select');
+            teamSelect.innerHTML = '<option value="">Select Team</option>';
+            Object.keys(teams).sort().forEach(teamId => {
+                const option = document.createElement('option');
+                option.value = teamId;
+                option.textContent = teamId;
+                teamSelect.appendChild(option);
+            });
+
+            // Add event listeners
+            groupSelect.addEventListener('change', filterTeams);
+            teamSelect.addEventListener('change', showTeamProfile);
+            document.getElementById('search-input').addEventListener('input', searchTeams);
+        }
+
+        function filterTeams() {
+            const selectedTier = document.getElementById('tier-select').value;
+            const selectedGroup = document.getElementById('group-select').value;
+            const teamSelect = document.getElementById('team-select');
+
+            teamSelect.innerHTML = '<option value="">Select Team</option>';
+
+            Object.entries(teams)
+                .filter(([_, team]) => {
+                    return (!selectedTier || team.preliminaryGroup.startsWith(selectedTier)) &&
+                           (!selectedGroup || team.preliminaryGroup === selectedGroup);
+                })
+                .sort(([teamIdA], [teamIdB]) => teamIdA.localeCompare(teamIdB))
+                .forEach(([teamId]) => {
+                    const option = document.createElement('option');
+                    option.value = teamId;
+                    option.textContent = teamId;
+                    teamSelect.appendChild(option);
+                });
+        }
+
+        function searchTeams(event) {
+            const searchText = event.target.value.toLowerCase();
+            if (!searchText) {
+                document.getElementById('profile-section').classList.add('hidden');
+                return;
+            }
+
+            const matchingTeams = Object.keys(teams).filter(teamId => 
+                teamId.toLowerCase().includes(searchText) ||
+                teams[teamId].preliminaryGroup.toLowerCase().includes(searchText)
+            );
+
+            if (matchingTeams.length > 0) {
+                showTeamProfile({ target: { value: matchingTeams[0] } });
+                
+                // Update dropdowns to match the found team
+                const team = teams[matchingTeams[0]];
+                const [tier] = team.preliminaryGroup.split('-');
+                
+                document.getElementById('tier-select').value = tier;
+                document.getElementById('tier-select').dispatchEvent(new Event('change'));
+                document.getElementById('group-select').value = team.preliminaryGroup;
+                document.getElementById('team-select').value = matchingTeams[0];
+            }
+        }
+
+        function calculateTeamScore(teamId) {
+            let score = 0;
+            matches.forEach(match => {
+                if (match.teamAID === teamId) {
+                    score += match.teamAScore || 0;
+                } else if (match.teamBID === teamId) {
+                    score += match.teamBScore || 0;
+                }
+            });
+            return score;
+        }
+
+        function showTeamProfile(event) {
+            const teamId = event.target.value;
+            if (!teamId) return;
+
+            const team = teams[teamId];
+            if (!team) return;
+
+            const profileSection = document.getElementById('profile-section');
+
+            let html = `
+                <div class="team-header">
+                    <div class="team-info">
+                        <h2>${teamId}</h2>
+                        <p>Group: ${team.preliminaryGroup}</p>
+                        <p>Available day: ${team.availableDays}</p>
+                    </div>
+                    <div class="team-stats">
+                        <p>Preliminary Score: ${team.preliminaryScore}</p>
+                    </div>
+                </div>
+                <div class="game-list">
+                    <h3>Match History</h3>
+            `;
+
+            team.games.forEach(gameId => {
+                const match = matches.find(m => m.id === gameId);
+                if (match) {
+                    html += `
+                        <div class="game-item">
+                            <p><strong>Game ${gameId}</strong>: ${match.teamAID} vs ${match.teamBID}</p>
+                            <p class="score">Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}</p>
+                            <p>Group: ${match.group}</p>
+                            <span class="status ${match.status ? 'completed' : 'pending'}">
+                                ${match.status ? 'Completed' : 'Pending'}
+                            </span>
+                        </div>
+                    `;
+                }
+            });
+
+            html += '</div>';
+            profileSection.innerHTML = html;
+            profileSection.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

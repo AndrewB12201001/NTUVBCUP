@@ -1,0 +1,41 @@
+<h3 class="popup-title">Game Info</h3>
+<div class="match-container">
+    <label>Game ID: ${match.id}</label>
+    <label class="group-label">${match.group}</label>
+    <label class="team-label">Team A: ${match.teamAID}</label>
+    <label class="team-label">Team B: ${match.teamBID}</label>
+    
+    <div class="set-container">
+        <label>Set 1:</label>
+        <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set1" data-team="0" value="${match.set1[0] || ''}">
+        <span>:</span>
+        <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set1" data-team="1" value="${match.set1[1] || ''}">
+    </div>
+
+    <div class="set-container">
+        <label>Set 2:</label>
+        <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set2" data-team="0" value="${match.set2[0] || ''}">
+        <span>:</span>
+        <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set2" data-team="1" value="${match.set2[1] || ''}">
+    </div>
+
+    <div class="set-container">
+        <label>Set 3:</label>
+        <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set3" data-team="0" value="${match.set3[0] || ''}">
+        <span>:</span>
+        <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set3" data-team="1" value="${match.set3[1] || ''}">
+    </div>
+
+    <div class="date-official-container">
+        <label>Match date:</label>
+        <input type="date" value="${match.date}" data-index="${index}" data-field="date">
+
+        <label>Official: </label>
+        <div class="official-dropdown">
+            <input type="text" class="official-search" value="${match.official || ''}" data-index="${index}" data-field="official" placeholder="Search official...">
+            <div class="official-list"></div>
+        </div>
+    </div>
+
+    <button class="delete-match" data-index="${index}">Delete</button>
+</div>
