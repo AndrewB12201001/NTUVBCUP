@@ -629,6 +629,7 @@
 
         document.getElementById('processBatchInput').addEventListener('click', () => {
             let teams = fetchTeams();
+            const matches = fetchMatches();
             const input = document.getElementById('batchInput').value;
             const resultDiv = document.getElementById('processResult');
             resultDiv.innerHTML = '';
@@ -657,9 +658,15 @@
                                 <span>不可比賽日: ${day1}, ${day2}</span>
                             `;
                             // Update matches involving this team
-                    
-                    // Save both teams and matches
-                    saveTeams(teams);
+                            Object.values(matches).forEach((match, index) => {
+                                if (match.teamAID === teamId || match.teamBID === teamId) {
+                                    matches[index].availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, teams);
+                                }
+                            });
+                            
+                            // Save both teams and matches
+                            saveTeams(teams);
+                            saveMatches(matches);
                         } else {
                             resultItem.classList.add('error');
                             resultItem.textContent = `✗ Team not found: ${teamId}`;
@@ -990,7 +997,6 @@
                 const dayIndex = Math.floor((date - currentWeekStart) / (1000 * 60 * 60 * 24));
                 if (dayIndex >= 0 && dayIndex < 7) {
                     const [teamA, teamB] = key.split('-'); // Extract team names from the key
-                    console.log('teamA:', teamA,"teamB:",  teamB);
                     if (
                         match.teamAID === teamA || match.teamAID === teamB ||
                         match.teamBID === teamA || match.teamBID === teamB
