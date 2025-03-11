@@ -326,7 +326,7 @@
         }
     
         // 分組邏輯
-        function groupTeams(teams, tier, groupSize) {
+        function groupTeams(teams, groupSize) {
             console.log('teams', teams);
             let groups = [];
             let remainingTeams = [...teams];
@@ -366,7 +366,7 @@
     
     
         // save team data for visual in text box
-        function saveTeamData() {
+        function saveVisualTeamData() {
 
             const teamData = {};
             const nameCount = {};
@@ -471,7 +471,7 @@
                     console.log('groupTierSize', groupTierSize);
                 }
                 console.log('groupSize', groupSize);
-                teamData[`${tier}-input`] = groupTeams(teams, tier, groupSize);
+                teamData[`${tier}-input`] = groupTeams(teams, groupSize);
             });
 
             // Check if games have started
@@ -489,8 +489,7 @@
 
 
         // save team data as json
-        function processAndSaveTeamData(teamDataString) {
-            const teamData = JSON.parse(teamDataString); // 將字串解析為物件
+        function processAndSaveTeamData(teamData) {
             const teamInstances = {}; // 用於儲存所有 Team 物件
             console.log(teamData)
             // 遍歷所有 Tier
@@ -601,10 +600,11 @@
                 location.reload();
             } else {
                 // We're in tier input mode - use existing submit functionality
+                const teamData = fetchTeamData();
                 wipeEverything();
-                saveTeamData();
+                saveVisualTeamData();
                 markGamesStarted();
-                processAndSaveTeamData(fetchTeamData());
+                processAndSaveTeamData(teamData);
                 loadTeamData();
             }
         });
