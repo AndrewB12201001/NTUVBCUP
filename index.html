@@ -438,7 +438,7 @@
                 const dateStr = `${prevMonthYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
                 // Add matches for this day
-                const dayMatches = matches.filter(match => match.date === dateStr);
+                const dayMatches = Object.values(matches).filter(match => match.date === dateStr);
                 const matchesContainer = dayDiv.querySelector('.calendar-matches');
                 dayMatches.forEach(match => {
                     const matchDiv = document.createElement('div');
@@ -477,7 +477,7 @@
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
                 // Add matches for this day
-                const dayMatches = matches.filter(match => match.date === dateStr);
+                const dayMatches = Object.values(matches).filter(match => match.date === dateStr);
                 const matchesContainer = dayDiv.querySelector('.calendar-matches');
                 dayMatches.forEach(match => {
                     const matchDiv = document.createElement('div');
@@ -519,7 +519,7 @@
                 const dateStr = `${nextMonthYear}-${String((month + 2)%12).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
 
                 // Add matches for this day
-                const dayMatches = matches.filter(match => match.date === dateStr);
+                const dayMatches = Object.values(matches).filter(match => match.date === dateStr);
                 const matchesContainer = dayDiv.querySelector('.calendar-matches');
                 dayMatches.forEach(match => {
                     const matchDiv = document.createElement('div');
