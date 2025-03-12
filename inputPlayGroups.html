@@ -489,7 +489,8 @@
 
 
         // save team data as json
-        function processAndSaveTeamData(teamData) {
+        function processAndSaveTeamData() {
+            const teamData = fetchTeamData();
             const teamInstances = {}; // 用於儲存所有 Team 物件
             console.log(teamData)
             // 遍歷所有 Tier
@@ -520,6 +521,7 @@
             const nameCount = {}
             if (formContainer.classList.contains('hidden')) {
                 // We're in batch input mode
+                console.log('batchinput');
                 const input = document.getElementById('batchInput').value;
                 const resultDiv = document.getElementById('processResult');
                 resultDiv.innerHTML = '';
@@ -600,11 +602,11 @@
                 location.reload();
             } else {
                 // We're in tier input mode - use existing submit functionality
-                const teamData = fetchTeamData();
+                console.log('regular input');
                 wipeEverything();
                 saveVisualTeamData();
                 markGamesStarted();
-                processAndSaveTeamData(teamData);
+                processAndSaveTeamData();
                 loadTeamData();
             }
         });
@@ -612,6 +614,7 @@
         document.getElementById('download-json').addEventListener('click', () => {
             downloadJSON(fetchTeams(), 'teams.json');
         });
+
         document.getElementById('delete-all-data').addEventListener('click', () => {
             // Create a confirmation dialog
             const userConfirmed = confirm("Are you sure you want to delete all data? This action cannot be undone.");
