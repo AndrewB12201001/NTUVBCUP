@@ -379,7 +379,7 @@
             <i class="fas fa-chart-bar"></i>
             Visual Matches
         </a>
-        <a href="teamProfiles.html" class="nav-link">
+        <a href="teamProfiles_v2.html" class="nav-link">
             <i class="fas fa-user-group"></i>
             Team Profiles
         </a>
@@ -434,79 +434,32 @@
             const prevMonthYear = month === 0 ? year - 1 : year;
             for (let i = firstDayOfWeek - 1; i >= 0; i--) {
                 const day = prevMonthLastDay - i;
-                const dayDiv = createDayDiv(prevMonthLastDay - i, true);
                 const dateStr = `${prevMonthYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
+                const dayDiv = createDayDiv(prevMonthLastDay - i, true, dateStr);
                 // Add matches for this day
                 const dayMatches = Object.values(matches).filter(match => match.date === dateStr);
                 const matchesContainer = dayDiv.querySelector('.calendar-matches');
                 dayMatches.forEach(match => {
-                    const matchDiv = document.createElement('div');
-                    matchDiv.className = 'calendar-match';
-                    matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
-                    matchDiv.draggable = true;
-                    matchDiv.addEventListener('dragstart', () => {
-                        selectedMatch = match;
-                        matchDiv.classList.add('dragging');
-                    });
-                    
-                    matchDiv.addEventListener('dragend', () => {
-                        matchDiv.classList.remove('dragging');
-                    });
-                    matchesContainer.appendChild(matchDiv);
-                    //show the popup
-                    showMatchinfo(matchDiv, dateStr, match);
+                    createMatchDiv(match, dayDiv, matchesContainer, dateStr);
                 });
                 dayDiv.addEventListener("dblclick", async () => {
                     showPopup(dateStr);  //for add match to date
-                });
-                dayDiv.addEventListener('dragend', () => {
-                    const matchIndex = matches.findIndex(m => 
-                        m.id === selectedMatch.id
-                    );
-                    matches[matchIndex].date = dateStr;
-                    saveMatches(matches);
-                    renderCalendar();
                 });
                 daysContainer.appendChild(dayDiv);
             }
             
             // Add current month days
             for (let day = 1; day <= lastDay.getDate(); day++) {
-                const dayDiv = createDayDiv(day, false);
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
+                const dayDiv = createDayDiv(day, false, dateStr);
                 // Add matches for this day
                 const dayMatches = Object.values(matches).filter(match => match.date === dateStr);
                 const matchesContainer = dayDiv.querySelector('.calendar-matches');
                 dayMatches.forEach(match => {
-                    const matchDiv = document.createElement('div');
-                    matchDiv.className = 'calendar-match';
-                    matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
-                    matchDiv.draggable = true;
-                    matchDiv.addEventListener('dragstart', () => {
-                        selectedMatch = match;
-                        console.log(selectedMatch);
-                        matchDiv.classList.add('dragging');
-                    });
-                    
-                    matchDiv.addEventListener('dragend', () => {
-                        matchDiv.classList.remove('dragging');
-                    });
-                    matchesContainer.appendChild(matchDiv);
-                    //show the popup
-                    showMatchinfo(matchDiv, dateStr, match);
+                    createMatchDiv(match, dayDiv, matchesContainer, dateStr);
                 });
                 dayDiv.addEventListener("dblclick", async () => {
                     showPopup(dateStr);  //for add match to date
-                });
-                dayDiv.addEventListener('dragend', () => {
-                    const matchIndex = matches.findIndex(m => 
-                        m.id === selectedMatch.id
-                    );
-                    matches[matchIndex].date = dateStr;
-                    saveMatches(matches);
-                    renderCalendar();
                 });
                 daysContainer.appendChild(dayDiv);
             }
@@ -515,52 +468,60 @@
             const lastDayOfWeek = lastDay.getDay();
             const nextMonthYear = (month + 1 > 11) ? year + 1 : year;
             for (let i = 1; i < 7 - lastDayOfWeek; i++) {
-                const dayDiv = createDayDiv(i, true);
                 const dateStr = `${nextMonthYear}-${String((month + 2)%12).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-
+                const dayDiv = createDayDiv(i, true, dateStr);
                 // Add matches for this day
                 const dayMatches = Object.values(matches).filter(match => match.date === dateStr);
                 const matchesContainer = dayDiv.querySelector('.calendar-matches');
                 dayMatches.forEach(match => {
-                    const matchDiv = document.createElement('div');
-                    matchDiv.className = 'calendar-match';
-                    matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
-                    matchDiv.draggable = true;
-                    matchDiv.addEventListener('dragstart', () => {
-                        selectedMatch = match;
-                        matchDiv.classList.add('dragging');
-                    });
-                    
-                    matchDiv.addEventListener('dragend', () => {
-                        matchDiv.classList.remove('dragging');
-                    });
-                    matchesContainer.appendChild(matchDiv);
-                    //show the popup
-                    showMatchinfo(matchDiv, dateStr, match);
+                    createMatchDiv(match, dayDiv, matchesContainer, dateStr);
                 });
                 dayDiv.addEventListener("dblclick", async () => {
                     showPopup(dateStr);  //for add match to date
-                });
-                dayDiv.addEventListener('dragend', () => {
-                    const matchIndex = matches.findIndex(m => 
-                        m.id === selectedMatch.id
-                    );
-                    matches[matchIndex].date = dateStr;
-                    saveMatches(matches);
-                    renderCalendar();
                 });
                 daysContainer.appendChild(dayDiv);
             }
         }
 
-        function createDayDiv(day, isOtherMonth) {
+        function createDayDiv(day, isOtherMonth, dateStr) {
             const dayDiv = document.createElement('div');
             dayDiv.className = `calendar-day${isOtherMonth ? ' other-month' : ''}`;
             dayDiv.innerHTML = `
                 <div class="calendar-date">${day}</div>
                 <div class="calendar-matches"></div>
             `;
+            dayDiv.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            dayDiv.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const matches = fetchMatches();
+                const matchIndex = matches.findIndex(m => m.id === selectedMatch.id);
+                if (matchIndex === -1) return;
+                matches[matchIndex].date = dateStr;
+                saveMatches(matches);
+                renderCalendar();
+            });
             return dayDiv;
+        }
+
+        function createMatchDiv(match, dayDiv, matchesContainer, dateStr){
+            const matchDiv = document.createElement('div');
+            matchDiv.className = 'calendar-match';
+            matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
+            matchDiv.style.background = match.status ? '#63d67e' : (match.set1[0] !== 0 && match.set1[1] !== 0) ? '#CCCCFF': '';
+            matchDiv.draggable = true;
+            matchDiv.addEventListener('dragstart', () => {
+                selectedMatch = match;
+                matchDiv.classList.add('dragging');
+            });
+            matchDiv.addEventListener('dragend', () => {
+                matchDiv.classList.remove('dragging');
+                renderCalendar();
+            });
+            matchesContainer.appendChild(matchDiv);
+            //show the popup
+            showMatchinfo(matchDiv, dateStr, match);
         }
 
         function showMatchinfo(matchDiv, dateStr, match){
@@ -569,14 +530,11 @@
                 document.getElementById("popup-overlay").style.display = 'block';
                 document.getElementById("popup").style.display = 'block';
                 document.getElementById('popup-content').innerHTML = `
-                    <h3 class="popup-title">Game Info</h3>
+                    <h3 class="popup-title">${match.teamAID} vs ${match.teamBID}</h3>
                     <div class="match-container">
                         <label>Game ID: ${match.id}</label>
-                        <label class="group-label">${match.group}</label>
-
-                        <div class="set-container">
-                            <label class="team-label">Team A: ${match.teamAID} Team B: ${match.teamBID}</label>
-                        </div>
+                        <label class="group-label">Group: ${match.group}</label>
+                        <label class="group-lavel">Date: ${match.date}</label>
                         
                         <div class="set-container">
                             <label>Set 1:</label>
@@ -715,21 +673,6 @@
                     document.getElementById("popup").style.display = 'none';
                 })
 
-                function recalculateOfficialStats() {
-                    const matches = fetchMatches();
-                    const officialStats = {};
-                    
-                    // Count officials from all matches
-                    matches.forEach(match => {
-                        if (match.official) {
-                            officialStats[match.official] = (officialStats[match.official] || 0) + 1;
-                        }
-                    });
-
-                    // Save updated stats
-                    saveOfficialStats(officialStats);
-                    return officialStats;
-                }
 
                 // Add these new functions to handle the official dropdown functionality
 
@@ -763,8 +706,6 @@
                             matches[matchIndex].official = newOfficial;
                             
                             saveMatches(matches);
-                            // Recalculate stats
-                            recalculateOfficialStats();
                             
                         });
                     });
@@ -807,9 +748,6 @@
                             // Save matches
                             saveMatches(matches);
 
-                            // Recalculate stats 
-                            const updatedStats = recalculateOfficialStats();
-                            
                             // Refresh the dropdown with updated stats
                             updateOfficialList(dropdownList, official, updatedStats);
                             console.log('updatedOfficialList from here');
@@ -835,8 +773,6 @@
                             matches[matchIndex].official = searchText;
                             // save match
                             saveMatches(matches);
-                            // Recalculate stats 
-                            const updatedStats = recalculateOfficialStats();
                             // Refresh all dropdowns with updated stats
                             document.querySelectorAll('.official-search').forEach(searchInput => {
                                 const list = searchInput.nextElementSibling;
@@ -957,9 +893,10 @@
                 return !match.date && !selectedMatches.has(key);
             });
             const filteredUndatedMatches = undatedMatches.filter(m => 
+                ((m.teamAID !== m.teamBID) || (m.teamAID === null && m.teamBID === null)) &&
                 keywords.every(keyword => 
-                    m.teamAID.toLowerCase().includes(keyword) || 
-                    m.teamBID.toLowerCase().includes(keyword)
+                    (m.teamAID || '').toLowerCase().includes(keyword) || 
+                    (m.teamBID || '').toLowerCase().includes(keyword)
                 )
             );
             filteredUndatedMatches.forEach(match => {
@@ -976,9 +913,10 @@
                 return match.date && !selectedMatches.has(key);
             });
             const filteredDatedMatches = datedMatches.filter(m => 
+                (m.teamAID !== m.teamBID) &&
                 keywords.every(keyword => 
-                    m.teamAID.toLowerCase().includes(keyword) || 
-                    m.teamBID.toLowerCase().includes(keyword)
+                    (m.teamAID || '').toLowerCase().includes(keyword) || 
+                    (m.teamBID || '').toLowerCase().includes(keyword)
                 )
             );
             filteredDatedMatches.forEach(match => {
@@ -1033,7 +971,6 @@
             }
             return match;
         }
-        // Modified function to recalculate all official stats
         
 
 

@@ -413,6 +413,7 @@
                     html += `
                         <div class="game-item">
                             <p><strong>Game ${gameId}</strong>: ${match.teamAID} vs ${match.teamBID}</p>
+                            <p><strong>Date: ${match.date}</p>
                             <p class="score">Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}</p>
                             <p>Group: ${match.group}</p>
                             <span class="status ${match.status ? 'completed' : 'pending'}">

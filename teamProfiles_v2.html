@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Profiles</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+        }
+
+        button {
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .edit-btn {
+            background: #f39c12;
+            color: white;
+        }
+
+        .match-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            min-width: 300px;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 12px 24px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-btn, .back-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script src = 'dataStorage.js'></script>
+    <a href="index.html" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Main Page
+    </a>
+    <h1>Team Profiles</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Team ID</th>
+                <th>Preliminary Group</th>
+                <th>Preliminary Rank</th>
+                <th>Preliminary Score</th>
+                <th>Available Days</th>
+                <th>Team Name</th>
+                <th>Edit</th>
+                <th>Matches</th>
+            </tr>
+        </thead>
+        <tbody id="team-table-body"></tbody>
+    </table>
+
+    <div class="modal-overlay" id="modal-overlay"></div>
+    <div class="modal" id="match-modal">
+        <h2>Match History</h2>
+        <div id="match-content"></div>
+        <button onclick="closeModal()">Close</button>
+    </div>
+
+    <script>
+        calculatePreliminaryScore();
+
+        let teams = fetchTeams();
+        let matches = fetchMatches();
+
+        function populateTable() {
+            let currentGroup = '';
+            const tableBody = document.getElementById("team-table-body");
+            tableBody.innerHTML = "";
+
+            Object.entries(teams).forEach(([teamID, team]) => {
+                // Insert blank row on group change
+                if (team.preliminaryGroup !== currentGroup && currentGroup !== '') {
+                    const blankRow = document.createElement("tr");
+                    blankRow.innerHTML = `<td colspan="7" style="height:10px;"></td>`;
+                    tableBody.appendChild(blankRow);
+                    console.log('created blank row');
+                }
+
+                currentGroup = team.preliminaryGroup;
+
+                // Determine the background color for the rank cell
+                const bgColor = isPreliminaryMatchesFinished(teamID) ? 'lightgreen' : 'lightcoral';
+
+                // Create the row for this team
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${teamID}</td>
+                    <td>${team.preliminaryGroup}</td>
+                    <td style="background-color:${bgColor};">${getTeamRank(teamID)}</td>
+                    <td>${team.preliminaryScore}</td>
+                    <td contenteditable="true">${team.availableDays}</td>
+                    <td contenteditable="true">${team.teamName || "N/A"}</td>
+                    <td><button class="edit-btn" onclick="saveChanges('${teamID}', this)">Save</button></td>
+                    <td><button class="match-btn" onclick="showMatches('${teamID}')">Matches</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }   
+
+        function saveChanges(teamID, button) {
+            const row = button.parentElement.parentElement;
+            teams[teamID].availableDays = row.cells[3].innerText;
+            teams[teamID].teamName = row.cells[4].innerText;
+            alert("Changes saved for " + teamID);
+            saveTeams(teams);
+        }
+
+        function showMatches(teamID) {
+            const team = Object.values(teams).filter(t => t.teamID === teamID)
+            const teamMatches = matches.filter(m => m.teamAID === teamID || m.teamBID === teamID);
+            const matchContent = document.getElementById("match-content");
+            matchContent.innerHTML = "";
+            console.log(team);
+            matchContent.innerHTML += `<p>Preliminary Score: ${team.preliminaryScore}</p>`
+            teamMatches.forEach(match => {
+                matchContent.innerHTML += `<p>${match.teamAID} vs ${match.teamBID} - Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}</p>`;
+            });
+            document.getElementById("modal-overlay").style.display = "block";
+            document.getElementById("match-modal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("modal-overlay").style.display = "none";
+            document.getElementById("match-modal").style.display = "none";
+        }
+
+        window.onload = populateTable;
+    </script>
+</body>
+</html>

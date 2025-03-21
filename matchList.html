@@ -256,7 +256,6 @@
         .scrollable-matches {
             flex-grow: 1;
             overflow-y: auto;
-            padding: 20px;
             padding-bottom: 70px; /* Space for fixed save bar */
         }
 
@@ -485,8 +484,6 @@
             gap: 10px;
             padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 10px;
             background: #f9f9f9;
         }
 
@@ -635,6 +632,7 @@
         // Fetch and render matches on page load
         let matches = fetchMatches();
         renderMatches(matches);
+        calculatePreliminaryScore();
 
         // Function to mark changes as unsaved
         function markUnsavedChanges() {
@@ -708,7 +706,7 @@
                 nextMatch: null,
                 preliminary: preliminary,
                 group: group,
-
+                availableDays: calculateMatchAvailableDays(teamA, teamB),
                 official: ""
             };
 
@@ -784,7 +782,7 @@
         // Render matches in the container
         // don't pass in a null object
         function renderMatches(matches) {
-            const container = document.getElementById("undo-container");
+            const container = document.getElementById("matches-container");
             container.innerHTML = "";
             
             // Add undo button container at the top
@@ -799,7 +797,7 @@
                 undoButton.onclick = () => {
                     const lastDeleted = deletedMatches.pop();
                     matches.splice(lastDeleted.index, 0, lastDeleted.match);
-                    saveMatches(matches)
+                    saveMatches(matches);
                     renderMatches(matches);
                 };
                 undoContainer.appendChild(undoButton);
@@ -915,23 +913,6 @@
             renderMatches(filteredMatches);
         });
 
-        // Modified function to recalculate all official stats
-        function recalculateOfficialStats() {
-            const officialStats = {};
-            
-            // Count officials from all matches
-            matches.forEach(match => {
-                if (match.official) {
-                    officialStats[match.official] = (officialStats[match.official] || 0) + 1;
-                }
-            });
-
-            // Save updated stats
-            saveOfficialStats(officialStats);
-            console.log('officialStatesLogged')
-            return officialStats;
-        }
-
         // Also modify deleteMatch to recalculate stats
         function deleteMatch(index) {
             const confirmDelete = true;//confirm("Are you sure you want to delete this match?");
@@ -958,7 +939,6 @@
                 });
                 matches.splice(index, 1);
                 saveMatches(matches);
-                recalculateOfficialStats();
                 markChangesSaved();
                 renderMatches(matches);
             }
@@ -1049,89 +1029,9 @@
 
             container.appendChild(finalsButton);
         }
-        function matchSetsWonLoss(game, teamID) {
-            const sets = [
-                game.set1 || [0, 0],
-                game.set2 || [0, 0],
-                game.set3 || [0, 0]
-            ];
-            let setsWon = 0;
-            let setsLost = 0;
+        
 
-            sets.forEach(set => {
-                const [scoreA, scoreB] = set;
-                if ((teamID === game.teamAID && scoreA > scoreB) || (teamID === game.teamBID && scoreB > scoreA)) {
-                    setsWon++;
-                } else {
-                    setsLost++;
-                }
-            });
-
-            return [setsWon, setsLost]; // Fixed typo
-        }
-
-        function ratioWonLoss(setsWon, setsLost) {
-            if (setsLost === 0) return 100;
-            return setsWon / setsLost;
-        }
-
-        function matchScoreWonLoss(game, teamID) {
-            const sets = [
-                game.set1 || [0, 0],
-                game.set2 || [0, 0],
-                game.set3 || [0, 0]
-            ];
-            let scoreWon = 0;
-            let scoreLost = 0;
-
-            sets.forEach(set => {
-                const [scoreA, scoreB] = set;
-                if (teamID === game.teamAID) {
-                    scoreWon += scoreA;
-                    scoreLost += scoreB;
-                } else if (teamID === game.teamBID) {
-                    scoreWon += scoreB;
-                    scoreLost += scoreA;
-                }
-            });
-
-            return [scoreWon, scoreLost];
-        }
-
-        function calculatePreliminaryScore() {
-            console.log('Starting preliminary score calculation');
-
-            const matches = fetchMatches();
-            const teams = fetchTeams();
-
-            Object.values(teams).forEach((team) => {
-                let gamesWon = 0;
-                let setsTotalResult = [0, 0];
-                let scoreTotalResult = [0, 0];
-
-                team.preliminaryScore = 0;
-
-                Object.values(matches).forEach(match => {
-                    const matchResult = matchSetsWonLoss(match, team.teamID); // Fixed function call
-                    const scoreResult = matchScoreWonLoss(match, team.teamID);
-
-                    if (matchResult[0] > matchResult[1]) gamesWon++;
-                    setsTotalResult[0] += matchResult[0];
-                    setsTotalResult[1] += matchResult[1];
-                    scoreTotalResult[0] += scoreResult[0];
-                    scoreTotalResult[1] += scoreResult[1];
-                });
-
-                team.preliminaryScore =
-                    gamesWon * 100000 +
-                    ratioWonLoss(setsTotalResult[0], setsTotalResult[1]) * 100 +
-                    ratioWonLoss(scoreTotalResult[0], scoreTotalResult[1]);
-
-                console.log(`Final preliminary score for ${team.teamID}: ${team.preliminaryScore}`);
-            });
-
-            saveTeams(teams);
-        }
+        
 //https://docs.google.com/document/d/1Wrz8QhUekCM4XEoycSSXh5Zimh9tDX-CzKcdyoL2bmU/edit?tab=t.0
         function generateFinalMatches(Tier) {  
             calculatePreliminaryScore();
@@ -1209,7 +1109,7 @@
                 tier3Groups.forEach((group) => {
                     let groupTeams = Object.values(teams)
                         .filter(team => team.preliminaryGroup === group)
-                        .sort((a, b) => b.points - a.points);
+                        .sort((a, b) => b.preliminaryScore - a.preliminaryScore);
 
                     rankingGroups.first.push(groupTeams[0]);
                     rankingGroups.second.push(groupTeams[1]);
@@ -1271,6 +1171,7 @@
                 createBracket(playoffMatches, 'Tier4Finals')
             }
             console.log('matches generated');
+            document.getElementById('save-all-matches').click();
             location.reload();
         }
 
@@ -1494,8 +1395,6 @@
                     // Update match official
                     matches[matchIndex].official = newOfficial;
                     
-                    // Recalculate stats
-                    recalculateOfficialStats();
                     
                     // Save matches
                     saveMatches(matches);
@@ -1544,11 +1443,7 @@
                     // Update input and match
                     input.value = official;
                     matches[matchIndex].official = official;
-                    
-                    // Recalculate stats and update Storage immediately
-                    const updatedStats = recalculateOfficialStats();
-                    saveOfficialStats(updatedStats);
-                    
+
                     // Save matches
                     saveMatches(matches);
                     
@@ -1573,10 +1468,6 @@
                     // Update input and match
                     input.value = searchText;
                     matches[matchIndex].official = searchText;
-                    
-                    // Recalculate stats and update Storage immediately
-                    const updatedStats = recalculateOfficialStats();
-                    saveOfficialStats(updatedStats);
                     
                     // Save matches
                     saveMatches(matches);
@@ -1699,10 +1590,9 @@
         // Add new save all function
         document.getElementById('save-all-matches').addEventListener('click', () => {
             console.log('save-all-matches')
-            let matches = fetchMatches();
-            let teams = fetchTeams();
-            let updated = false;
-
+            const matches = fetchMatches();
+            const teams = fetchTeams();
+            const refMatches = fetchMatches();
             // Get all match elements from the DOM
             document.querySelectorAll('.match').forEach((matchDiv, index) => {
                 if (index >= matches.length) return; // Skip if no corresponding match data
@@ -1715,159 +1605,19 @@
                     
                     if (field) {
                         matches[index][field] = input.value;
-                        updated = true;
                     } else if (set && team) {
                         if (!matches[index][set]) matches[index][set] = [0, 0];
                         matches[index][set][team] = parseInt(input.value) || 0;
-                        updated = true;
                     }
                 });
-
-                // Calculate scores and update status
-                matches[index] = updateMatchStatus(matches[index]);
-
-                if (matches[index].status) {
-                    // Store previous winner before updating
-                    const previousWinner = matches[index].winner;
-                    
-                    // Calculate sets won by each team
-                    let teamASets = 0;
-                    let teamBSets = 0;
-                    
-                    // Count sets won
-                    if (matches[index].set1[0] > matches[index].set1[1]) teamASets++;
-                    else if (matches[index].set1[1] > matches[index].set1[0]) teamBSets++;
-                    
-                    if (matches[index].set2[0] > matches[index].set2[1]) teamASets++;
-                    else if (matches[index].set2[1] > matches[index].set2[0]) teamBSets++;
-                    
-                    if (matches[index].set3[0] > matches[index].set3[1]) teamASets++;
-                    else if (matches[index].set3[1] > matches[index].set3[0]) teamBSets++;
-                    
-                    // Update current match winner
-                    matches[index].winner = (teamASets >= 2) ? matches[index].teamAID : matches[index].teamBID;
-                    
-                    // Handle next match updates
-                    if (matches[index].nextMatch !== null) {
-                        const nextMatchId = matches[index].nextMatch;
-                        const nextMatch = matches.find(m => m.id === nextMatchId);
-                        
-                        if (nextMatch) {
-                            // If winner changed, update next match
-                            if (previousWinner !== matches[index].winner) {
-                                // Remove previous winner from next match and update teams' games array
-                                if (nextMatch.teamAID === previousWinner) {
-                                    // Remove game from previous winner's games array
-                                    if (teams[previousWinner] && teams[previousWinner].games) {
-                                        teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
-                                    }
-                                    
-                                    // Add game to new winner's games array
-                                    if (teams[matches[index].winner]) {
-                                        if (!teams[matches[index].winner].games) {
-                                            teams[matches[index].winner].games = [];
-                                        }
-                                        if (!teams[matches[index].winner].games.includes(nextMatchId)) {
-                                            teams[matches[index].winner].games.push(nextMatchId);
-                                        }
-                                    }
-                                    
-                                    nextMatch.teamAID = matches[index].winner;
-                                    console.log(`Updated teamA in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
-                                } else if (nextMatch.teamBID === previousWinner) {
-                                    // Remove game from previous winner's games array
-                                    if (teams[previousWinner] && teams[previousWinner].games) {
-                                        teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
-                                    }
-                                    
-                                    // Add game to new winner's games array
-                                    if (teams[matches[index].winner]) {
-                                        if (!teams[matches[index].winner].games) {
-                                            teams[matches[index].winner].games = [];
-                                        }
-                                        if (!teams[matches[index].winner].games.includes(nextMatchId)) {
-                                            teams[matches[index].winner].games.push(nextMatchId);
-                                        }
-                                    }
-                                    
-                                    nextMatch.teamBID = matches[index].winner;
-                                    console.log(`Updated teamB in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
-                                } else {
-                                    // If previous winner not found, add to first empty slot
-                                    if (nextMatch.teamAID === null) {
-                                        // Add game to new winner's games array
-                                        if (teams[matches[index].winner]) {
-                                            if (!teams[matches[index].winner].games) {
-                                                teams[matches[index].winner].games = [];
-                                            }
-                                            if (!teams[matches[index].winner].games.includes(nextMatchId)) {
-                                                teams[matches[index].winner].games.push(nextMatchId);
-                                            }
-                                        }
-                                        
-                                        nextMatch.teamAID = matches[index].winner;
-                                        console.log(`Added winner to teamA in match ${nextMatchId}: ${matches[index].winner}`);
-                                    } else if (nextMatch.teamBID === null) {
-                                        // Add game to new winner's games array
-                                        if (teams[matches[index].winner]) {
-                                            if (!teams[matches[index].winner].games) {
-                                                teams[matches[index].winner].games = [];
-                                            }
-                                            if (!teams[matches[index].winner].games.includes(nextMatchId)) {
-                                                teams[matches[index].winner].games.push(nextMatchId);
-                                            }
-                                        }
-                                        
-                                        nextMatch.teamBID = matches[index].winner;
-                                        console.log(`Added winner to teamB in match ${nextMatchId}: ${matches[index].winner}`);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // If match is not complete, remove winner and potentially update next match
-                    const previousWinner = matches[index].winner;
-                    matches[index].winner = null;
-                    
-                    // Remove winner from next match if it exists
-                    if (matches[index].nextMatch !== null && previousWinner) {
-                        const nextMatchId = matches[index].nextMatch;
-                        const nextMatch = matches.find(m => m.id === nextMatchId);
-                        
-                        if (nextMatch) {
-                            if (nextMatch.teamAID === previousWinner) {
-                                // Remove game from previous winner's games array
-                                if (teams[previousWinner] && teams[previousWinner].games) {
-                                    teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
-                                }
-                                
-                                nextMatch.teamAID = null;
-                                console.log(`Removed ${previousWinner} from teamA in match ${nextMatchId}`);
-                            } else if (nextMatch.teamBID === previousWinner) {
-                                // Remove game from previous winner's games array
-                                if (teams[previousWinner] && teams[previousWinner].games) {
-                                    teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
-                                }
-                                
-                                nextMatch.teamBID = null;
-                                console.log(`Removed ${previousWinner} from teamB in match ${nextMatchId}`);
-                            }
-                        }
-                    }
-                }
                 
             });
-
-            if (updated) {
-                saveMatches(matches);
-                saveTeams(teams);
-                recalculateOfficialStats();
-                checkAndCreateFinalMatches();
-                alert('All changes saved successfully!');
-                console.log('match saved');
-                renderMatches(matches);
-            }
+            // Save data to local storage
+            saveMatches(matches);
+            recalculateOfficialStats();
+            checkAndCreateFinalMatches();
+            renderMatches(matches);
+            alert('All changes saved successfully!');
         });
 
         function checkAndCreateFinalMatches() {
@@ -1907,27 +1657,7 @@
 
         // Finals
 
-        function updateMatchStatus(match) {
-            // Check for special case where two teams are the same name
-            if(match.teamAID == match.teamBID) match.status = true;
-            else {
-                // Check if all sets have valid scores
-                const hasAllScores = 
-                    (match.set1[0] !== 0 || match.set1[1] !== 0) &&  // At least one team scored in set 1
-                    (match.set2[0] !== 0 || match.set2[1] !== 0);    // At least one team scored in set 2
-                
-                // For set 3, we only check if it's needed (when each team won one set)
-                const needsSet3 = 
-                    ((match.set1[0] > match.set1[1] && match.set2[0] < match.set2[1]) ||
-                    (match.set1[0] < match.set1[1] && match.set2[0] > match.set2[1]));
-                
-                const set3Valid = !needsSet3 || (match.set3[0] !== 0 || match.set3[1] !== 0);
-
-                // Update status if all required sets have scores
-                match.status = hasAllScores && set3Valid;
-            }
-            return match;
-        }
+        
 
     </script>
 </body>
