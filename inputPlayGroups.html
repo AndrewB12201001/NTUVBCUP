@@ -223,48 +223,14 @@
         </button>
     </div>
     <h1>Input Playing Groups</h1>
-    <div class="form-container">
-        <div class="tier-form">
-            <h3>一級</h3>
-            <label for="Tier1-input">Enter Team Names<br>(要表示分組就隔一行):</label>
-            <textarea id="Tier1-input" rows="6"></textarea>
-            <div class="checkbox-wrapper">
-                <input type="checkbox" id="Tier1-random" name="Tier1-random" value="true">
-                <label for="Tier1-random">隨機分組</label>
-            </div>
-        </div>
-        
-        <div class="tier-form">
-            <h3>二級</h3>
-            <label for="Tier2-input">Enter Team Names<br>(要表示分組就隔一行):</label>
-            <textarea id="Tier2-input" rows="6"></textarea>
-            <div class="checkbox-wrapper">
-                <input type="checkbox" id="Tier2-random" name="Tier2-random" value="true">
-                <label for="Tier2-random">隨機分組</label>
-            </div>
-        </div>
-        
-        <div class="tier-form">
-            <h3>三級</h3>
-            <label for="Tier3-input">Enter Team Names<br>(要表示分組就隔一行):</label>
-            <textarea id="Tier3-input" rows="6"></textarea>
-            <div class="checkbox-wrapper">
-                <input type="checkbox" id="Tier3-random" name="Tier3-random" value="true">
-                <label for="Tier3-random">隨機分組</label>
-            </div>
-        </div>
-        
-        <div class="tier-form">
-            <h3>四級</h3>
-            <label for="Tier4-input">Enter Team Names (要表示分組就隔一行):</label>
-            <textarea id="Tier4-input" rows="6"></textarea>
-            <div class="checkbox-wrapper">
-                <input type="checkbox" id="Tier4-random" name="Tier4-random" value="true">
-                <label for="Tier4-random">隨機分組</label>
-            </div>
-        </div>
+    <!-- Add Tier button and a container for dynamically added tiers -->
+    <button id="add-tier-button" class="action-button">
+        <i class="fas fa-plus"></i>
+        Add Tier
+    </button>
+    <div id="dynamic-tiers-container">
+        <!-- Existing tier forms removed, now we add them dynamically -->
     </div>
-    <!-- Add this after your form-container div -->
     <div id="batch-input-container">
         <div class="popup" id="batch-popup">
             <div class="input-container">
@@ -367,16 +333,17 @@
     
         // save team data for visual in text box
         function saveVisualTeamData() {
-
+            const tierForms = document.querySelectorAll('#dynamic-tiers-container .tier-form');
             const teamData = {};
             const nameCount = {};
 
-            ['Tier1', 'Tier2', 'Tier3', 'Tier4'].forEach(tier => {
-                // group Size
+            tierForms.forEach((form, index) => {
+                // Using index as key
+                const textarea = form.querySelector('.tier-input');
+                const checkbox = form.querySelector('.tier-random');
+                const tierKey = `Tier${index + 1}-input`;
                 let groupSize = [];
                 let groupTierSize = 0;
-                const textarea = document.getElementById(`${tier}-input`);
-                const checkbox = document.getElementById(`${tier}-random`);
                 let teams = textarea.value.split('\n');
                 let count = 0;
                 
@@ -413,13 +380,13 @@
                 
                 let teamsLength = teams.length;
                 // set number of teams for ideal match format
-                if (tier === 'Tier1') {
+                if (index === 0) {
                     groupTierSize = 6;
-                }else if (tier === 'Tier2') {
+                }else if (index === 1) {
                     groupTierSize = 4;
-                }else if (tier === 'Tier3') {
+                }else if (index === 2) {
                     groupTierSize = 3;
-                }else if (tier === 'Tier4') {
+                }else if (index === 3) {
                     groupTierSize = Math.floor(teamsLength / 5);  // Base size for each group
                 }
                 // randomize teams
@@ -428,7 +395,7 @@
                     teams = shuffleTeams(teams);
                     groupSize = [];
                     console.log('groupSize', groupSize);
-                    if (tier === 'Tier4') {
+                    if (index === 3) {
                         let extraTeams = teams.length % 5;
                         while (teamsLength > 0) {
                             if (extraTeams > 0) {
@@ -448,7 +415,7 @@
                     }
                     console.log('groupSize', groupSize);
                 }else{
-                    if (tier === 'Tier4') {
+                    if (index === 3) {
                         let extraTeams = teamsLength % 5;
 
                         while (teamsLength > 0) {
@@ -471,7 +438,7 @@
                     console.log('groupTierSize', groupTierSize);
                 }
                 console.log('groupSize', groupSize);
-                teamData[`${tier}-input`] = groupTeams(teams, groupSize);
+                teamData[tierKey] = groupTeams(teams, groupSize);
             });
 
             // Check if games have started
@@ -630,7 +597,10 @@
         });
 
         // 頁面載入時載入資料
-        window.onload = loadTeamData();
+        window.onload = () => {
+            loadTeamData();
+            addTier();
+        };
 
         document.getElementById('toggle-input-mode').addEventListener('click', function() {
             const button = this;
@@ -688,6 +658,25 @@
             return processedTeams;
         }
 
+        // Dynamically add a new tier block
+        function addTier() {
+            const container = document.getElementById('dynamic-tiers-container');
+            const tierIndex = container.children.length + 1;
+            const tierForm = document.createElement('div');
+            tierForm.className = 'tier-form';
+            tierForm.innerHTML = `
+                <h3>Tier ${tierIndex}</h3>
+                <label>Enter Team Names<br>(one blank line to indicate new group):</label>
+                <textarea rows="6" class="tier-input"></textarea>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" class="tier-random" value="true">
+                    <label>隨機分組</label>
+                </div>
+            `;
+            container.appendChild(tierForm);
+        }
+
+        document.getElementById('add-tier-button').addEventListener('click', addTier);
 
     </script>
 </body>
