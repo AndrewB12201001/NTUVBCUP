@@ -599,27 +599,6 @@
             return mapping[num] || num;
         }
 
-        function calculateAvailableDays(unavailableDays) {
-            const allDays = [1, 2, 3, 4, 5];
-            return allDays.filter(day => !unavailableDays.includes(Number(day)));
-        }
-
-        // Add this new function to calculate intersection of available days
-        function calculateMatchAvailableDays(teamA, teamB, teams) {
-            // Check if both teams exist and have availableDays
-            if (!teams[teamA] || !teams[teamB]) {
-                console.log(`Warning: Team not found - TeamA: ${teamA}, TeamB: ${teamB}`);
-                return [1, 2, 3, 4, 5];  // Return all days if teams not found
-            }
-
-            const teamADays = teams[teamA].availableDays || [1, 2, 3, 4, 5];
-            const teamBDays = teams[teamB].availableDays || [1, 2, 3, 4, 5];
-            
-            console.log(`TeamA (${teamA}) days:`, teamADays);
-            console.log(`TeamB (${teamB}) days:`, teamBDays);
-            
-            return teamADays.filter(day => teamBDays.includes(day));
-        }
 
         // Batch Input Implementation
         document.getElementById('batch-input').addEventListener('click', () => {
@@ -887,7 +866,7 @@
                     matchDiv.className = assignment.previouslyAssigned ? 'past-assigned-match' : 'assigned-match';
                     matchDiv.draggable = true;
                     matchDiv.textContent = `${assignment.match.teamAID} vs ${assignment.match.teamBID}`;
-                    
+                    matchDiv.style.background = assignment.match.status ? '#63d67e' : (assignment.match.set1[0] !== 0 && assignment.match.set1[1] !== 0) ? '#CCCCFF': '';
                     // Add drag events to assigned match
                     matchDiv.addEventListener('dragstart', () => {
                         selectedMatch = assignment.match;
@@ -914,7 +893,7 @@
             const matches = fetchMatches();
             const undatedMatches = matches.filter(match => {
                 const key = `${match.teamAID}-${match.teamBID}`;
-                return !match.date && !tempAssignments.has(key);
+                return !match.date && !tempAssignments.has(key) && match.teamAID !== match.teamBID;
             });
             const container = document.getElementById('undated-matches');
             container.innerHTML = '';
@@ -991,7 +970,7 @@
         function createMatchBox(match) {
             const box = document.createElement('div');
             box.className = 'match-box'; // Default style
-            //console.log(tempAssignments);
+            box.style.background = match.status ? '#63d67e' : (match.set1[0] !== 0 && match.set1[1] !== 0) ? '#CCCCFF': '';
             tempAssignments.forEach((assignment, key) => {
                 const date = assignment.date;
                 const dayIndex = Math.floor((date - currentWeekStart) / (1000 * 60 * 60 * 24));
