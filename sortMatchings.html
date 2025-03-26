@@ -487,6 +487,34 @@
         .result-item.error {
             background: #f8d7da;
         }
+
+        /* Enhance popup styling */
+        .popup.resizable-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid #ccc;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            resize: both;
+            overflow: auto;
+            min-width: 500px;
+            min-height: 500px;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -581,11 +609,25 @@
                         <i class="fas fa-save"></i>
                         Save Assignments
                     </button>
+                    <button id="fb-announcement" class="nav-btn">
+                        <i class="fas fa-sync"></i>
+                        FB Announcement Generator
+                    </button>
                     
                 </div>
             </div>
             <div id="week-view"></div>
             
+        </div>
+    </div>
+
+    <!-- Add a new popup for announcements (place it anywhere near your other popups) -->
+    <div class="popup-overlay" id="announcement-popup-overlay" style="display:none;"></div>
+    <div class="popup resizable-popup" id="announcement-popup" style="display:none;">
+        <button class="copy-button" onclick="copyAnnouncementText()">Copy</button>
+        <div class="input-container">
+            <h3>FB Announcement</h3>
+            <textarea id="announcement-content" rows="30" style="width:100%;"></textarea>
         </div>
     </div>
 
@@ -1041,6 +1083,15 @@
             console.log('Undated match count rendered');
         }
 
+        function matchNumberToChinese(num) {
+            const map = {
+                1: '一', 2: '二', 3: '三', 4: '四',
+                5: '五', 6: '六', 7: '七', 8: '八',
+                9: '九', 10: '十'
+            };
+            return map[num] ?? num; // Fallback if not in map
+        }
+
         document.getElementById('prev-week').addEventListener('click', () => {
             currentWeekStart.setDate(currentWeekStart.getDate() - 7);
             firstRender = true;
@@ -1101,6 +1152,62 @@
             updateWeekView();
             renderUndatedMatchCount();
             alert('Match assignments saved successfully!');
+        });
+
+        // Utility to get weekday in Chinese
+        const dayOfWeekZH = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+        const tierMap = {
+            'Tier1': '一級',
+            'Tier2': '二級',
+            'Tier3': '三級',
+            'Tier4': '四級'
+        };
+        // Replace your fb-announcement listener with this:
+        document.getElementById('fb-announcement').addEventListener('click', () => {
+            let teams = fetchTeams();
+            let announcementText = "[台大盃公告]\n**本週台大賽程**\n";
+
+            // Build a map dateString -> array of assignments
+            const dayAssignments = {};
+            tempAssignments.forEach((assignment) => {
+                const date = assignment.date;
+                const dayIndex = Math.floor((date - currentWeekStart) / (1000 * 60 * 60 * 24));
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const weekday = dayOfWeekZH[date.getDay()];
+                const dateKey = `${month}/${day} ${weekday}`;
+                if (!dayAssignments[dateKey] && (dayIndex>=0 && dayIndex<7)) {
+                    dayAssignments[dateKey] = [];
+                }
+                if (dayIndex>=0 && dayIndex<7) {
+                    dayAssignments[dateKey].push(assignment);
+                }
+            });
+
+            // Sort each day's assignments and build text lines
+            Object.keys(dayAssignments).sort().forEach(dateKey => {
+                announcementText += `${dateKey}\n`;
+                dayAssignments[dateKey].forEach((assignment, index) => {
+                    const groupPart = assignment.match.group?.split('-')[0] || '';
+                    const prefix = groupPart.substring(0, 5);
+                    const matchTier = tierMap[prefix] ?? '未定級';
+                    // Use "場"+(index+1) as the match number
+                    const teamAName = teams[assignment.match.teamAID]?.teamName || assignment.match.teamAID;
+                    const teamBName = teams[assignment.match.teamBID]?.teamName || assignment.match.teamBID;
+                    announcementText += `場${matchNumberToChinese(index + 1)} (${matchTier}) ${teamAName} vs ${teamBName}\n`;
+                });
+            });
+
+            // Show popup with text
+            document.getElementById('announcement-content').value = announcementText;
+            document.getElementById('announcement-popup-overlay').style.display = 'block';
+            document.getElementById('announcement-popup').style.display = 'block';
+        });
+
+        // Close popup when clicking outside
+        document.getElementById('announcement-popup-overlay').addEventListener('click', () => {
+            document.getElementById('announcement-popup-overlay').style.display = 'none';
+            document.getElementById('announcement-popup').style.display = 'none';
         });
 
         // Add drop zone for undated matches area
@@ -1178,6 +1285,13 @@
         updateWeekView();
         renderUndatedMatches();
         renderUndatedMatchCount();
+
+        function copyAnnouncementText() {
+            const textArea = document.getElementById('announcement-content');
+            textArea.select();
+            document.execCommand('copy'); // May require modern approach if deprecated
+            alert('Text Copied!');
+        }
 
     </script>
 </body>

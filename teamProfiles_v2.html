@@ -104,6 +104,16 @@
                 justify-content: center;
             }
         }
+
+        .clickable-header {
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .clickable-header:hover {
+            background-color: lightblue;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -121,7 +131,7 @@
                 <th>Preliminary Rank</th>
                 <th>Preliminary Score</th>
                 <th>Available Days</th>
-                <th>Team Name</th>
+                <th class="clickable-header" onclick="openBatchInputModal()">Team Name</th>
                 <th>Edit</th>
                 <th>Matches</th>
             </tr>
@@ -134,6 +144,15 @@
         <h2>Match History</h2>
         <div id="match-content"></div>
         <button onclick="closeModal()">Close</button>
+    </div>
+
+    <div class="modal-overlay" id="batch-input-overlay" style="display:none;"></div>
+    <div class="modal" id="batch-input-modal" style="display:none;">
+        <h2>Batch Input (TeamID [tab] TeamName)</h2>
+        <textarea id="batch-input-area" rows="8" cols="40"></textarea>
+        <br>
+        <button onclick="saveBatchInput()">Save</button>
+        <button onclick="closeBatchInputModal()">Cancel</button>
     </div>
 
     <script>
@@ -202,6 +221,29 @@
         function closeModal() {
             document.getElementById("modal-overlay").style.display = "none";
             document.getElementById("match-modal").style.display = "none";
+        }
+
+        function openBatchInputModal() {
+            document.getElementById("batch-input-overlay").style.display = "block";
+            document.getElementById("batch-input-modal").style.display = "block";
+        }
+
+        function closeBatchInputModal() {
+            document.getElementById("batch-input-overlay").style.display = "none";
+            document.getElementById("batch-input-modal").style.display = "none";
+        }
+
+        function saveBatchInput() {
+            const input = document.getElementById("batch-input-area").value.trim().split('\n');
+            input.forEach(line => {
+                const [id, name] = line.split(/\s+/); // split by whitespace
+                if (teams[id]) {
+                    teams[id].teamName = name;
+                }
+            });
+            saveTeams(teams);
+            closeBatchInputModal();
+            populateTable();
         }
 
         window.onload = populateTable;
