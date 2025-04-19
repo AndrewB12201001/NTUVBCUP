@@ -840,7 +840,7 @@
                             <span>:</span>
                             <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set3" data-team="1" value="${match.set3[1] || ''}">
                         </div>
-
+                        <label class="team-label">Availabledays : ${match.availableDays}</label>
                         <div class="date-official-container">
                             <label>Match date:</label>
                             <input type="date" value="${match.date}" data-index="${index}" data-field="date">
@@ -1055,13 +1055,12 @@
                     quarterFinalists.push(...groupTeams.slice(0, 4)); // Top 4
                     relegationTeams.push(...groupTeams.slice(-2)); // Bottom 2
                 });
-                
                 console.log('Quarter finalists:', quarterFinalists);
                 console.log('relegationTeams: ', relegationTeams);
                 let quarterFinalMatches = [
                     quarterFinalists[0].teamID, quarterFinalists[7].teamID,
-                    quarterFinalists[1].teamID, quarterFinalists[6].teamID,
                     quarterFinalists[2].teamID, quarterFinalists[5].teamID,
+                    quarterFinalists[1].teamID, quarterFinalists[6].teamID,
                     quarterFinalists[3].teamID, quarterFinalists[4].teamID
                 ];
                 
@@ -1079,26 +1078,36 @@
                 let playoffTeams = [];
                 let relegationTeams = [];
                 let groupTeams = [];
+                let rankingGroups = { first: [], second: [], third: [] , forth: []};
                 tier2Groups.forEach((group) => {
-                    console.log('Processing Tier2 group:', group);
-                    let preTeams = Object.values(teams)
+                    let groupTeams = Object.values(teams)
                         .filter(team => team.preliminaryGroup === group)
                         .sort((a, b) => b.preliminaryScore - a.preliminaryScore);
-                    groupTeams.push(...preTeams);
+
+                    rankingGroups.first.push(groupTeams[0]);
+                    rankingGroups.second.push(groupTeams[1]);
+                    rankingGroups.third.push(groupTeams[2]);
+                    rankingGroups.forth.push(groupTeams[3]);
                 });
+                rankingGroups.first.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
+                rankingGroups.second.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
+                rankingGroups.third.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
+                rankingGroups.forth.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
+                
                 console.log('All playoff teams:', groupTeams);
                 // Match remaining teams (lowest second-place vs lowest first-place)
                 let playoffMatches = [
-                    groupTeams[0].teamID, groupTeams[0].teamID,//seed
-                    groupTeams[7].teamID, groupTeams[8].teamID,
-                    groupTeams[11].teamID, groupTeams[4].teamID,
-                    groupTeams[3].teamID, groupTeams[3].teamID,//seed
-                    groupTeams[2].teamID, groupTeams[2].teamID,//seed
-                    groupTeams[5].teamID, groupTeams[10].teamID,
-                    groupTeams[9].teamID, groupTeams[6].teamID,
-                    groupTeams[1].teamID, groupTeams[1].teamID,//seed
+                    rankingGroups.first[0].teamID, rankingGroups.first[0].teamID,//seed
+                    rankingGroups.third[1].teamID, rankingGroups.third[2].teamID,
+                    rankingGroups.second[1].teamID,rankingGroups.forth[2].teamID,
+                    rankingGroups.second[0].teamID, rankingGroups.second[0].teamID,//seed
+                    rankingGroups.first[2].teamID, rankingGroups.first[2].teamID, //seed
+                    rankingGroups.second[2].teamID, rankingGroups.forth[1].teamID,
+                    rankingGroups.third[0].teamID, rankingGroups.forth[0].teamID,
+                    rankingGroups.first[1].teamID, rankingGroups.first[1].teamID,//seed
                 ];
                 createBracket(playoffMatches, 'Tier2Finals');
+
             }
 //三級 分組第一打1~6名排名賽，分組第二打7~12名排名賽，分組第三打13~18排名賽每個排名賽依據積分選兩個種子，積分第三高打積分第六，積分第四打第五。
             if (Tier === 3) {
@@ -1163,8 +1172,10 @@
                 let playoffMatches = [
                     firstSeed[9].teamID, firstSeed[6].teamID, 
                     firstSeed[0].teamID, firstSeed[0].teamID, //seed
-                    firstSeed[3].teamID, firstSeed[4].teamID, 
-                    firstSeed[5].teamID, firstSeed[2].teamID,
+                    firstSeed[3].teamID, firstSeed[3].teamID,
+                    firstSeed[4].teamID, firstSeed[4].teamID, 
+                    firstSeed[5].teamID, firstSeed[5].teamID,
+                    firstSeed[2].teamID, firstSeed[2].teamID,
                     firstSeed[1].teamID, firstSeed[1].teamID, //seed
                     firstSeed[7].teamID, firstSeed[8].teamID,
                 ];
