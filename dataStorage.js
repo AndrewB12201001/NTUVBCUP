@@ -299,7 +299,9 @@ function calculateMatchAvailableDays(teamA, teamB) {
     console.log(`TeamA (${teamA}) days:`, teamADays);
     console.log(`TeamB (${teamB}) days:`, teamBDays);
     
-    return teamADays.filter(day => teamBDays.includes(day));
+    const validTeamADays = Array.isArray(teamADays) ? teamADays : [];
+    const validTeamBDays = Array.isArray(teamBDays) ? teamBDays : [];
+    return validTeamADays.filter(day => validTeamBDays.includes(day));
 }
 // save Matches sub functions
 function recalculateOfficialStats() {
@@ -368,7 +370,8 @@ function saveMatches(matches){
         Object.values(matches).forEach((match, index) => {
             // Calculate scores and update status
             match = updateMatchStatus(match);
-
+            match.availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID);
+            
             if (matches[index].status) {
                 // Store previous winner before updating
                 const previousWinner = matches[index].winner;

@@ -198,8 +198,8 @@
 
         function saveChanges(teamID, button) {
             const row = button.parentElement.parentElement;
-            teams[teamID].availableDays = row.cells[3].innerText;
-            teams[teamID].teamName = row.cells[4].innerText;
+            teams[teamID].availableDays = row.cells[4].innerText;
+            teams[teamID].teamName = row.cells[5].innerText;
             alert("Changes saved for " + teamID);
             saveTeams(teams);
         }
