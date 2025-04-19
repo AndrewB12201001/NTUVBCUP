@@ -31,31 +31,37 @@
         }
         .bracket-container {
             display: flex;
-            gap: 40px;
-            align-items: center;
-        }
-        .round {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            width: 180px;
+            gap: 80px;
+            align-items: flex-start; /* ← aligns rounds to the top */
         }
         .match {
             width: 120px;
             height: 40px;
             padding: 10px;
-            margin: 30px 0; /* Controls spacing between matches */
             background: #ddd;
             border-radius: 5px;
             text-align: center;
             position: relative;
         }
+
+        .round {
+            align-items: center;
+            position: relative;
+        }
+        .round:not(:first-child) .match::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 100%;
+            width: 40px;
+            height: 2px;
+            background: black;
+        }
         .champMatch{
             width: 120px;
             height: 40px;
             padding: 10px;
-            margin: 30px 0; /* Controls spacing between matches */
+            margin: 40px 0; /* Controls spacing between matches */
             background: #ddd;
             border-radius: 5px;
             text-align: center;
@@ -80,15 +86,26 @@
             height: 2px;
             background: black;
         }
+        
         /* Vertical Line */
-        .match:nth-child(odd)::before {
+        .vertical-line {
             content: "";
             position: absolute;
             left: 180px;
             bottom: 30px;
             width: 2px;
-            height: 200%;
+            height: 165%;
             background: black;
+        }
+
+        .match, .champMatch {
+            width: 160px;
+            padding: 12px;
+            min-height: 60px;
+            font-size: 14px;
+            word-wrap: break-word;
+            white-space: pre-line;
+            overflow-wrap: break-word;
         }
     </style>
 </head>
@@ -102,6 +119,7 @@
     <div id="bracketContainer" class="bracket-container"></div>
 
     <script>
+        const Height = 40;
         document.addEventListener("DOMContentLoaded", () => {
             const bracketsData = fetchBrackets();
             const matches = fetchMatches();
@@ -119,27 +137,53 @@
                 const bracketContainer = document.createElement("div");
                 bracketContainer.classList.add("bracket-container");
 
+                let mar = 40;
+                let top = 0;
                 bracket.roundMatchIds.forEach((round, roundIndex) => {
                     const roundDiv = document.createElement("div");
                     roundDiv.classList.add("round");
-
                     const roundTitle = document.createElement("h3");
                     roundTitle.textContent = `Round ${roundIndex + 1}`;
                     roundDiv.appendChild(roundTitle);
+                    round.forEach((matchId, matchIndex) => {
 
-                    round.forEach(matchId => {
                         const match = matches.find(m => m.id == matchId) || {};
                         const matchDiv = document.createElement("div");
+                    
                         if(match.nextMatch !== null){
                             matchDiv.classList.add("match");
                         }else{
                             matchDiv.classList.add("champMatch")
                         }
-                        
-                        matchDiv.textContent = match.teamAID !== match.teamBID ? `${match.teamAID ?? 'TBD'} vs ${match.teamBID ?? 'TBD'}` : match.teamAID ?? 'TBD';
-                        roundDiv.appendChild(matchDiv);
-                    });
+                        matchDiv.style.marginBottom = `${mar}px`; // Only bottom margin
+                        if (matchIndex === 0) {
+                            matchDiv.style.marginTop = `${top}px`; // Extra top space for first child
+                        }
+                        const teamA = match.teamAID ?? 'TBD';
+                        const teamB = match.teamBID ?? 'TBD';
+                        const date = match.date ?? '';
+                        const status = match.status === false ? "To Be Played" : (match.winner ? `Winner: ${match.winner}` : 'To Be Played');
 
+                        matchDiv.textContent = teamA !== teamB
+                            ? `${teamA} vs ${teamB}\n${date}\n${status}`
+                            : teamA;
+                            
+                        roundDiv.appendChild(matchDiv);
+                        // create connecting lines
+                        if (matchIndex % 2 === 1) {
+                            const verticalLine = document.createElement("div");
+                            verticalLine.style.position = "absolute";
+                            verticalLine.style.left = 223 + "px";
+                            verticalLine.style.bottom = Height + "px"; 
+                            verticalLine.style.width = "2px";
+                            verticalLine.style.height = `${mar + 2 * Height+ 6}px`;
+                            verticalLine.style.backgroundColor = "black";
+                            matchDiv.appendChild(verticalLine);
+                        }
+                        
+                    });
+                    mar  = mar * 2 + Height * 2;
+                    top = mar/2;
                     bracketContainer.appendChild(roundDiv);
                 });
 
