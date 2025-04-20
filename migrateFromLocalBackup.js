@@ -1,25 +1,13 @@
-const { app, BrowserWindow } = require('electron');
-
-app.whenReady().then(() => {
-  const win = new BrowserWindow({
-    width: 1000,
-    height: 800,
-    webPreferences: {
-      nodeIntegration: true
-    }
-  });
-  win.loadFile('index.html');
-});
+const Store = require('electron-store');
 const fs = require('fs');
 const path = require('path');
-const Store = require('electron-store').default;
 
 function loadJSON(fileName, defaultValue) {
     try {
-        const data = fs.readFileSync(path.join(__dirname, 'LocalStorageBackup', fileName), 'utf-8');
+        const data = fs.readFileSync(path.join(__dirname, 'LocalStorageBack', fileName), 'utf-8');
         return JSON.parse(data);
     } catch (err) {
-        console.error(`❌ Failed to read ${fileName}:`, err);
+        console.error(`Failed to read ${fileName}:`, err);
         return defaultValue;
     }
 }
@@ -44,13 +32,5 @@ function migrate() {
     console.log('✅ Migration from LocalStorageBack completed!');
 }
 
-// Run it once during startup
-function peepStore(){
-    const store = new Store();
-    console.log("matches:", store.get("matches"));
-    console.log("teams:", store.get("teams"));
-    console.log("teamData:", store.get("teamData"));
-    console.log("officialStats:", store.get("officialStats"));
-    console.log("brackets:", store.get("brackets"));
-    console.log("gameIDCounter:", store.get("gameIDCounter"));  
-}
+// call it from your Electron main process
+migrate();

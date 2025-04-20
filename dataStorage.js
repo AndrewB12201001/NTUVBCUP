@@ -1,6 +1,6 @@
-const Store = require('electron-store');
+const Store = require('electron-store').default || require('electron-store');
 const store = new Store();
-
+console.log("Electron store path:", store.path);
 // FETCH FUNCTIONS
 
 function fetchMatches() {
