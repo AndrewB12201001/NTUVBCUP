@@ -185,7 +185,7 @@ function matchSetsWonLoss(game, teamID) {
 }
 
 function ratioWonLoss(setsWon, setsLost) {
-    console.log('W/L', setsWon, setsLost);
+    //console.log('W/L', setsWon, setsLost);
     if (setsLost === 0) return 100;
     return (setsWon)/(setsLost);
 }
@@ -215,7 +215,7 @@ function matchScoreWonLoss(game, teamID) {
 
 // preliminary score calculation
 function calculatePreliminaryScore() {
-    console.log('Starting preliminary score calculation');
+    //console.log('Starting preliminary score calculation');
 
     const matches = fetchMatches();
     const teams = fetchTeams();
@@ -239,7 +239,7 @@ function calculatePreliminaryScore() {
                 scoreTotalResult[1] += scoreResult[1];
             }
         });
-        console.log(team.teamID, 'gamesWon', gamesWon, setsTotalResult, scoreTotalResult, scoreTotalResult[0]/scoreTotalResult[1]);
+        //console.log(team.teamID, 'gamesWon', gamesWon, setsTotalResult, scoreTotalResult, scoreTotalResult[0]/scoreTotalResult[1]);
         team.preliminaryScore = (gamesWon * 100000000 + ratioWonLoss(setsTotalResult[0], setsTotalResult[1]) * 10000 + ratioWonLoss(scoreTotalResult[0], scoreTotalResult[1]));
         // console.log(`Final preliminary score for ${team.teamID}: ${team.preliminaryScore}`);
     });
@@ -409,7 +409,7 @@ function saveMatches(matches){
                                 }
                                 
                                 nextMatch.teamAID = matches[index].winner;
-                                console.log(`Updated teamA in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
+                                //console.log(`Updated teamA in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
                             } else if (nextMatch.teamBID === previousWinner) {
                                 // Remove game from previous winner's games array
                                 if (teams[previousWinner] && teams[previousWinner].games) {
@@ -427,7 +427,7 @@ function saveMatches(matches){
                                 }
                                 
                                 nextMatch.teamBID = matches[index].winner;
-                                console.log(`Updated teamB in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
+                                //console.log(`Updated teamB in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
                             } else {
                                 // If previous winner not found, add to first empty slot
                                 if (nextMatch.teamAID === null) {
@@ -442,7 +442,7 @@ function saveMatches(matches){
                                     }
                                     
                                     nextMatch.teamAID = matches[index].winner;
-                                    console.log(`Added winner to teamA in match ${nextMatchId}: ${matches[index].winner}`);
+                                    //.log(`Added winner to teamA in match ${nextMatchId}: ${matches[index].winner}`);
                                 } else if (nextMatch.teamBID === null) {
                                     // Add game to new winner's games array
                                     if (teams[matches[index].winner]) {
@@ -455,7 +455,7 @@ function saveMatches(matches){
                                     }
                                     
                                     nextMatch.teamBID = matches[index].winner;
-                                    console.log(`Added winner to teamB in match ${nextMatchId}: ${matches[index].winner}`);
+                                    //console.log(`Added winner to teamB in match ${nextMatchId}: ${matches[index].winner}`);
                                 }
                             }
                         }
@@ -479,7 +479,7 @@ function saveMatches(matches){
                             }
                             
                             nextMatch.teamAID = null;
-                            console.log(`Removed ${previousWinner} from teamA in match ${nextMatchId}`);
+                            //console.log(`Removed ${previousWinner} from teamA in match ${nextMatchId}`);
                         } else if (nextMatch.teamBID === previousWinner) {
                             // Remove game from previous winner's games array
                             if (teams[previousWinner] && teams[previousWinner].games) {
@@ -487,7 +487,7 @@ function saveMatches(matches){
                             }
                             
                             nextMatch.teamBID = null;
-                            console.log(`Removed ${previousWinner} from teamB in match ${nextMatchId}`);
+                            //console.log(`Removed ${previousWinner} from teamB in match ${nextMatchId}`);
                         }
                     }
                 }

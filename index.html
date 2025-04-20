@@ -388,6 +388,10 @@
             <i class="fas fa-user-group"></i>
             Team Profiles
         </a>
+        <a href="OfficialProfiles.html" class="nav-link">
+            <i class="fas fa-user-group"></i>
+            Official Profiles
+        </a>
     </div>
     <!-- Popup structure -->
     <div class="popup-overlay hidden" id="popup-overlay"></div>
@@ -528,7 +532,7 @@
                         matches[existingMatchIndex] = { ...match }; // Overwrite the existing match
                         saveMatches(matches); // Save updated matches
                         renderCalendar(); // Re-render calendar
-                    }, 1000); // 1 second for long press
+                    }, 600); // 1 second for long press
                 }
             });
             matchDiv.addEventListener('mouseup', () => clearTimeout(longPressTimer));
@@ -720,7 +724,6 @@
                     document.getElementById("popup-overlay").style.display = 'none';
                     document.getElementById("popup").style.display = 'none';
                 })
-
 
                 // Add these new functions to handle the official dropdown functionality
 
