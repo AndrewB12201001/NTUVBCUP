@@ -88,26 +88,6 @@
 </head>
 <body>
     <script src="dataStorage.js"></script>
-    <!-- Officials profiles are stored in localStorage under 'officialsProfiles'. -->
-    <script>
-        // If no officialsProfiles exist, initialize an empty object.
-        function fetchOfficialsProfiles() {
-            let data = localStorage.getItem('officialsProfiles');
-            if (!data) {
-                saveOfficialsProfiles({});
-                data = localStorage.getItem('officialsProfiles');
-            }
-            try {
-                return JSON.parse(data);
-            } catch (error) {
-                console.error("Error parsing officialsProfiles JSON:", error);
-                return {};
-            }
-        }
-        function saveOfficialsProfiles(data) {
-            localStorage.setItem('officialsProfiles', JSON.stringify(data));
-        }
-    </script>
     <a href="index.html" class="back-link">
         <i class="fas fa-arrow-left"></i>
         Back to Main Page
@@ -137,17 +117,15 @@
         // Populate the table by merging official stats and profiles.
         function populateOfficialsTable() {
             const stats = fetchOfficialStats(); // { officialName: count, ... }
-            const profiles = fetchOfficialsProfiles(); // { officialName: { availableDays: [...] } }
             
             // Create a union of official names found both in stats and profiles.
-            const officialNames = new Set([...Object.keys(stats), ...Object.keys(profiles)]);
             const tableBody = document.getElementById("officials-table-body");
             tableBody.innerHTML = "";
 
-            officialNames.forEach(official => {
+            Object.values(stats).forEach(official => {
                 // Use availableDays from profiles; if undefined, default to [1,2,3,4,5]
-                const availableDays = (profiles[official] && profiles[official].availableDays) ?
-                    profiles[official].availableDays.join(', ') : "1,2,3,4,5";
+                const availableDays = (official.availableDays !== undefined) ?
+                    stats[official].availableDays.join(', ') : "1,2,3,4,5";
                 const matchCount = stats[official] || 0;
                 const row = document.createElement("tr");
                 row.innerHTML = `
@@ -172,8 +150,8 @@
                 availableDays = ["1", "2", "3", "4", "5"];
             }
             const profiles = fetchOfficialsProfiles();
-            profiles[official] = { availableDays };
-            saveOfficialsProfiles(profiles);
+            profiles[official].availableDays = { ...availableDays };
+            saveOfficialStats(profiles);
             alert("Changes saved for " + official);
         }
 
