@@ -451,7 +451,7 @@
                 dayMatches.forEach(match => {
                     createMatchDiv(match, dayDiv, matchesContainer, dateStr);
                 });
-                dayDiv.addEventListener("dblclick", async () => {
+                dayDiv.addEventListener("click", async () => {
                     showPopup(dateStr);  //for add match to date
                 });
                 daysContainer.appendChild(dayDiv);
@@ -467,7 +467,7 @@
                 dayMatches.forEach(match => {
                     createMatchDiv(match, dayDiv, matchesContainer, dateStr);
                 });
-                dayDiv.addEventListener("dblclick", async () => {
+                dayDiv.addEventListener("click", async () => {
                     showPopup(dateStr);  //for add match to date
                 });
                 daysContainer.appendChild(dayDiv);
@@ -485,7 +485,7 @@
                 dayMatches.forEach(match => {
                     createMatchDiv(match, dayDiv, matchesContainer, dateStr);
                 });
-                dayDiv.addEventListener("dblclick", async () => {
+                dayDiv.addEventListener("click", async () => {
                     showPopup(dateStr);  //for add match to date
                 });
                 daysContainer.appendChild(dayDiv);
@@ -499,6 +499,7 @@
                 <div class="calendar-date">${day}</div>
                 <div class="calendar-matches"></div>
             `;
+            dayDiv.style.cursor = 'pointer';
             dayDiv.addEventListener('dragover', (e) => {
                 e.preventDefault();
             });

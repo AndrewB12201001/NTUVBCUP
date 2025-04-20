@@ -338,7 +338,7 @@ function recalculateOfficialStats() {
 
 function updateMatchStatus(match) {
     // Check for special case where two teams are the same name
-    if(match.teamAID == match.teamBID && match.teamAID !== null) match.status = true;
+    if(match.teamAID === match.teamBID && match.teamAID !== null) match.status = true;
     else {
         // Check if all sets have valid scores
         const hasAllScores = 
