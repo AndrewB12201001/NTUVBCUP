@@ -193,6 +193,7 @@
             font-size: 0.9em;
             cursor: pointer;
             user-select: none;
+            position: relative; /* Added to enable proper positioning of the lock icon */
         }
         .past-assigned-match{
             background: #bbbaba;
@@ -202,7 +203,9 @@
             font-size: 0.9em;
             cursor: pointer;
             user-select: none;
+            position: relative; /* Added to enable proper positioning of the lock icon */
         }
+        
 
         .assigned-match:hover {
             background: #d0d0d0;
@@ -761,13 +764,13 @@
 
         document.getElementById('individual-input').addEventListener('click', () => {
             const teams = fetchTeams();
-            console.log("All teams:", teams); // Debug log
+            //console.log("All teams:", teams); // Debug log
             
             teamsList = Object.keys(teams).filter(teamId => 
                 teams[teamId].availableDays === null || 
                 teams[teamId].availableDays === undefined
             );
-            console.log("Filtered teams:", teamsList); // Debug log
+            //console.log("Filtered teams:", teamsList); // Debug log
             
             currentTeamIndex = 0;
             updateCurrentTeam();
@@ -866,8 +869,8 @@
                     date: date,
                     previouslyAssigned: false
                 });
-                console.log("matchDrop", match);
-                console.log('tampMatchDate', date)
+                //console.log("matchDrop", match);
+                //console.log('tampMatchDate', date)
                 displayAssignedMatches();
                 renderUndatedMatches(); // Re-render undated matches to keep them visible
                 renderUndatedMatchCount();
@@ -902,26 +905,64 @@
                 const date = assignment.date;
                 const dayIndex = Math.floor((date - currentWeekStart) / (1000 * 60 * 60 * 24));
                 if (dayIndex >= 0 && dayIndex < 7) {
-                    
+                    if (assignment.match.locked === undefined) {
+                        assignment.match.locked = false; // Initialize if undefined
+                    }
                     const dayBox = document.querySelectorAll('.day-matches')[dayIndex];
                     const matchDiv = document.createElement('div');
                     matchDiv.className = assignment.previouslyAssigned ? 'past-assigned-match' : 'assigned-match';
-                    matchDiv.draggable = true;
                     matchDiv.textContent = `${assignment.match.teamAID} vs ${assignment.match.teamBID}`;
                     matchDiv.style.background = assignment.match.status ? '#63d67e' : (assignment.match.set1[0] !== 0 && assignment.match.set1[1] !== 0) ? '#CCCCFF': '';
-                    // Add drag events to assigned match
-                    matchDiv.addEventListener('dragstart', () => {
-                        selectedMatch = assignment.match;
+                    
+                    // Long press to lock/unlock the match
+                    let longPressTimer;
+                    matchDiv.addEventListener('mousedown', () => {
+                        if (!matchDiv.classList.contains('dragging')) { // Check if not dragging
+                            longPressTimer = setTimeout(() => {
+                                assignment.match.locked = !assignment.match.locked;
+                                displayAssignedMatches();
+                            }, 1000); // 1 second for long press
+                        }
+                        
+                    });
+                    if (assignment.match.locked) {
+                        const lockIcon = document.createElement('i');
+                        lockIcon.className = 'fas fa-lock';
+                        lockIcon.style.position = 'absolute';
+                        lockIcon.style.top = '5px';
+                        lockIcon.style.left = '5px';
+                        lockIcon.style.color = '#555';
+                        lockIcon.style.right = '5px';
+                        lockIcon.style.left = 'auto';
+                        matchDiv.appendChild(lockIcon);
+                        matchDiv.draggable = false; // Disable dragging
+                    }else{
+                        matchDiv.draggable = true; // Enable dragging
+                        // Add drag events to assigned match
+                        matchDiv.addEventListener('dragstart', () => {
+                            clearTimeout(longPressTimer)
+                            selectedMatch = assignment.match;
+                            matchDiv.classList.add('dragging');
+                            // Remove the current assignment when starting to drag
+                            tempAssignments.delete(key);
+                        });
+                        
+                        matchDiv.addEventListener('dragend', () => {
+                            matchDiv.classList.remove('dragging');
+                            displayAssignedMatches();
+                        });
+                    }
+                    matchDiv.addEventListener('mouseup', () => {
+                        if (longPressTimer) clearTimeout(longPressTimer);
+                    });
+                    matchDiv.addEventListener('mouseleave', () => {
+                        if (longPressTimer) clearTimeout(longPressTimer);
+                    });
+                    matchDiv.addEventListener('dragenter', (e) => {
+                        e.preventDefault();
                         matchDiv.classList.add('dragging');
-                        // Remove the current assignment when starting to drag
-                        tempAssignments.delete(key);
                     });
-                    
-                    matchDiv.addEventListener('dragend', () => {
-                        matchDiv.classList.remove('dragging');
-                        displayAssignedMatches();
-                    });
-                    
+                
                     matchDiv.addEventListener('click', () => {
                         highlightAvailableDays(assignment.match);
                     });
@@ -941,7 +982,7 @@
             container.innerHTML = '';
             
             const sortType = document.getElementById('sort-type').value;
-            console.log('Sort type:', sortType); // Debug log
+            //console.log('Sort type:', sortType); // Debug log
             
             if (sortType === 'tier') {
                 const tiers = {};
@@ -968,16 +1009,16 @@
                     container.appendChild(section);
                 });
             } else if (sortType === 'day') { // Make sure this matches your select option value
-                console.log('Sorting by day'); // Debug log
+                //console.log('Sorting by day'); // Debug log
                 const dayMatches = {
                     'Monday': [], 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': []
                 };
                 
-                console.log('Undated matches:', undatedMatches); // Debug log
+                //console.log('Undated matches:', undatedMatches); // Debug log
                 
                 undatedMatches.forEach(match => {
-                    console.log('Processing match:', match); // Debug log
-                    console.log('Available days:', match.availableDays); // Debug log
+                    //console.log('Processing match:', match); // Debug log
+                    //log('Available days:', match.availableDays); // Debug log
                     
                     if (match.availableDays) {
                         match.availableDays.forEach(day => {
@@ -987,7 +1028,7 @@
                     }
                 });
                 
-                console.log('Day matches:', dayMatches); // Debug log
+                //console.log('Day matches:', dayMatches); // Debug log
                 
                 Object.keys(dayMatches).forEach(day => {
                     const section = document.createElement('div');
@@ -1022,7 +1063,7 @@
                         match.teamAID === teamA || match.teamAID === teamB ||
                         match.teamBID === teamA || match.teamBID === teamB
                     ) {
-                        console.log('deepshadow');
+                        //console.log('deepshadow');
                         box.className = 'match-box-sameweek'; // Teams match, highlight the box
                     }
                 };
@@ -1050,7 +1091,7 @@
         }
 
         function highlightAvailableDays(match) {
-            console.log('Match available days:', match.availableDays); // Debug log
+            //console.log('Match available days:', match.availableDays); // Debug log
             
             document.querySelectorAll('.day-box').forEach((box, index) => {
                 box.classList.remove('available', 'unavailable');
@@ -1058,7 +1099,7 @@
                     const dayNumber = index + 1;
                     // Convert availableDays to numbers if they're strings
                     const availableDays = match.availableDays?.map(day => Number(day)) || [];
-                    console.log('Checking day:', dayNumber, 'Available:', availableDays); // Debug log
+                    //console.log('Checking day:', dayNumber, 'Available:', availableDays); // Debug log
                     
                     if (availableDays.includes(dayNumber)) {
                         box.classList.add('available');
@@ -1080,7 +1121,7 @@
                 }
             });
             undatedMatchesCount.innerHTML = `<p>There are still ${count} matches unsorted</p>`;
-            console.log('Undated match count rendered');
+            //console.log('Undated match count rendered');
         }
 
         function matchNumberToChinese(num) {
@@ -1141,7 +1182,7 @@
                     matches[matchIndex].date = matchDate.getFullYear() +
                         '-' + String(matchDate.getMonth() + 1).padStart(2, '0') +
                         '-' + String(matchDate.getDate()).padStart(2, '0');
-                    console.log('savedMatchDate', matches[matchIndex].date);
+                    //log('savedMatchDate', matches[matchIndex].date);
                 }
             });
             
@@ -1242,13 +1283,13 @@
             
             if (userConfirmed) {
                 const teams = fetchTeams();
-                console.log("Teams before reset:", teams); // Debug log
+                //console.log("Teams before reset:", teams); // Debug log
                 
                 Object.keys(teams).forEach(teamId => {
                     teams[teamId].availableDays = null;
                 });
                 
-                console.log("Teams after reset:", teams); // Debug log
+                //console.log("Teams after reset:", teams); // Debug log
                 
                 // Update matches with new available days
                 const matches = fetchMatches();
