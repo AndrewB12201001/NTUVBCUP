@@ -1,79 +1,63 @@
-// Fetch Data
+const Store = require('electron-store');
+const store = new Store();
+
+// FETCH FUNCTIONS
 
 function fetchMatches() {
-    let matchesJSON = localStorage.getItem("matches");
-    if (!matchesJSON) {
+    let matches = store.get("matches", []);
+    if (!matches || !Array.isArray(matches)) {
         console.log("No matches found.");
-        saveMatches([]);
-        matchesJSON = localStorage.getItem("matches");
+        saveMatches([]); // initialize if not present
+        matches = store.get("matches", []);
     }
-    try {
-        return JSON.parse(matchesJSON);
-    } catch (error) {
-        console.error("Error parsing matches JSON:", error);
-        return [];
-    }
+    return matches;
 }
 
 function fetchTeams(){
-    let teamsJSON = localStorage.getItem("teams");
-    if (!teamsJSON) {
+    let teams = store.get("teams", {});
+    if (!teams || Object.keys(teams).length === 0) {
         console.log("No teams found.");
         saveTeams({});
-        teamsJSON = localStorage.getItem("teams");
+        teams = store.get("teams", {});
     }
-    try {
-        return JSON.parse(teamsJSON);
-    } catch (error) {
-        console.error("Error parsing teams JSON:", error);
-        return {};
-    }
+    return teams;
 }
 
-function fetchTeamData(){// for input
-    let teamDataJSON = localStorage.getItem("teamData");
-    if (!teamDataJSON) {
+function fetchTeamData(){
+    let teamData = store.get("teamData", {});
+    if (!teamData || Object.keys(teamData).length === 0) {
         console.log("No teamData found.");
         saveTeamData({});
-        teamDataJSON = localStorage.getItem("teamData");
-    }try {
-        return JSON.parse(teamDataJSON);
-    } catch (error) {
-        console.error("Error parsing teamData JSON:", error);
-        return {};
+        teamData = store.get("teamData", {});
     }
+    return teamData;
 }
 
 function fetchBrackets(){
-    const brackets = JSON.parse(localStorage.getItem('brackets')) || {};
-    return brackets;
+    return store.get("brackets", {});
 }
 
 function fetchOfficialStats() {
-    const officialStats = JSON.parse(localStorage.getItem('officialStats')) || {};
-    return officialStats;
+    return store.get("officialStats", {});
 }
 
 function fetchGamesStarted(){
-    const hasGamesStarted = localStorage.getItem('gamesStarted') || false;
-    return hasGamesStarted;
+    return store.get("gamesStarted", false);
 }
 
 function fetchGameIDCounter(){
-    const gameIDCounter = localStorage.getItem('gameIDCounter') || 0;
-    return gameIDCounter;
+    return store.get("gameIDCounter", 0);
 }
 
 function fetchFirstClick(firstClickKey){
-    const isFirstClick = localStorage.getItem(firstClickKey) || false;
-    return isFirstClick;
+    return store.get(firstClickKey, false);
 }
-// Save data
+
+// SAVE FUNCTIONS
 
 function saveMatches(matches) {
     try {
-        const matchesJSON = JSON.stringify(matches);
-        localStorage.setItem("matches", matchesJSON);
+        store.set("matches", matches);
     } catch (error) {
         console.error("Error saving matches:", error);
     }
@@ -81,8 +65,7 @@ function saveMatches(matches) {
 
 function saveTeams(teams){
     try {
-        const teamsJSON = JSON.stringify(teams);
-        localStorage.setItem("teams", teamsJSON);
+        store.set("teams", teams);
     } catch (error) {
         console.error("Error saving teams:", error);
     }
@@ -90,8 +73,7 @@ function saveTeams(teams){
 
 function saveTeamData(teamData){
     try {
-        const teamDataJSON = JSON.stringify(teamData);
-        localStorage.setItem("teamData", teamDataJSON);
+        store.set("teamData", teamData);
     } catch (error) {
         console.error("Error saving teamData:", error);
     }
@@ -99,67 +81,55 @@ function saveTeamData(teamData){
 
 function saveOfficialStats(officialStats){
     try {
-        const officialsJSON = JSON.stringify(officialStats);
-        localStorage.setItem("officialStats", officialsJSON);
+        store.set("officialStats", officialStats);
     } catch (error) {
-        console.error("Error saving officials:", error);
+        console.error("Error saving officialStats:", error);
     }
 }
 
 function saveBrackets(existingBrackets){
-    localStorage.setItem('brackets', JSON.stringify(existingBrackets));
+    store.set("brackets", existingBrackets);
 }
 
 function saveGameIDCounter(gameIDCounter){
     try {
-        const gameIDCounterJSON = JSON.stringify(gameIDCounter);
-        localStorage.setItem("gameIDCounter", gameIDCounterJSON);
+        store.set("gameIDCounter", gameIDCounter);
     } catch (error) {
         console.error("Error saving gameIDCounter:", error);
     }
 }
 
 function saveFirstClick(firstClickKey, state){
-    localStorage.setItem(firstClickKey, state);
+    store.set(firstClickKey, state);
 }
 
-// 標記比賽已開始
+// OTHER FUNCTIONS
+
+// Mark games started
 function markGamesStarted(state) {
-    localStorage.setItem('gamesStarted', state);
+    store.set("gamesStarted", state);
 }
 
 function wipeEverything(){
-    localStorage.clear();
+    store.clear();
 }
 
 function downloadJSON(jsonString, fileName = "data.json") {
     try {
-        // 將字串解析為 JSON 格式
         const jsonObject = jsonString;
-
-        // 將 JSON 物件轉換為字串，並設定縮排
         const formattedJSON = JSON.stringify(jsonObject, null, 2);
-
-        // 創建一個 Blob 物件
         const blob = new Blob([formattedJSON], { type: "application/json" });
-
-        // 創建一個臨時的超連結
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = fileName;
-
-        // 觸發下載
         document.body.appendChild(link);
         link.click();
-
-        // 清理資源
         document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
-
-        console.log("JSON 文件已成功下載！");
+        console.log("JSON file downloaded successfully!");
     } catch (error) {
-        console.error("無法解析 JSON 字串:", error);
-        alert("提供的字串無法解析為 JSON 格式，請檢查格式是否正確。");
+        console.error("Unable to parse JSON string:", error);
+        alert("The provided string could not be parsed as valid JSON. Please check the formatting.");
     }
 }
 
@@ -171,7 +141,6 @@ function matchSetsWonLoss(game, teamID) {
     ];
     let setsWon = 0;
     let setsLost = 0;
-
     sets.forEach(set => {
         const [scoreA, scoreB] = set;
         if ((teamID === game.teamAID && scoreA > scoreB) || (teamID === game.teamBID && scoreB > scoreA)) {
@@ -180,14 +149,12 @@ function matchSetsWonLoss(game, teamID) {
             setsLost++;
         }
     });
-
-    return [setsWon, setsLost]; // Fixed typo
+    return [setsWon, setsLost];
 }
 
 function ratioWonLoss(setsWon, setsLost) {
-    //console.log('W/L', setsWon, setsLost);
     if (setsLost === 0) return 100;
-    return (setsWon)/(setsLost);
+    return setsWon / setsLost;
 }
 
 function matchScoreWonLoss(game, teamID) {
@@ -198,7 +165,6 @@ function matchScoreWonLoss(game, teamID) {
     ];
     let scoreWon = 0;
     let scoreLost = 0;
-
     sets.forEach(set => {
         const [scoreA, scoreB] = set;
         if (teamID === game.teamAID) {
@@ -209,29 +175,22 @@ function matchScoreWonLoss(game, teamID) {
             scoreLost += scoreA;
         }
     });
-
     return [scoreWon, scoreLost];
 }
 
-// preliminary score calculation
+// Preliminary score calculation
 function calculatePreliminaryScore() {
-    //console.log('Starting preliminary score calculation');
-
     const matches = fetchMatches();
     const teams = fetchTeams();
-
     Object.values(teams).forEach((team) => {
         let gamesWon = 0;
         let setsTotalResult = [0, 0];
         let scoreTotalResult = [0, 0];
-
         team.preliminaryScore = 0;
-
         Object.values(matches).forEach(match => {
             if (match.preliminary === true){
-                const matchResult = matchSetsWonLoss(match, team.teamID); // Fixed function call
+                const matchResult = matchSetsWonLoss(match, team.teamID);
                 const scoreResult = matchScoreWonLoss(match, team.teamID);
-
                 if (matchResult[0] > matchResult[1]) gamesWon++;
                 setsTotalResult[0] += matchResult[0];
                 setsTotalResult[1] += matchResult[1];
@@ -239,30 +198,21 @@ function calculatePreliminaryScore() {
                 scoreTotalResult[1] += scoreResult[1];
             }
         });
-        //console.log(team.teamID, 'gamesWon', gamesWon, setsTotalResult, scoreTotalResult, scoreTotalResult[0]/scoreTotalResult[1]);
-        team.preliminaryScore = (gamesWon * 100000000 + ratioWonLoss(setsTotalResult[0], setsTotalResult[1]) * 10000 + ratioWonLoss(scoreTotalResult[0], scoreTotalResult[1]));
-        // console.log(`Final preliminary score for ${team.teamID}: ${team.preliminaryScore}`);
+        team.preliminaryScore = (gamesWon * 100000000 +
+            ratioWonLoss(setsTotalResult[0], setsTotalResult[1]) * 10000 +
+            ratioWonLoss(scoreTotalResult[0], scoreTotalResult[1]));
     });
-
     saveTeams(teams);
 }
 
 function getTeamRank(teamID) {
-    // first calculate team rank
     const teams = fetchTeams();
     const team = teams[teamID];
     const group = team.preliminaryGroup;
-
-    // Filter teams that are in the same group
     const groupTeams = Object.entries(teams)
         .filter(([id, t]) => t.preliminaryGroup === group)
-        // Sort by preliminaryScore descending
         .sort((a, b) => b[1].preliminaryScore - a[1].preliminaryScore);
-
-    // Find the position (index) of the current team in that sorted array
     const index = groupTeams.findIndex(([id]) => id === teamID);
-
-    // Return rank (1-based index)
     return index + 1;
 }
 
@@ -278,53 +228,45 @@ function isPreliminaryMatchesFinished(teamID) {
     }
     return true;
 }
-// day sorting
+
+// Day sorting
 function calculateAvailableDays(unavailableDays) {
     const allDays = [1, 2, 3, 4, 5];
     return allDays.filter(day => !unavailableDays.includes(Number(day)));
 }
 
-// Add this new function to calculate intersection of available days
+// Calculate intersection of available days for two teams
 function calculateMatchAvailableDays(teamA, teamB) {
     const teams = fetchTeams();
-    // Check if both teams exist and have availableDays
     if (!teams[teamA] || !teams[teamB]) {
-        if(!teams[teamA] && !teams[teamB]){
-            return [1, 2, 3, 4, 5];  // Return all days if teams not found
-        }else if(!teams[teamA]){
+        if (!teams[teamA] && !teams[teamB]) {
+            return [1, 2, 3, 4, 5];
+        } else if (!teams[teamA]) {
             return teams[teamB].availableDays || [1, 2, 3, 4, 5];
-        }else if(!teams[teamB]){
+        } else if (!teams[teamB]) {
             return teams[teamA].availableDays || [1, 2, 3, 4, 5];
         }
     }
-
     const teamADays = teams[teamA].availableDays || [1, 2, 3, 4, 5];
     const teamBDays = teams[teamB].availableDays || [1, 2, 3, 4, 5];
-    
-    //console.log(`TeamA (${teamA}) days:`, teamADays);
-    //console.log(`TeamB (${teamB}) days:`, teamBDays);
-    
     const validTeamADays = Array.isArray(teamADays) ? teamADays : [];
     const validTeamBDays = Array.isArray(teamBDays) ? teamBDays : [];
     return validTeamADays.filter(day => validTeamBDays.includes(day));
 }
-// save Matches sub functions
+
+// Recalculate official stats from matches
 function recalculateOfficialStats() {
     const matches = fetchMatches();
     const officialStats = {};
-    
-    // Count officials from all matches
     matches.forEach(match => {
         if (match.official) {
             if (!officialStats[match.official]) {
-                officialStats[match.official] = {count: 0};
+                officialStats[match.official] = { count: 0 };
             }
             officialStats[match.official].count = (officialStats[match.official].count || 0) + 1;
         }
     });
-    const allOfficialStats = fetchOfficialStats()
-    // Save updated stats
-    // Update count for each official while preserving availableDays if already set
+    const allOfficialStats = fetchOfficialStats();
     for (let official in officialStats) {
         if (allOfficialStats.hasOwnProperty(official)) {
             allOfficialStats[official].count = officialStats[official].count;
@@ -337,176 +279,66 @@ function recalculateOfficialStats() {
 }
 
 function updateMatchStatus(match) {
-    // Check for special case where two teams are the same name
-    if(match.teamAID === match.teamBID && match.teamAID !== null) match.status = true;
-    else {
-        // Check if all sets have valid scores
+    if (match.teamAID === match.teamBID && match.teamAID !== null) {
+        match.status = true;
+    } else {
         const hasAllScores = 
-            (match.set1[0] !== 0 || match.set1[1] !== 0) &&  // At least one team scored in set 1
-            (match.set2[0] !== 0 || match.set2[1] !== 0);    // At least one team scored in set 2
-        
-        // For set 3, we only check if it's needed (when each team won one set)
-        const needsSet3 = 
-            ((match.set1[0] > match.set1[1] && match.set2[0] < match.set2[1]) ||
-            (match.set1[0] < match.set1[1] && match.set2[0] > match.set2[1]));
-        
+            ((match.set1[0] !== 0 || match.set1[1] !== 0) &&
+             (match.set2[0] !== 0 || match.set2[1] !== 0));
+        const needsSet3 = (
+            (match.set1[0] > match.set1[1] && match.set2[0] < match.set2[1]) ||
+            (match.set1[0] < match.set1[1] && match.set2[0] > match.set2[1])
+        );
         const set3Valid = !needsSet3 || (match.set3[0] !== 0 || match.set3[1] !== 0);
-
-        // Update status if all required sets have scores
         match.status = hasAllScores && set3Valid;
     }
     return match;
 }
-function updateMatchWinner(match){
-    // Calculate sets won by each team
+
+function updateMatchWinner(match) {
     let teamASets = 0;
     let teamBSets = 0;
-    
-    // Count sets won
     if (match.set1[0] > match.set1[1]) teamASets++;
     else if (match.set1[1] > match.set1[0]) teamBSets++;
-    
     if (match.set2[0] > match.set2[1]) teamASets++;
     else if (match.set2[1] > match.set2[0]) teamBSets++;
-    
     if (match.set3[0] > match.set3[1]) teamASets++;
     else if (match.set3[1] > match.set3[0]) teamBSets++;
-    
-    // Update current match winner
-    match.winner = (match.teamAID == match.teamBID && match.teamAID !== null) ? match.teamAID : (teamASets === 0 && teamBSets === 0) ? null : (teamASets >= 2) ? match.teamAID : match.teamBID;
+    match.winner = (match.teamAID === match.teamBID && match.teamAID !== null) ? match.teamAID :
+                    (teamASets === 0 && teamBSets === 0) ? null :
+                    (teamASets >= 2) ? match.teamAID : match.teamBID;
     return match;
 }
-// save Matches main function
-function saveMatches(matches){
-    const teams = fetchTeams();
-    let updated = false
-    do {
-        const refMatches = fetchMatches();
-        updated = false
-        Object.values(matches).forEach((match, index) => {
-            // Calculate scores and update status
-            match = updateMatchStatus(match);
-            match.availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID);
-            
-            if (matches[index].status) {
-                // Store previous winner before updating
-                const previousWinner = matches[index].winner;
-                
-                match = updateMatchWinner(match);
-                
-                // Handle next match updates
-                if (matches[index].nextMatch !== null) {
-                    const nextMatchId = matches[index].nextMatch;
-                    const nextMatch = matches.find(m => m.id === nextMatchId);
-                    
-                    if (nextMatch) {
-                        // If winner changed, update next match
-                        if (previousWinner !== matches[index].winner) {
-                            // Remove previous winner from next match and update teams' games array
-                            if (nextMatch.teamAID === previousWinner) {
-                                // Remove game from previous winner's games array
-                                if (teams[previousWinner] && teams[previousWinner].games) {
-                                    teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
-                                }
-                                
-                                // Add game to new winner's games array
-                                if (teams[matches[index].winner]) {
-                                    if (!teams[matches[index].winner].games) {
-                                        teams[matches[index].winner].games = [];
-                                    }
-                                    if (!teams[matches[index].winner].games.includes(nextMatchId)) {
-                                        teams[matches[index].winner].games.push(nextMatchId);
-                                    }
-                                }
-                                
-                                nextMatch.teamAID = matches[index].winner;
-                                //console.log(`Updated teamA in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
-                            } else if (nextMatch.teamBID === previousWinner) {
-                                // Remove game from previous winner's games array
-                                if (teams[previousWinner] && teams[previousWinner].games) {
-                                    teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
-                                }
-                                
-                                // Add game to new winner's games array
-                                if (teams[matches[index].winner]) {
-                                    if (!teams[matches[index].winner].games) {
-                                        teams[matches[index].winner].games = [];
-                                    }
-                                    if (!teams[matches[index].winner].games.includes(nextMatchId)) {
-                                        teams[matches[index].winner].games.push(nextMatchId);
-                                    }
-                                }
-                                
-                                nextMatch.teamBID = matches[index].winner;
-                                //console.log(`Updated teamB in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
-                            } else {
-                                // If previous winner not found, add to first empty slot
-                                if (nextMatch.teamAID === null) {
-                                    // Add game to new winner's games array
-                                    if (teams[matches[index].winner]) {
-                                        if (!teams[matches[index].winner].games) {
-                                            teams[matches[index].winner].games = [];
-                                        }
-                                        if (!teams[matches[index].winner].games.includes(nextMatchId)) {
-                                            teams[matches[index].winner].games.push(nextMatchId);
-                                        }
-                                    }
-                                    
-                                    nextMatch.teamAID = matches[index].winner;
-                                    //.log(`Added winner to teamA in match ${nextMatchId}: ${matches[index].winner}`);
-                                } else if (nextMatch.teamBID === null) {
-                                    // Add game to new winner's games array
-                                    if (teams[matches[index].winner]) {
-                                        if (!teams[matches[index].winner].games) {
-                                            teams[matches[index].winner].games = [];
-                                        }
-                                        if (!teams[matches[index].winner].games.includes(nextMatchId)) {
-                                            teams[matches[index].winner].games.push(nextMatchId);
-                                        }
-                                    }
-                                    
-                                    nextMatch.teamBID = matches[index].winner;
-                                    //console.log(`Added winner to teamB in match ${nextMatchId}: ${matches[index].winner}`);
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                // If match is not complete, remove winner and potentially update next match
-                const previousWinner = matches[index].winner;
-                matches[index].winner = null;
-                
-                // Remove winner from next match if it exists
-                if (matches[index].nextMatch !== null && previousWinner) {
-                    const nextMatchId = matches[index].nextMatch;
-                    const nextMatch = matches.find(m => m.id === nextMatchId);
-                    
-                    if (nextMatch) {
-                        if (nextMatch.teamAID === previousWinner) {
-                            // Remove game from previous winner's games array
-                            if (teams[previousWinner] && teams[previousWinner].games) {
-                                teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
-                            }
-                            
-                            nextMatch.teamAID = null;
-                            //console.log(`Removed ${previousWinner} from teamA in match ${nextMatchId}`);
-                        } else if (nextMatch.teamBID === previousWinner) {
-                            // Remove game from previous winner's games array
-                            if (teams[previousWinner] && teams[previousWinner].games) {
-                                teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
-                            }
-                            
-                            nextMatch.teamBID = null;
-                            //console.log(`Removed ${previousWinner} from teamB in match ${nextMatchId}`);
-                        }
-                    }
-                }
-            }
-        });
-        if (JSON.stringify(refMatches) !== JSON.stringify(matches)) updated = true;
-        const matchesJSON = JSON.stringify(matches);
-        localStorage.setItem("matches", matchesJSON);
-        recalculateOfficialStats();
-    } while (updated === true);
-}
+
+// Export functions if needed
+module.exports = {
+    fetchMatches,
+    fetchTeams,
+    fetchTeamData,
+    fetchBrackets,
+    fetchOfficialStats,
+    fetchGamesStarted,
+    fetchGameIDCounter,
+    fetchFirstClick,
+    saveMatches,
+    saveTeams,
+    saveTeamData,
+    saveOfficialStats,
+    saveBrackets,
+    saveGameIDCounter,
+    saveFirstClick,
+    markGamesStarted,
+    wipeEverything,
+    downloadJSON,
+    matchSetsWonLoss,
+    ratioWonLoss,
+    matchScoreWonLoss,
+    calculatePreliminaryScore,
+    getTeamRank,
+    isPreliminaryMatchesFinished,
+    calculateAvailableDays,
+    calculateMatchAvailableDays,
+    recalculateOfficialStats,
+    updateMatchStatus,
+    updateMatchWinner
+};
