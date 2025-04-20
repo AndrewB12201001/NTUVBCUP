@@ -502,7 +502,7 @@
                 e.preventDefault();
                 const matches = fetchMatches();
                 const matchIndex = matches.findIndex(m => m.id === selectedMatch.id);
-                if (matchIndex === -1) return;
+                if (matchIndex === -1 || matches[matchIndex].locked) return; // Prevent moving locked matches
                 matches[matchIndex].date = dateStr;
                 saveMatches(matches);
                 renderCalendar();
@@ -515,17 +515,56 @@
             matchDiv.className = 'calendar-match';
             matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
             matchDiv.style.background = match.status ? '#63d67e' : (match.set1[0] !== 0 && match.set1[1] !== 0) ? '#CCCCFF': '';
-            matchDiv.draggable = true;
-            matchDiv.addEventListener('dragstart', () => {
-                selectedMatch = match;
+            if (match.locked === undefined) {
+                match.locked = false; // Initialize if undefined
+            }
+            // Long press to lock/unlock the match
+            let longPressTimer;
+            matchDiv.addEventListener('mousedown', () => {
+                if (!matchDiv.classList.contains('dragging')) { // Check if not dragging
+                    longPressTimer = setTimeout(() => {
+                        match.locked = !match.locked;
+                        const matches = fetchMatches();
+                        const existingMatchIndex = matches.findIndex(m => m.id === match.id);
+                        matches[existingMatchIndex] = { ...match }; // Overwrite the existing match
+                        saveMatches(matches); // Save updated matches
+                        renderCalendar(); // Re-render calendar
+                    }, 1000); // 1 second for long press
+                }
+            });
+            matchDiv.addEventListener('mouseup', () => clearTimeout(longPressTimer));
+            matchDiv.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
+            matchDiv.addEventListener('dragenter', (e) => {
+                e.preventDefault();
                 matchDiv.classList.add('dragging');
             });
-            matchDiv.addEventListener('dragend', () => {
-                matchDiv.classList.remove('dragging');
-                renderCalendar();
-            });
+            // Add lock icon if match is locked
+            if (match.locked) {
+                const lockIcon = document.createElement('i');
+                lockIcon.className = 'fas fa-lock';
+                lockIcon.style.position = 'absolute';
+                lockIcon.style.top = '5px';
+                lockIcon.style.left = '5px';
+                lockIcon.style.color = '#555';
+                matchDiv.appendChild(lockIcon);
+                matchDiv.draggable = false; // Disable dragging
+            } else {
+                matchDiv.draggable = true;
+                matchDiv.addEventListener('dragstart', () => {
+                    clearTimeout(longPressTimer)
+                    selectedMatch = match;
+                    matchDiv.classList.add('dragging');
+                });
+                matchDiv.addEventListener('dragend', () => {
+                    matchDiv.classList.remove('dragging');
+                    renderCalendar();
+                });
+            }
+
+            
+            
             matchesContainer.appendChild(matchDiv);
-            //show the popup
+            // Show the popup
             showMatchinfo(matchDiv, dateStr, match);
         }
 

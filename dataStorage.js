@@ -289,15 +289,20 @@ function calculateMatchAvailableDays(teamA, teamB) {
     const teams = fetchTeams();
     // Check if both teams exist and have availableDays
     if (!teams[teamA] || !teams[teamB]) {
-        console.log(`Warning: Team not found - TeamA: ${teamA}, TeamB: ${teamB}`);
-        return [1, 2, 3, 4, 5];  // Return all days if teams not found
+        if(!teams[teamA] && !teams[teamB]){
+            return [1, 2, 3, 4, 5];  // Return all days if teams not found
+        }else if(!teams[teamA]){
+            return teams[teamB].availableDays || [1, 2, 3, 4, 5];
+        }else if(!teams[teamB]){
+            return teams[teamA].availableDays || [1, 2, 3, 4, 5];
+        }
     }
 
     const teamADays = teams[teamA].availableDays || [1, 2, 3, 4, 5];
     const teamBDays = teams[teamB].availableDays || [1, 2, 3, 4, 5];
     
-    console.log(`TeamA (${teamA}) days:`, teamADays);
-    console.log(`TeamB (${teamB}) days:`, teamBDays);
+    //console.log(`TeamA (${teamA}) days:`, teamADays);
+    //console.log(`TeamB (${teamB}) days:`, teamBDays);
     
     const validTeamADays = Array.isArray(teamADays) ? teamADays : [];
     const validTeamBDays = Array.isArray(teamBDays) ? teamBDays : [];
