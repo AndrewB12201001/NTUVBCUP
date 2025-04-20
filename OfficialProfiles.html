@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Profiles</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #2c3e50;
+            color: white;
+        }
+        button {
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .edit-btn {
+            background: #f39c12;
+            color: white;
+        }
+        .match-btn {
+            background: #3498db;
+            color: white;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 12px 24px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            min-width: 300px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <script src="dataStorage.js"></script>
+    <!-- Officials profiles are stored in localStorage under 'officialsProfiles'. -->
+    <script>
+        // If no officialsProfiles exist, initialize an empty object.
+        function fetchOfficialsProfiles() {
+            let data = localStorage.getItem('officialsProfiles');
+            if (!data) {
+                saveOfficialsProfiles({});
+                data = localStorage.getItem('officialsProfiles');
+            }
+            try {
+                return JSON.parse(data);
+            } catch (error) {
+                console.error("Error parsing officialsProfiles JSON:", error);
+                return {};
+            }
+        }
+        function saveOfficialsProfiles(data) {
+            localStorage.setItem('officialsProfiles', JSON.stringify(data));
+        }
+    </script>
+    <a href="index.html" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Main Page
+    </a>
+    <h1>Official Profiles</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Official Name</th>
+                <th>Available Days</th>
+                <th>Matches Officiated</th>
+                <th>Action</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody id="officials-table-body"></tbody>
+    </table>
+
+    <div class="modal-overlay" id="modal-overlay"></div>
+    <div class="modal" id="match-modal">
+        <h2>Matches Officiated</h2>
+        <div id="match-content"></div>
+        <button onclick="closeModal()">Close</button>
+    </div>
+
+    <script>
+        // Populate the table by merging official stats and profiles.
+        function populateOfficialsTable() {
+            const stats = fetchOfficialStats(); // { officialName: count, ... }
+            const profiles = fetchOfficialsProfiles(); // { officialName: { availableDays: [...] } }
+            
+            // Create a union of official names found both in stats and profiles.
+            const officialNames = new Set([...Object.keys(stats), ...Object.keys(profiles)]);
+            const tableBody = document.getElementById("officials-table-body");
+            tableBody.innerHTML = "";
+
+            officialNames.forEach(official => {
+                // Use availableDays from profiles; if undefined, default to [1,2,3,4,5]
+                const availableDays = (profiles[official] && profiles[official].availableDays) ?
+                    profiles[official].availableDays.join(', ') : "1,2,3,4,5";
+                const matchCount = stats[official] || 0;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${official}</td>
+                    <td contenteditable="true">${availableDays}</td>
+                    <td>${matchCount}</td>
+                    <td><button class="match-btn" onclick="showMatchesForOfficial('${official}')">View Matches</button></td>
+                    <td><button class="edit-btn" onclick="saveOfficialChanges('${official}', this)">Save</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Save changes to availableDays
+        function saveOfficialChanges(official, button) {
+            const row = button.parentElement.parentElement;
+            const availableDaysText = row.cells[1].innerText.trim();
+            // Convert comma-separated string to an array, removing any extra spaces.
+            let availableDays = availableDaysText.split(',').map(s => s.trim()).filter(s => s !== '');
+            // If not valid, default to [1,2,3,4,5]
+            if (availableDays.length === 0) {
+                availableDays = ["1", "2", "3", "4", "5"];
+            }
+            const profiles = fetchOfficialsProfiles();
+            profiles[official] = { availableDays };
+            saveOfficialsProfiles(profiles);
+            alert("Changes saved for " + official);
+        }
+
+        function showMatchesForOfficial(official) {
+            const matches = fetchMatches();
+            const officialMatches = matches.filter(match => match.official === official);
+            const matchContent = document.getElementById("match-content");
+            matchContent.innerHTML = "";
+            if (officialMatches.length === 0) {
+                matchContent.innerHTML = `<p>No matches officiated by ${official}.</p>`;
+            } else {
+                officialMatches.forEach(match => {
+                    matchContent.innerHTML += `<p>${match.teamAID} vs ${match.teamBID} - Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}</p>`;
+                });
+            }
+            document.getElementById("modal-overlay").style.display = "block";
+            document.getElementById("match-modal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("modal-overlay").style.display = "none";
+            document.getElementById("match-modal").style.display = "none";
+        }
+        
+        window.onload = populateOfficialsTable;
+    </script>
+</body>
+</html>

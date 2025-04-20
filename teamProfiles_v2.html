@@ -210,7 +210,6 @@
             const matchContent = document.getElementById("match-content");
             matchContent.innerHTML = "";
             console.log(team);
-            matchContent.innerHTML += `<p>Preliminary Score: ${team.preliminaryScore}</p>`
             teamMatches.forEach(match => {
                 matchContent.innerHTML += `<p>${match.teamAID} vs ${match.teamBID} - Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}</p>`;
             });
