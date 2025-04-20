@@ -610,7 +610,8 @@
                         <button id="delete-match" class="btn-secondary">UnDate</button>
                     </div>
                 `;
-                setupOfficialDropdowns();
+                window.currentMatchDate = match.date;
+                setupOfficialDropdowns(match);
                 
                 // Attach event listener after the popup is created
                 document.getElementById('save-match').addEventListener('click', () => {
@@ -727,7 +728,7 @@
 
                 // Add these new functions to handle the official dropdown functionality
 
-                function setupOfficialDropdowns() {
+                function setupOfficialDropdowns(match) {
                     const searchInputs = document.querySelectorAll('.official-search');
                     
                     searchInputs.forEach(input => {
@@ -736,17 +737,17 @@
 
                         // Show dropdown on focus
                         input.addEventListener('click', () => {
-                            updateOfficialList(dropdownList, input.value, officialStats);
+                            updateOfficialList(dropdownList, input.value, officialStats, match);
                             dropdownList.style.display = 'block';
                         });
 
                         // Handle input changes
                         input.addEventListener('input', () => {
-                            updateOfficialList(dropdownList, input.value, officialStats);
+                            updateOfficialList(dropdownList, input.value, officialStats, match);
                             console.log('updatedOfficialList from here');
                         });
 
-                        // Add change event handler
+                        // When the input value changes, update the match official in storage
                         input.addEventListener('change', () => {
                             const matches = fetchMatches();
                             const matchIndex = matches.findIndex(m => m.id === match.id);
@@ -755,36 +756,43 @@
                             
                             // Update match official
                             matches[matchIndex].official = newOfficial;
-                            
                             saveMatches(matches);
-                            
+                            console.log(`Updated official from ${previousOfficial} to ${newOfficial}`);
                         });
                     });
                 }
 
-                function updateOfficialList(dropdownList, searchText, officialStats) {
+                function updateOfficialList(dropdownList, searchText, officialStats, match) {
                     const matches = fetchMatches();
                     dropdownList.innerHTML = '';
                     const officials = Object.keys(officialStats);
                     
-                    const filteredOfficials = officials.filter(official => 
-                        official.toLowerCase().includes(searchText.toLowerCase())
-                    );
+                    // Get the day of week for the current match date
+                    const matchDay = new Date(match.date).getDay();
+                    
+                    const filteredOfficials = officials.filter(official => {
+                        if (officialStats[official].availableDays === undefined) {
+                            return true;
+                        } else {
+                            return official.toLowerCase().includes(searchText.toLowerCase()) &&
+                                   officialStats[official].availableDays.includes(matchDay);
+                        }
+                    });
                     console.log(filteredOfficials);
 
                     filteredOfficials.forEach(official => {
                         const div = document.createElement('div');
-                        div.textContent = `${official} (${officialStats[official]} games)`;
+                        div.textContent = `${official} (${officialStats[official].count} games)`;
                         // Add CSS styles directly to the element
-                        div.style.cursor = 'default';  // Prevents cursor from changing
-                        div.style.transition = 'background-color 0.2s';  // Smooth transition
+                        div.style.cursor = 'default';
+                        div.style.transition = 'background-color 0.2s';
                         
                         // Add hover event listeners
                         div.addEventListener('mouseenter', () => {
-                            div.style.backgroundColor = '#e0e0e0';  // Darker background on hover
+                            div.style.backgroundColor = '#e0e0e0';
                         });
                         div.addEventListener('mouseleave', () => {
-                            div.style.backgroundColor = '';  // Reset background
+                            div.style.backgroundColor = '';
                         });
                         
                         div.addEventListener('click', () => {
@@ -795,22 +803,19 @@
                             // Update input and match
                             input.value = official;
                             matches[matchIndex].official = official;
-
-                            // Save matches
                             saveMatches(matches);
 
                             // Refresh the dropdown with updated stats
-                            updateOfficialList(dropdownList, official, updatedStats);
-                            console.log('updatedOfficialList from here');
+                            updateOfficialList(dropdownList, official, officialStats, match);
+                            console.log(`Updated official from ${previousOfficial} to ${official}`);
                             
                             dropdownList.style.display = 'none';
-                            console.log(`Updated official from ${previousOfficial} to ${official}`);
                         });
                         dropdownList.appendChild(div);
                     });
 
-                    // Add option for new official
-                    if (!filteredOfficials.includes(searchText) && searchText.trim() !== '') {
+                    // Add option for new official if the search text does not match any existing official
+                    if (!filteredOfficials.some(off => off.toLowerCase() === searchText.toLowerCase()) && searchText.trim() !== '') {
                         const div = document.createElement('div');
                         div.textContent = `Add new: ${searchText}`;
                         div.style.cursor = 'pointer';
@@ -822,12 +827,12 @@
                             // Update input and match
                             input.value = searchText;
                             matches[matchIndex].official = searchText;
-                            // save match
                             saveMatches(matches);
+                            
                             // Refresh all dropdowns with updated stats
                             document.querySelectorAll('.official-search').forEach(searchInput => {
                                 const list = searchInput.nextElementSibling;
-                                updateOfficialList(list, searchInput.value, updatedStats);
+                                updateOfficialList(list, searchInput.value, officialStats, match);
                                 console.log('updatedOfficialList from here');
                             });
                             

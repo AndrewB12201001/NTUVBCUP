@@ -116,26 +116,26 @@
     <script>
         // Populate the table by merging official stats and profiles.
         function populateOfficialsTable() {
-            const stats = fetchOfficialStats(); // { officialName: count, ... }
-            
-            // Create a union of official names found both in stats and profiles.
+            const stats = fetchOfficialStats(); // {"蔡定恩":{"count":20,"availableDays":[1,2,3,4,5]}, ...}
             const tableBody = document.getElementById("officials-table-body");
             tableBody.innerHTML = "";
-
-            Object.values(stats).forEach(official => {
-                // Use availableDays from profiles; if undefined, default to [1,2,3,4,5]
-                const availableDays = (official.availableDays !== undefined) ?
-                    stats[official].availableDays.join(', ') : "1,2,3,4,5";
-                const matchCount = stats[official] || 0;
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${official}</td>
-                    <td contenteditable="true">${availableDays}</td>
-                    <td>${matchCount}</td>
-                    <td><button class="match-btn" onclick="showMatchesForOfficial('${official}')">View Matches</button></td>
-                    <td><button class="edit-btn" onclick="saveOfficialChanges('${official}', this)">Save</button></td>
-                `;
-                tableBody.appendChild(row);
+        
+            Object.keys(stats).forEach(officialName => {
+            const officialData = stats[officialName];
+            // If availableDays is not defined or empty, default to "1,2,3,4,5"
+            const availableDays = (Array.isArray(officialData.availableDays) && officialData.availableDays.length > 0)
+                ? officialData.availableDays.join(', ')
+                : "1,2,3,4,5";
+            const matchCount = officialData.count || 0;
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${officialName}</td>
+                <td contenteditable="true">${availableDays}</td>
+                <td>${matchCount}</td>
+                <td><button class="match-btn" onclick="showMatchesForOfficial('${officialName}')">View Matches</button></td>
+                <td><button class="edit-btn" onclick="saveOfficialChanges('${officialName}', this)">Save</button></td>
+            `;
+            tableBody.appendChild(row);
             });
         }
 
@@ -144,14 +144,16 @@
             const row = button.parentElement.parentElement;
             const availableDaysText = row.cells[1].innerText.trim();
             // Convert comma-separated string to an array, removing any extra spaces.
-            let availableDays = availableDaysText.split(',').map(s => s.trim()).filter(s => s !== '');
+            let availableDays = availableDaysText.split(',')
+                .map(s => parseInt(s.trim(), 10))
+                .filter(n => !isNaN(n));
             // If not valid, default to [1,2,3,4,5]
             if (availableDays.length === 0) {
-                availableDays = ["1", "2", "3", "4", "5"];
+                availableDays = [1,2,3,4,5];
             }
-            const profiles = fetchOfficialsProfiles();
-            profiles[official].availableDays = { ...availableDays };
-            saveOfficialStats(profiles);
+            const stats = fetchOfficialStats(); 
+            stats[official].availableDays = availableDays;
+            saveOfficialStats(stats);
             alert("Changes saved for " + official);
         }
 
@@ -159,13 +161,24 @@
             const matches = fetchMatches();
             const officialMatches = matches.filter(match => match.official === official);
             const matchContent = document.getElementById("match-content");
+            // Set scrollable container styles.
+            matchContent.style.maxHeight = "200px";
+            matchContent.style.overflowY = "auto";
             matchContent.innerHTML = "";
             if (officialMatches.length === 0) {
-                matchContent.innerHTML = `<p>No matches officiated by ${official}.</p>`;
+            matchContent.innerHTML = `<p>No matches officiated by ${official}.</p>`;
             } else {
-                officialMatches.forEach(match => {
-                    matchContent.innerHTML += `<p>${match.teamAID} vs ${match.teamBID} - Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}</p>`;
-                });
+            const ul = document.createElement("ul");
+            ul.style.listStyleType = "none";
+            ul.style.margin = 0;
+            ul.style.padding = 0;
+            officialMatches.forEach(match => {
+                const li = document.createElement("li");
+                li.style.padding = "4px 0";
+                li.innerHTML = `${match.teamAID} vs ${match.teamBID} - Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}`;
+                ul.appendChild(li);
+            });
+            matchContent.appendChild(ul);
             }
             document.getElementById("modal-overlay").style.display = "block";
             document.getElementById("match-modal").style.display = "block";
@@ -175,7 +188,7 @@
             document.getElementById("modal-overlay").style.display = "none";
             document.getElementById("match-modal").style.display = "none";
         }
-        
+        document.getElementById("modal-overlay").onclick = closeModal();
         window.onload = populateOfficialsTable;
     </script>
 </body>
