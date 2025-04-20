@@ -316,12 +316,23 @@ function recalculateOfficialStats() {
     // Count officials from all matches
     matches.forEach(match => {
         if (match.official) {
-            officialStats[match.official] = (officialStats[match.official] || 0) + 1;
+            if (!officialStats[match.official]) {
+                officialStats[match.official] = {count: 0};
+            }
+            officialStats[match.official].count = (officialStats[match.official].count || 0) + 1;
         }
     });
-
+    const allOfficialStats = fetchOfficialStats()
     // Save updated stats
-    saveOfficialStats(officialStats);
+    // Update count for each official while preserving availableDays if already set
+    for (let official in officialStats) {
+        if (allOfficialStats.hasOwnProperty(official)) {
+            allOfficialStats[official].count = officialStats[official].count;
+        } else {
+            allOfficialStats[official] = { count: officialStats[official].count };
+        }
+    }
+    saveOfficialStats(allOfficialStats);
     return officialStats;
 }
 
