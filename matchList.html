@@ -601,6 +601,11 @@
                 <div id="teamB-list" class="scrolling-list"></div>
             </div>
 
+            <div class="form-group">
+                <label for="group-attribute">Group Name:</label>
+                <input type="text" id="group-attribute" class="search-input" placeholder="Enter group name">
+            </div>
+
             <div class="popup-buttons">
                 <button id="create-game-button" class="btn-primary">
                     <i class="fas fa-plus"></i>
@@ -622,7 +627,6 @@
         </div>
     </div>
     <script>
-
         // Add at the beginning of JavaScript
         let hasUnsavedChanges = false;
         let gameIDCounter = null;
@@ -668,7 +672,7 @@
             updateCreateMatchesButtonVisibility();
             checkAndCreateFinalMatches();
         });
-        
+
         function generateGameID() {
             // Retrieve the current gameIDCounter
             let gameIDCounter = fetchGameIDCounter();
@@ -995,7 +999,9 @@
             saveMatches(matches);
             renderMatches(matches);
         });*/
-        
+
+
+
         /* Generate Final Matches */
         function showGenerateFinalsButton(tier) {
             console.log('Raw tier value:', tier);
@@ -1029,15 +1035,16 @@
 
             container.appendChild(finalsButton);
         }
-        
 
-        
-//https://docs.google.com/document/d/1Wrz8QhUekCM4XEoycSSXh5Zimh9tDX-CzKcdyoL2bmU/edit?tab=t.0
+
+
+
+        //https://docs.google.com/document/d/1Wrz8QhUekCM4XEoycSSXh5Zimh9tDX-CzKcdyoL2bmU/edit?tab=t.0
         function generateFinalMatches(Tier) {  
             calculatePreliminaryScore();
             const matches = fetchMatches();
             const teams = fetchTeams();
-//一級 的各組的前四打八強賽淘汰賽各組後二打保級賽 最後三名降級（8隊的淘汰&4隊的淘汰）
+        //一級 的各組的前四打八強賽淘汰賽各組後二打保級賽 最後三名降級（8隊的淘汰&4隊的淘汰）
             if (Tier === 1) {
                 // Tier 1: Top 4 from each group → Quarterfinals, Bottom 2 → Relegation
                 const tier1Groups = ["Tier1-A", "Tier1-B"];
@@ -1071,7 +1078,7 @@
                 createBracket(quarterFinalMatches, 'Tier1Finals');
                 createBracket(relegationMatches, 'Tier1Relegation');
             }
-//二級 巨大淘汰賽
+        //二級 巨大淘汰賽
             if (Tier === 2) {
                 // Tier 2: 3 groups → Top 2 from each group → Elimination rounds
                 const tier2Groups = ["Tier2-A", "Tier2-B", "Tier2-C"];
@@ -1109,7 +1116,7 @@
                 createBracket(playoffMatches, 'Tier2Finals');
 
             }
-//三級 分組第一打1~6名排名賽，分組第二打7~12名排名賽，分組第三打13~18排名賽每個排名賽依據積分選兩個種子，積分第三高打積分第六，積分第四打第五。
+        //三級 分組第一打1~6名排名賽，分組第二打7~12名排名賽，分組第三打13~18排名賽每個排名賽依據積分選兩個種子，積分第三高打積分第六，積分第四打第五。
             if (Tier === 3) {
                 // Tier 3: First place teams → Rank 1-6, Second place → Rank 7-12, Third place → Rank 13-18
                 const tier3Groups = ["Tier3-A", "Tier3-B", "Tier3-C", "Tier3-D", "Tier3-E", "Tier3-F"];
@@ -1150,7 +1157,7 @@
                 createBracket(rankingMatch2, 'Tier3(7-12)');
                 createBracket(rankingMatch3, 'Tier3Relegation');
             }
-//四級分組一打排名賽 奇數個分組一，積分最高的當種子，偶數個但不是2^n分組一，前N-2^[floor_function(log(2,N))]有優勢，N= 2^n for some n 就積分最高打積分最低的。
+        //四級分組一打排名賽 奇數個分組一，積分最高的當種子，偶數個但不是2^n分組一，前N-2^[floor_function(log(2,N))]有優勢，N= 2^n for some n 就積分最高打積分最低的。
             if (Tier === 4) {
                 // Tier 4: Ranking playoffs with seeding rules
                 const tier4Groups = ["Tier4-A", "Tier4-B", "Tier4-C", "Tier4-D", "Tier4-E"];
@@ -1293,7 +1300,7 @@
             updateList();
         }
 
-        
+
         // Show the popup
         document.getElementById("add-game-button").addEventListener("click", () => {
             const teams = fetchTeams();
@@ -1313,13 +1320,13 @@
         document.getElementById("create-game-button").addEventListener("click", () => {
             const teamAID = document.getElementById("search-teamA").value;
             const teamBID = document.getElementById("search-teamB").value;
-
+            const groupName = document.getElementById("group-attribute").value;
             if (!teamAID || !teamBID) {
                 alert("Please select both teams.");
                 return;
             }
 
-            const newGame = createGames(teamAID, teamBID, preliminary = null, groupName = null);
+            const newGame = createGames(teamAID, teamBID, preliminary = null, groupName);
             const matches = fetchMatches();
             matches.push(newGame);
             saveMatches(matches);
@@ -1663,13 +1670,60 @@
                 if (preliminary.length > 0 && preliminary.every(match => Boolean(match.status))) {
                     showGenerateFinalsButton(tier);
                 }
+                const quarterFinalMatches = matches.filter(match => match.group === 'Tier1Finals-Round1');
+                // For Tier1, if quarterfinal (first round) finals are finished, show the 5-8 button
+                if (tier === "Tier1" && quarterFinalMatches.length === 4 && quarterFinalMatches.every(match => match.status === true)) {
+                    showGenerate5to8Button(tier);
+                }
+                // tier2
             });
         }
 
         // Finals
 
-        
+        function showGenerate5to8Button(tier) {
+            // Only apply for Tier1
+            if (tier !== "Tier1") return;
 
+            const matches = fetchMatches();
+            // Filter Tier1 finals first round matches (created with group "Tier1Finals-Round1")
+            
+            
+            // Check that all quarterfinal matches are finished
+            const container = document.getElementById("final-matches-container");
+            // Create the 5-8 generation button
+            const button5to8 = document.createElement("button");
+            button5to8.className = 'action-btn success';
+            button5to8.textContent = "Generate Tier1 5-8 Bracket";
+            
+            button5to8.addEventListener("click", () => {
+                generate5to8Matches();
+                alert("Tier1 5-8 matches generated");
+            });
+            container.appendChild(button5to8);
+        }
+
+        function generate5to8Matches() {
+            const matches = fetchMatches();
+            // Get Tier1 finals first round matches
+            const quarterFinalMatches = matches.filter(match => match.group === 'Tier1Finals-Round1');
+            
+            // Determine losers from each match:
+            // (Assumes match.winner holds the winning team ID)
+            const losers = quarterFinalMatches.map(match => {
+                // If winner is teamA, loser is teamB; otherwise, loser is teamA.
+                // You may adjust logic if team IDs or input differs.
+                return match.winner === match.teamAID ? match.teamBID : match.teamAID;
+            });
+            
+            // Now create a new bracket using these four losing team IDs
+            // Group attribute will be set inside createBracket as bracketName + "-Round1"
+            createBracket(losers, 'Tier1_5to8');
+            
+            // Optionally, update the view
+            const updatedMatches = fetchMatches();
+            renderMatches(updatedMatches);
+        }
     </script>
 </body>
 </html>
