@@ -502,7 +502,6 @@
                 e.preventDefault();
                 const matches = fetchMatches();
                 const matchIndex = matches.findIndex(m => m.id === selectedMatch.id);
-                if (matchIndex === -1 || matches[matchIndex].locked) return; // Prevent moving locked matches
                 matches[matchIndex].date = dateStr;
                 saveMatches(matches);
                 renderCalendar();
@@ -540,18 +539,13 @@
             });
             // Add lock icon if match is locked
             if (match.locked) {
-                const lockIcon = document.createElement('i');
-                lockIcon.className = 'fas fa-lock';
-                lockIcon.style.position = 'absolute';
-                lockIcon.style.top = '5px';
-                lockIcon.style.left = '5px';
-                lockIcon.style.color = '#555';
-                matchDiv.appendChild(lockIcon);
+                matchDiv.textContent = `🔒${match.group}: ${match.teamAID} vs ${match.teamBID}`;
                 matchDiv.draggable = false; // Disable dragging
             } else {
                 matchDiv.draggable = true;
+                matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
                 matchDiv.addEventListener('dragstart', () => {
-                    clearTimeout(longPressTimer)
+                    clearTimeout(longPressTimer);
                     selectedMatch = match;
                     matchDiv.classList.add('dragging');
                 });
@@ -613,7 +607,7 @@
                     </div>
                 `;
                 setupOfficialDropdowns();
-
+                
                 // Attach event listener after the popup is created
                 document.getElementById('save-match').addEventListener('click', () => {
                     console.log('Saving match:', match.id);
@@ -695,9 +689,19 @@
                     //rerender the callender
                     renderCalendar();
                 });
-
+                if(match.locked !== undefined){
+                    if (match.locked == true){
+                        document.getElementById('delete-match').style.display = 'none';
+                    }
+                }
                 document.getElementById('delete-match').addEventListener('click', () => {
                     // Find the current match in the stored data
+                    if(match.locked !== undefined){
+                        if (match.locked == true){
+                            alert('Match is locked. Cannot delete.');
+                            return;
+                        }
+                    }
                     const matchIndex = matches.findIndex(m => m.id === match.id);
                     if (matchIndex === -1) return;
                     matches[matchIndex].date = null;
