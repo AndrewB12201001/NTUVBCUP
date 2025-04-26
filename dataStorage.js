@@ -510,3 +510,71 @@ function saveMatches(matches){
         recalculateOfficialStats();
     } while (updated === true);
 }
+/*
+function prepareTeamID(teamID) {
+    // Trim the teamID for consistent comparisons.
+    return teamID.trim();
+}
+
+function updateTeamID(originalTeamID, newTeamID) {
+    // -------------------------
+    // Update Teams
+    // -------------------------
+    const teams = fetchTeams();
+    if (!(originalTeamID in teams)) {
+        console.error(`Team "${originalTeamID}" not found.`);
+        return;
+    }
+    if (newTeamID in teams) {
+        console.error(`Team "${newTeamID}" already exists.`);
+        return;
+    }
+    // Update the team record in teams object.
+    const teamRecord = teams[originalTeamID];
+    teamRecord.teamID = newTeamID; // update team record if applicable
+    teams[newTeamID] = teamRecord;
+    delete teams[originalTeamID];
+    saveTeams(teams);
+
+    // -------------------------
+    // Update teamData (each tier)
+    // -------------------------
+    const teamData = fetchTeamData();
+    // For each tier (e.g., "Tier1-input"), update any occurrence of the original teamID.
+    for (const tier in teamData) {
+        // Split the tier string into an array of team names.
+        const teamList = teamData[tier].split('\n');
+        // Map each name: if it matches the original (after trimming), update it.
+        const updatedList = teamList.map(name => {
+            if (prepareTeamID(name) === prepareTeamID(originalTeamID)) {
+                return newTeamID;
+            }
+            return name;
+        });
+        // Rejoin the list and update the tier value.
+        teamData[tier] = updatedList.join('\n');
+    }
+    saveTeamData(teamData);
+
+    // -------------------------
+    // Update Matches (teamAID and teamBID)
+    // -------------------------
+    const matches = fetchMatches();
+    let matchesUpdated = false;
+    matches.forEach(match => {
+        if (match.teamAID === originalTeamID) {
+            match.teamAID = newTeamID;
+            matchesUpdated = true;
+        }
+        if (match.teamBID === originalTeamID) {
+            match.teamBID = newTeamID;
+            matchesUpdated = true;
+        }
+    });
+    if (matchesUpdated) {
+        saveMatches(matches);
+    }
+
+    console.log(`Team ID updated from "${originalTeamID}" to "${newTeamID}".`);
+}
+    */
