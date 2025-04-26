@@ -1072,10 +1072,11 @@
             
             
             box.draggable = true;
-            box.textContent = `${match.teamAID} vs ${match.teamBID}`;
+            box.innerHTML = `${match.group}:<br>${match.teamAID} vs ${match.teamBID}`;
             
             box.addEventListener('dragstart', () => {
                 selectedMatch = match;
+                box.textContent = `${match.teamAID} vs ${match.teamBID}`;
                 box.classList.add('dragging');
             });
             
@@ -1086,7 +1087,6 @@
             box.addEventListener('click', () => {
                 highlightAvailableDays(match);
             });
-            
             return box;
         }
 

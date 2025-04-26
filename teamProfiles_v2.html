@@ -170,9 +170,8 @@
                 // Insert blank row on group change
                 if (team.preliminaryGroup !== currentGroup && currentGroup !== '') {
                     const blankRow = document.createElement("tr");
-                    blankRow.innerHTML = `<td colspan="7" style="height:10px;"></td>`;
+                    blankRow.innerHTML = `<td colspan="8" style="height:10px;"></td>`;
                     tableBody.appendChild(blankRow);
-                    console.log('created blank row');
                 }
 
                 currentGroup = team.preliminaryGroup;
@@ -180,10 +179,10 @@
                 // Determine the background color for the rank cell
                 const bgColor = isPreliminaryMatchesFinished(teamID) ? 'lightgreen' : 'lightcoral';
 
-                // Create the row for this team
+                // Create the row for this team. Team ID cell is now editable.
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                    <td>${teamID}</td>
+                    <td contenteditable="true">${teamID}</td>
                     <td>${team.preliminaryGroup}</td>
                     <td style="background-color:${bgColor};">${getTeamRank(teamID)}</td>
                     <td>${team.preliminaryScore}</td>
@@ -196,12 +195,28 @@
             });
         }   
 
-        function saveChanges(teamID, button) {
+        function saveChanges(oldTeamID, button) {
             const row = button.parentElement.parentElement;
-            teams[teamID].availableDays = row.cells[4].innerText;
-            teams[teamID].teamName = row.cells[5].innerText;
-            alert("Changes saved for " + teamID);
+            // Get the new team ID from the first cell
+            const newTeamID = row.cells[0].innerText.trim();
+            
+            // If team ID was changed, update it
+            if (newTeamID !== oldTeamID) {
+                updateTeamID(oldTeamID, newTeamID);
+            }
+            
+            // Refresh the teams data after the potential update
+            teams = fetchTeams();
+            // Use the new team ID as key (could be same as old if unchanged)
+            const currentID = newTeamID;
+            
+            // Save availableDays and teamName in cells 4 and 5 (0-indexed)
+            teams[currentID].availableDays = row.cells[4].innerText.trim();
+            teams[currentID].teamName = row.cells[5].innerText.trim();
+            
             saveTeams(teams);
+            alert("Changes saved for " + currentID);
+            populateTable();
         }
 
         function showMatches(teamID) {
