@@ -247,12 +247,10 @@ function calculatePreliminaryScore() {
     saveTeams(teams);
 }
 
-function getTeamRank(teamID) {
+function getTeamRank(team) {
     // first calculate team rank
     const teams = fetchTeams();
-    const team = teams[teamID];
     const group = team.preliminaryGroup;
-
     // Filter teams that are in the same group
     const groupTeams = Object.entries(teams)
         .filter(([id, t]) => t.preliminaryGroup === group)
@@ -260,21 +258,21 @@ function getTeamRank(teamID) {
         .sort((a, b) => b[1].preliminaryScore - a[1].preliminaryScore);
 
     // Find the position (index) of the current team in that sorted array
-    const index = groupTeams.findIndex(([id]) => id === teamID);
+    const index = groupTeams.findIndex(([id]) => id === team.teamID);
 
     // Return rank (1-based index)
     return index + 1;
 }
 
 function isPreliminaryMatchesFinished(teamID) {
-    const teams = fetchTeams();
     const matches = fetchMatches();
-    const team = teams[teamID];
-    const group = team.preliminaryGroup;
     for (const m of Object.values(matches)) {
-        if (m.preliminary === true && (m.teamAID === teamID || m.teamBID === teamID) && m.status === false) {
+        if (m.preliminary === undefined){
+            
+        }else if (m.preliminary === true && (m.teamAID === teamID || m.teamBID === teamID) && m.status === false) {
             return false;
         }
+        
     }
     return true;
 }
@@ -510,7 +508,7 @@ function saveMatches(matches){
         recalculateOfficialStats();
     } while (updated === true);
 }
-/*
+
 function prepareTeamID(teamID) {
     // Trim the teamID for consistent comparisons.
     return teamID.trim();
@@ -530,11 +528,17 @@ function updateTeamID(originalTeamID, newTeamID) {
         return;
     }
     // Update the team record in teams object.
-    const teamRecord = teams[originalTeamID];
-    teamRecord.teamID = newTeamID; // update team record if applicable
-    teams[newTeamID] = teamRecord;
-    delete teams[originalTeamID];
-    saveTeams(teams);
+    const newTeams = {};
+    Object.keys(teams).forEach(key => {
+        if (key === originalTeamID) {
+            const teamRecord = teams[originalTeamID];
+            teamRecord.teamID = newTeamID; // update team record if applicable
+            newTeams[newTeamID] = teamRecord;
+        } else {
+            newTeams[key] = teams[key];
+        }
+    });
+    saveTeams(newTeams);
 
     // -------------------------
     // Update teamData (each tier)
@@ -554,27 +558,22 @@ function updateTeamID(originalTeamID, newTeamID) {
         // Rejoin the list and update the tier value.
         teamData[tier] = updatedList.join('\n');
     }
+    console.log("teamData", teamData);
     saveTeamData(teamData);
 
     // -------------------------
     // Update Matches (teamAID and teamBID)
     // -------------------------
     const matches = fetchMatches();
-    let matchesUpdated = false;
     matches.forEach(match => {
         if (match.teamAID === originalTeamID) {
             match.teamAID = newTeamID;
-            matchesUpdated = true;
         }
         if (match.teamBID === originalTeamID) {
             match.teamBID = newTeamID;
-            matchesUpdated = true;
         }
     });
-    if (matchesUpdated) {
-        saveMatches(matches);
-    }
+    saveMatches(matches);
 
     console.log(`Team ID updated from "${originalTeamID}" to "${newTeamID}".`);
 }
-    */

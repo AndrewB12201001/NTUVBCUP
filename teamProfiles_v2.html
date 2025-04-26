@@ -184,7 +184,7 @@
                 row.innerHTML = `
                     <td contenteditable="true">${teamID}</td>
                     <td>${team.preliminaryGroup}</td>
-                    <td style="background-color:${bgColor};">${getTeamRank(teamID)}</td>
+                    <td style="background-color:${bgColor};">${getTeamRank(team)}</td>
                     <td>${team.preliminaryScore}</td>
                     <td contenteditable="true">${team.availableDays}</td>
                     <td contenteditable="true">${team.teamName || "N/A"}</td>
@@ -206,7 +206,7 @@
             }
             
             // Refresh the teams data after the potential update
-            teams = fetchTeams();
+            const teams = fetchTeams();
             // Use the new team ID as key (could be same as old if unchanged)
             const currentID = newTeamID;
             
@@ -216,17 +216,33 @@
             
             saveTeams(teams);
             alert("Changes saved for " + currentID);
+            // Refresh the table
+            window.location.reload();
             populateTable();
         }
 
         function showMatches(teamID) {
             const team = Object.values(teams).filter(t => t.teamID === teamID)
-            const teamMatches = matches.filter(m => m.teamAID === teamID || m.teamBID === teamID);
+            const teamMatches = matches.filter(m => (m.teamAID !== m.teamBID) && (m.teamAID === teamID || m.teamBID === teamID));
             const matchContent = document.getElementById("match-content");
             matchContent.innerHTML = "";
             console.log(team);
+            // Group matches by match.group, using "Unknown Group" if not present
+            const groups = {};
             teamMatches.forEach(match => {
-                matchContent.innerHTML += `<p>${match.teamAID} vs ${match.teamBID} - Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}</p>`;
+                const group = match.group || "Unknown Group";
+                if (!groups[group]) {
+                    groups[group] = [];
+                }
+                groups[group].push(match);
+            });
+
+            // Display matches grouped by match.group with a title for each group
+            Object.keys(groups).forEach(groupName => {
+                matchContent.innerHTML += `<h3>${groupName}</h3>`;
+                groups[groupName].forEach(match => {
+                    matchContent.innerHTML += `<p>${match.teamAID} vs ${match.teamBID} - Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}</p>`;
+                });
             });
             document.getElementById("modal-overlay").style.display = "block";
             document.getElementById("match-modal").style.display = "block";
