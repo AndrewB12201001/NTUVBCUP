@@ -302,9 +302,9 @@ function calculateMatchAvailableDays(teamA, teamB) {
     //console.log(`TeamA (${teamA}) days:`, teamADays);
     //console.log(`TeamB (${teamB}) days:`, teamBDays);
     
-    const validTeamADays = Array.isArray(teamADays) ? teamADays : [];
-    const validTeamBDays = Array.isArray(teamBDays) ? teamBDays : [];
-    return validTeamADays.filter(day => validTeamBDays.includes(day));
+    //const validTeamADays = Array.isArray(teamADays) ? teamADays : [];
+    //const validTeamBDays = Array.isArray(teamBDays) ? teamBDays : [];
+    return Object.values(teamADays).filter(day => Object.values(teamBDays).includes(day));
 }
 // save Matches sub functions
 function recalculateOfficialStats() {
@@ -372,6 +372,7 @@ function updateMatchWinner(match){
     
     // Update current match winner
     match.winner = (match.teamAID == match.teamBID && match.teamAID !== null) ? match.teamAID : (teamASets === 0 && teamBSets === 0) ? null : (teamASets >= 2) ? match.teamAID : match.teamBID;
+    match.loser = (match.teamAID == match.teamBID && match.teamAID !== null) ? match.teamAID : (teamASets === 0 && teamBSets === 0) ? null : (teamASets >= 2) ? match.teamBID : match.teamAID;
     return match;
 }
 // save Matches main function
@@ -384,14 +385,14 @@ function saveMatches(matches){
         Object.values(matches).forEach((match, index) => {
             // Calculate scores and update status
             match = updateMatchStatus(match);
+            // Store previous winner before updating
+            const previousWinner = matches[index].winner;
+            // Store previous loser before updating
+            const previousloser = matches[index].loser;
+            match = updateMatchWinner(match);
             match.availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID);
-            
+            // update brackets
             if (matches[index].status) {
-                // Store previous winner before updating
-                const previousWinner = matches[index].winner;
-                
-                match = updateMatchWinner(match);
-                
                 // Handle next match updates
                 if (matches[index].nextMatch !== null) {
                     const nextMatchId = matches[index].nextMatch;
@@ -471,10 +472,7 @@ function saveMatches(matches){
                     }
                 }
             } else {
-                // If match is not complete, remove winner and potentially update next match
-                const previousWinner = matches[index].winner;
                 matches[index].winner = null;
-                
                 // Remove winner from next match if it exists
                 if (matches[index].nextMatch !== null && previousWinner) {
                     const nextMatchId = matches[index].nextMatch;
@@ -488,6 +486,7 @@ function saveMatches(matches){
                             }
                             
                             nextMatch.teamAID = null;
+                            if (nextMatch.teamBID === previousWinner) nextMatch.teamBID = null;
                             //console.log(`Removed ${previousWinner} from teamA in match ${nextMatchId}`);
                         } else if (nextMatch.teamBID === previousWinner) {
                             // Remove game from previous winner's games array
@@ -496,12 +495,127 @@ function saveMatches(matches){
                             }
                             
                             nextMatch.teamBID = null;
+                            if (nextMatch.teamAID === previousWinner) nextMatch.teamAID = null;
                             //console.log(`Removed ${previousWinner} from teamB in match ${nextMatchId}`);
                         }
                     }
                 }
             }
+            // update 3rd 4th place mathch
+            if (matches[index].status) {
+                // Handle next match updates
+                if (matches[index].loserNextMatch !== null) {
+                    const nextMatchId = matches[index].loserNextMatch;
+                    const nextMatch = matches.find(m => m.id === nextMatchId);
+                    
+                    if (nextMatch) {
+                        // If loser changed, update next match
+                        if (previousloser !== matches[index].loser) {
+                            // Remove previous loser from next match and update teams' games array
+                            if (nextMatch.teamAID === previousloser) {
+                                // Remove game from previous loser's games array
+                                if (teams[previousloser] && teams[previousloser].games) {
+                                    teams[previousloser].games = teams[previousloser].games.filter(id => id !== nextMatchId);
+                                }
+                                
+                                // Add game to new loser's games array
+                                if (teams[matches[index].loser]) {
+                                    if (!teams[matches[index].loser].games) {
+                                        teams[matches[index].loser].games = [];
+                                    }
+                                    if (!teams[matches[index].loser].games.includes(nextMatchId)) {
+                                        teams[matches[index].loser].games.push(nextMatchId);
+                                    }
+                                }
+                                
+                                nextMatch.teamAID = matches[index].loser;
+                                //console.log(`Updated teamA in match ${nextMatchId} from ${previousloser} to ${matches[index].loser}`);
+                            } else if (nextMatch.teamBID === previousloser) {
+                                // Remove game from previous loser's games array
+                                if (teams[previousloser] && teams[previousloser].games) {
+                                    teams[previousloser].games = teams[previousloser].games.filter(id => id !== nextMatchId);
+                                }
+                                
+                                // Add game to new loser's games array
+                                if (teams[matches[index].loser]) {
+                                    if (!teams[matches[index].loser].games) {
+                                        teams[matches[index].loser].games = [];
+                                    }
+                                    if (!teams[matches[index].loser].games.includes(nextMatchId)) {
+                                        teams[matches[index].loser].games.push(nextMatchId);
+                                    }
+                                }
+                                
+                                nextMatch.teamBID = matches[index].loser;
+                                //console.log(`Updated teamB in match ${nextMatchId} from ${previousloser} to ${matches[index].loser}`);
+                            } else {
+                                // If previous loser not found, add to first empty slot
+                                if (nextMatch.teamAID === null) {
+                                    // Add game to new loser's games array
+                                    if (teams[matches[index].loser]) {
+                                        if (!teams[matches[index].loser].games) {
+                                            teams[matches[index].loser].games = [];
+                                        }
+                                        if (!teams[matches[index].loser].games.includes(nextMatchId)) {
+                                            teams[matches[index].loser].games.push(nextMatchId);
+                                        }
+                                    }
+                                    
+                                    nextMatch.teamAID = matches[index].loser;
+                                    //.log(`Added loser to teamA in match ${nextMatchId}: ${matches[index].loser}`);
+                                } else if (nextMatch.teamBID === null) {
+                                    // Add game to new loser's games array
+                                    if (teams[matches[index].loser]) {
+                                        if (!teams[matches[index].loser].games) {
+                                            teams[matches[index].loser].games = [];
+                                        }
+                                        if (!teams[matches[index].loser].games.includes(nextMatchId)) {
+                                            teams[matches[index].loser].games.push(nextMatchId);
+                                        }
+                                    }
+                                    
+                                    nextMatch.teamBID = matches[index].loser;
+                                    //console.log(`Added loser to teamB in match ${nextMatchId}: ${matches[index].loser}`);
+                                }
+                            }
+                        }
+                    }console.log('nextMatch', nextMatch);
+
+                }
+            } else {
+                // If match is not complete, remove loser and potentially update next match
+                const previousloser = matches[index].loser;
+                matches[index].loser = null;
+                
+                // Remove loser from next match if it exists
+                if (matches[index].loserNextMatch !== null && previousloser) {
+                    const nextMatchId = matches[index].loserNextMatch;
+                    const nextMatch = matches.find(m => m.id === nextMatchId);
+                    
+                    if (nextMatch) {
+                        if (nextMatch.teamAID === previousloser) {
+                            // Remove game from previous loser's games array
+                            if (teams[previousloser] && teams[previousloser].games) {
+                                teams[previousloser].games = teams[previousloser].games.filter(id => id !== nextMatchId);
+                            }
+                            
+                            nextMatch.teamAID = null;
+                            //console.log(`Removed ${previousloser} from teamA in match ${nextMatchId}`);
+                        } else if (nextMatch.teamBID === previousloser) {
+                            // Remove game from previous loser's games array
+                            if (teams[previousloser] && teams[previousloser].games) {
+                                teams[previousloser].games = teams[previousloser].games.filter(id => id !== nextMatchId);
+                            }
+                            
+                            nextMatch.teamBID = null;
+                            //console.log(`Removed ${previousloser} from teamB in match ${nextMatchId}`);
+                        }
+                    }
+                }
+            }
         });
+        
+        
         if (JSON.stringify(refMatches) !== JSON.stringify(matches)) updated = true;
         const matchesJSON = JSON.stringify(matches);
         localStorage.setItem("matches", matchesJSON);
