@@ -170,7 +170,7 @@
                             
                         roundDiv.appendChild(matchDiv);
                         // create connecting lines
-                        if (matchIndex % 2 === 1) {
+                        if (matchIndex % 2 === 1 && match.nextMatch !== null) {
                             const verticalLine = document.createElement("div");
                             verticalLine.style.position = "absolute";
                             verticalLine.style.left = 223 + "px";
