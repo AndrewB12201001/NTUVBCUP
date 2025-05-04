@@ -211,7 +211,7 @@
             const currentID = newTeamID;
             
             // Save availableDays and teamName in cells 4 and 5 (0-indexed)
-            teams[currentID].availableDays = row.cells[4].innerText.trim();
+            teams[currentID].availableDays = row.cells[4].innerText.split(',').map(Number);
             teams[currentID].teamName = row.cells[5].innerText.trim();
             
             saveTeams(teams);
