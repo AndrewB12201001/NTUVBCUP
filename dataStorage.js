@@ -579,7 +579,7 @@ function saveMatches(matches){
                                 }
                             }
                         }
-                    }console.log('nextMatch', nextMatch);
+                    }//console.log('nextMatch', nextMatch);
 
                 }
             } else {
