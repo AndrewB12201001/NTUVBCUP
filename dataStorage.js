@@ -472,8 +472,6 @@ function saveMatches(matches){
                     }
                 }
             } else {
-                matches[index].winner = null;
-                // Remove winner from next match if it exists
                 if (matches[index].nextMatch !== null && previousWinner) {
                     const nextMatchId = matches[index].nextMatch;
                     const nextMatch = matches.find(m => m.id === nextMatchId);
@@ -583,11 +581,8 @@ function saveMatches(matches){
 
                 }
             } else {
-                // If match is not complete, remove loser and potentially update next match
-                const previousloser = matches[index].loser;
-                matches[index].loser = null;
-                
                 // Remove loser from next match if it exists
+                console.log("remove loser");
                 if (matches[index].loserNextMatch !== null && previousloser) {
                     const nextMatchId = matches[index].loserNextMatch;
                     const nextMatch = matches.find(m => m.id === nextMatchId);
@@ -598,17 +593,15 @@ function saveMatches(matches){
                             if (teams[previousloser] && teams[previousloser].games) {
                                 teams[previousloser].games = teams[previousloser].games.filter(id => id !== nextMatchId);
                             }
-                            
                             nextMatch.teamAID = null;
-                            //console.log(`Removed ${previousloser} from teamA in match ${nextMatchId}`);
+                            console.log(`Removed ${previousloser} from teamA in match ${nextMatchId}`);
                         } else if (nextMatch.teamBID === previousloser) {
                             // Remove game from previous loser's games array
                             if (teams[previousloser] && teams[previousloser].games) {
                                 teams[previousloser].games = teams[previousloser].games.filter(id => id !== nextMatchId);
                             }
-                            
                             nextMatch.teamBID = null;
-                            //console.log(`Removed ${previousloser} from teamB in match ${nextMatchId}`);
+                            console.log(`Removed ${previousloser} from teamB in match ${nextMatchId}`);
                         }
                     }
                 }
