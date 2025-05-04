@@ -1004,14 +1004,14 @@
 
         /* Generate Final Matches */
         function showGenerateFinalsButton(tier) {
-            console.log('Raw tier value:', tier);
+            //console.log('Raw tier value:', tier);
 
             const container = document.getElementById("final-matches-container");
             const tierNumber = tier.replace('Tier', ''); // Extracts the tier number (1,2,3,4)
             
             if (!tierNumber || isNaN(tierNumber)) return; // Exit if tierNumber is invalid
 
-            console.log(`Creating button for Tier ${tierNumber}`);
+            //console.log(`Creating button for Tier ${tierNumber}`);
             
             const finalsButton = document.createElement("button");
             finalsButton.className = 'action-btn success';
