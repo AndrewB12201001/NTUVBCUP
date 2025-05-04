@@ -1195,42 +1195,6 @@
 
         // ** loser bracket ** //
 
-        function showGenerateLosersButton(tier) {
-            console.log('Raw tier value:', tier);
-
-            const container = document.getElementById("final-matches-container");
-            const tierNumber = tier.replace('Tier', ''); // Extracts the tier number (1,2,3,4)
-            
-            if (!tierNumber || isNaN(tierNumber)) return; // Exit if tierNumber is invalid
-
-            console.log(`Creating loser button for Tier ${tierNumber}`);
-            
-            const loserButton = document.createElement("button");
-            loserButton.className = 'action-btn success';
-            loserButton.textContent = `Generate Tier ${tierNumber} Losers`;
-
-            let firstClickKey = `isTier${tierNumber}LoserFirstClick`;
-            let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
-
-            loserButton.addEventListener("click", () => {
-                if (isFirstClick) {
-                    saveFirstClick(firstClickKey, "false");
-                    isFirstClick = false;
-                    generateFinalLoserMatches(parseInt(tierNumber));
-                    alert(`Tier ${tierNumber} Loser matches generated`);
-                } else {
-                    if (confirm("Loser matches already generated. Generate again?")) {
-                        generateFinalLoserMatches(parseInt(tierNumber));
-                    }
-                }
-            });
-
-            container.appendChild(loserButton);
-        }
-
-
-
-
         //https://docs.google.com/document/d/1Wrz8QhUekCM4XEoycSSXh5Zimh9tDX-CzKcdyoL2bmU/edit?tab=t.0
         function generateFinalLoserMatches(Tier) {  
             calculatePreliminaryScore();
@@ -1806,8 +1770,19 @@
             button5to8.textContent = "Generate Tier1 5-8 Bracket";
             
             button5to8.addEventListener("click", () => {
-                generateFinalLoserMatches(1);
-                alert("Tier1 5-8 matches generated");
+                let firstClickKey = `Tier1 5-8 matches FirstClick`;
+                let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+                if (isFirstClick) {
+                    saveFirstClick(firstClickKey, "false");
+                    isFirstClick = false;
+                    generateFinalLoserMatches(1);
+                    alert("Tier1 5-8 matches generated");
+                } else {
+                    if (confirm("Loser matches already generated. Generate again?")) {
+                        generateFinalLoserMatches(1);
+                    }
+                }
+                
             });
             container.appendChild(button5to8);
 
@@ -1820,8 +1795,18 @@
             button.className = 'action-btn success';
             button.textContent = "Generate Tier2 5-8 Bracket";
             button.addEventListener("click", () => {
-                generateFinalLoserMatches(2);
-                alert("Tier2 5-8 matches generated");
+                let firstClickKey = `Tier2 5-8 matches FirstClick`;
+                let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+                if (isFirstClick) {
+                    saveFirstClick(firstClickKey, "false");
+                    isFirstClick = false;
+                    generateFinalLoserMatches(2);
+                    alert("Tier2 5-8 matches generated");
+                } else {
+                    if (confirm("Loser matches already generated. Generate again?")) {
+                        generateFinalLoserMatches(2);
+                    }
+                }
             });
             container.appendChild(button);
 
@@ -1834,8 +1819,18 @@
             button.className = 'action-btn success';
             button.textContent = "Generate Tier1 9-12 Bracket";
             button.addEventListener("click", () => {
-                generateFinalLoserMatches(22);
-                alert("Tier2 9-12 matches generated");
+                let firstClickKey = `Tier2 9-12 matches FirstClick`;
+                let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+                if (isFirstClick) {
+                    saveFirstClick(firstClickKey, "false");
+                    isFirstClick = false;
+                    generateFinalLoserMatches(22);
+                    alert("Tier2 9-12 matches generated");
+                } else {
+                    if (confirm("Loser matches already generated. Generate again?")) {
+                        generateFinalLoserMatches(22);
+                    }
+                }
             });
             container.appendChild(button);
 
