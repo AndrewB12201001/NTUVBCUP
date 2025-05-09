@@ -602,8 +602,7 @@
             document.getElementById('save-match').addEventListener('click' ,() => {
                 selectedMatches.forEach((assignment, key) => {
                     const matchIndex = matches.findIndex(m => 
-                    m.teamAID === assignment.match.teamAID && 
-                    m.teamBID === assignment.match.teamBID
+                    m.id === assignment.match.id
                 );
 
                 if (matchIndex !== -1) {
@@ -636,7 +635,7 @@
             const keywords = searchText.toLowerCase().trim().split(/\s+/); // Split by spaces
             // undated match
             const undatedMatches = matches.filter(match => {
-                const key = `${match.teamAID}-${match.teamBID}`;
+                const key = `${match.id}`;
                 return !match.date && !selectedMatches.has(key);
             });
             const filteredUndatedMatches = undatedMatches.filter(m => 
@@ -656,7 +655,7 @@
             });
             // now append dated match
             const datedMatches = matches.filter(match => {
-                const key = `${match.teamAID}-${match.teamBID}`;
+                const key = `${match.id}`;
                 return match.date && !selectedMatches.has(key);
             });
             const filteredDatedMatches = datedMatches.filter(m => 
@@ -678,7 +677,7 @@
 
         function addMatchToSelection(match, dateStr) {
             match.date = dateStr; // Set the date
-            const key = `${match.teamAID}-${match.teamBID}`;
+            const key = `${match.id}`;
             selectedMatches.set(key, {
                 match: match,
                 date: dateStr
