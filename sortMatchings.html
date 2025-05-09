@@ -863,7 +863,7 @@
 
         function handleMatchDrop(match, dayOfWeek, date) {
             if (dayOfWeek <= 7) { // Only allow drops on weekdays
-                const key = `${match.teamAID}-${match.teamBID}`;
+                const key = `${match.id}`;
                 tempAssignments.set(key, {
                     match: match,
                     date: date,
@@ -888,7 +888,7 @@
                     const dayIndex = Math.floor((date - currentWeekStart) / (1000 * 60 * 60 * 24));
 
                     if (dayIndex >= 0 && dayIndex < 7) {
-                        const key = `${match.teamAID}-${match.teamBID}`;
+                        const key = `${match.id}`;
                         tempAssignments.set(key, {
                         match: match,
                         date: date,
@@ -975,7 +975,7 @@
         function renderUndatedMatches() {
             const matches = fetchMatches();
             const undatedMatches = matches.filter(match => {
-                const key = `${match.teamAID}-${match.teamBID}`;
+                const key = `${match.id}`;
                 return !match.date && !tempAssignments.has(key) && (match.teamAID !== match.teamBID || match.teamAID === null);
             });
             const container = document.getElementById('undated-matches');
@@ -1058,7 +1058,8 @@
                 const date = assignment.date;
                 const dayIndex = Math.floor((date - currentWeekStart) / (1000 * 60 * 60 * 24));
                 if (dayIndex >= 0 && dayIndex < 7) {
-                    const [teamA, teamB] = key.split('-'); // Extract team names from the key
+                    const teamA = assignment.match.teamAID;
+                    const teamB = assignment.match.teamBID;
                     if (
                         match.teamAID === teamA || match.teamAID === teamB ||
                         match.teamBID === teamA || match.teamBID === teamB
@@ -1115,7 +1116,7 @@
             const matches = fetchMatches();
             let count = 0;
             Object.values(matches).forEach(match => {
-                const key = `${match.teamAID}-${match.teamBID}`;
+                const key = `${match.id}`;
                 if (!match.date && !tempAssignments.has(key) && (match.teamAID !== match.teamBID || match.teamAID === null)){
                     count++;
                 }
@@ -1260,7 +1261,7 @@
         document.getElementById('undated-matches').addEventListener('drop', e => {
             e.preventDefault();
             if (selectedMatch) {
-                const key = `${selectedMatch.teamAID}-${selectedMatch.teamBID}`;
+                const key = `${match.id}`;
                 tempAssignments.delete(key);
                 const matches = fetchMatches();
                 const match = matches.find(m => 
