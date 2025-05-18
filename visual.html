@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="volleyball.png" type="image/png">
     <title>Tournament Bracket</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -22,10 +23,34 @@
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 120px;
             transition: all 0.3s ease;
         }
 
         .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .download-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: sticky;
+            top: 120px;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .download-link:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
@@ -291,10 +316,20 @@
 <body>
     <script src = 'dataStorage.js'></script>
     <script src = 'Matchinfo.js'></script>
-    <a href="index.html" class="back-link">
-        <i class="fas fa-arrow-left"></i>
-        Back to Main Page
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <div style="display: flex; justify-content: space-between; position: sticky; top: 0; z-index: 100; background: #f4f4f9; padding: 10px 20px;">
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Main Page
+        </a>
+        <a id="downloadPdfBtn" class="download-link">
+            <i class="fas fa-file-pdf"></i> 
+            Download Bracket as PDF
+        </a>
+    </div>
+        
     </a>
+    <div><div>
     <h1>Tournament Bracket</h1>
     <div id="bracketContainer" class="bracket-container"></div>
     <!-- Popup structure -->
@@ -307,6 +342,20 @@
         const Height = 40;
         document.addEventListener("DOMContentLoaded", () => {
             renderCalendar();
+
+            // PDF download logic for the whole page
+            document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+                // Use the body or a main wrapper for the whole page
+                const element = document.body;
+                const opt = {
+                    margin:       0.2,
+                    filename:     'tournament_fullpage.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'in', format: 'a1', orientation: 'portrait' } // A1 for extra large
+                };
+                html2pdf().set(opt).from(element).save();
+            });
         });
         function renderCalendar(){
             const bracketsData = fetchBrackets();
