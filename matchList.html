@@ -953,11 +953,12 @@
         function updateCreateMatchesButtonVisibility() {
             const matches = fetchMatches();
             const createMatchesButton = document.getElementById('create-matches-according-to-ntu-cup-rules');
-            
-            if (matches.length > 0) {
-                createMatchesButton.style.display = 'none';
-            } else {
-                createMatchesButton.style.display = 'block';
+            if (matches !== null) {
+                if (Object.keys(matches).length > 0) {
+                    createMatchesButton.style.display = 'none';
+                } else {
+                    createMatchesButton.style.display = 'block';
+                }
             }
         }
 
@@ -1715,24 +1716,45 @@
             
             // Group matches by tier
             const tierMatches = {};
-            matches.forEach(match => {
-                const teamA = teams[match.teamAID];
-                if (!teamA) return;
-                
-                const tier = teamA.preliminaryGroup.split('-')[0]; // e.g., "Tier1" from "Tier1-A"
-                if (!tierMatches[tier]) {
-                    tierMatches[tier] = {
-                        preliminary: [],
-                        final: []
-                    };
-                }
-                
-                if (match.preliminary) {
-                    tierMatches[tier].preliminary.push(match);
-                } else {
-                    tierMatches[tier].final.push(match);
-                }
-            });
+            if (matches !== null){
+                matches.forEach(match => {
+                    const teamA = teams[match.teamAID];
+                    if (!teamA) return;
+                    
+                    const tier = teamA.preliminaryGroup.split('-')[0]; // e.g., "Tier1" from "Tier1-A"
+                    if (!tierMatches[tier]) {
+                        tierMatches[tier] = {
+                            preliminary: [],
+                            final: []
+                        };
+                    }
+                    
+                    if (match.preliminary) {
+                        tierMatches[tier].preliminary.push(match);
+                    } else {
+                        tierMatches[tier].final.push(match);
+                    }
+                });
+                matches.forEach(match => {
+                    const teamA = teams[match.teamAID];
+                    if (!teamA) return;
+                    
+                    const tier = teamA.preliminaryGroup.split('-')[0]; // e.g., "Tier1" from "Tier1-A"
+                    if (!tierMatches[tier]) {
+                        tierMatches[tier] = {
+                            preliminary: [],
+                            final: []
+                        };
+                    }
+                    
+                    if (match.preliminary) {
+                        tierMatches[tier].preliminary.push(match);
+                    } else {
+                        tierMatches[tier].final.push(match);
+                    }
+                });
+            }
+            
             // Clear existing finals buttons 
             const container = document.getElementById("final-matches-container");
             container.innerHTML = '';

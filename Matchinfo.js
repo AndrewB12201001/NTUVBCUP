@@ -198,56 +198,76 @@ function showMatchinfo(matchDiv, match){
             const matches = fetchMatches();
             dropdownList.innerHTML = '';
             const officials = Object.keys(officialStats);
-            
+
             // Get the day of week for the current match date
             const matchDay = new Date(match.date).getDay();
-            
-            const filteredOfficials = officials.filter(official => {
-                if (officialStats[official].availableDays === undefined) {
-                    return true;
-                } else {
-                    return official.toLowerCase().includes(searchText.toLowerCase()) &&
-                           officialStats[official].availableDays.includes(matchDay);
+
+            // Split officials into available and unavailable
+            const availableOfficials = [];
+            const unavailableOfficials = [];
+
+            officials.forEach(official => {
+                const isMatch = official.toLowerCase().includes(searchText.toLowerCase());
+                const available = (
+                    officialStats[official].availableDays === undefined ||
+                    officialStats[official].availableDays.includes(matchDay)
+                );
+                if (isMatch) {
+                    if (available) {
+                        availableOfficials.push(official);
+                    } else {
+                        unavailableOfficials.push(official);
+                    }
                 }
             });
-            console.log(filteredOfficials);
 
-            filteredOfficials.forEach(official => {
-                const div = document.createElement('div');
-                div.textContent = `${official} (${officialStats[official].count} games)`;
-                // Add CSS styles directly to the element
-                div.style.cursor = 'default';
-                div.style.transition = 'background-color 0.2s';
-                
-                // Add hover event listeners
-                div.addEventListener('mouseenter', () => {
-                    div.style.backgroundColor = '#e0e0e0';
-                });
-                div.addEventListener('mouseleave', () => {
-                    div.style.backgroundColor = '';
-                });
-                
-                div.addEventListener('click', () => {
-                    const input = dropdownList.previousElementSibling;
-                    const matchIndex = matches.findIndex(m => m.id === match.id);
-                    const previousOfficial = matches[matchIndex].official;
-                    
-                    // Update input and match
-                    input.value = official;
-                    matches[matchIndex].official = official;
-                    saveMatches(matches);
+            // Helper to render officials
+            function renderOfficials(list, isUnavailable = false) {
+                list.forEach(official => {
+                    const div = document.createElement('div');
+                    div.textContent = `${official} (${officialStats[official].count} games)`;
+                    div.style.cursor = 'default';
+                    div.style.transition = 'background-color 0.2s';
+                    if (isUnavailable) {
+                        div.style.opacity = '0.5';
+                        div.title = 'Not available this day';
+                    }
+                    div.addEventListener('mouseenter', () => {
+                        div.style.backgroundColor = '#e0e0e0';
+                    });
+                    div.addEventListener('mouseleave', () => {
+                        div.style.backgroundColor = '';
+                    });
+                    div.addEventListener('click', () => {
+                        const input = dropdownList.previousElementSibling;
+                        const matchIndex = matches.findIndex(m => m.id === match.id);
+                        const previousOfficial = matches[matchIndex].official;
 
-                    // Refresh the dropdown with updated stats
-                    updateOfficialList(dropdownList, official, officialStats, match);
-                    console.log(`Updated official from ${previousOfficial} to ${official}`);
-                    
-                    dropdownList.style.display = 'none';
+                        // Update input and match
+                        input.value = official;
+                        matches[matchIndex].official = official;
+                        saveMatches(matches);
+
+                        // Refresh the dropdown with updated stats
+                        updateOfficialList(dropdownList, official, officialStats, match);
+                        console.log(`Updated official from ${previousOfficial} to ${official}`);
+
+                        dropdownList.style.display = 'none';
+                    });
+                    dropdownList.appendChild(div);
                 });
-                dropdownList.appendChild(div);
-            });
+            }
+
+            // Render available first, then unavailable
+            renderOfficials(availableOfficials, false);
+            renderOfficials(unavailableOfficials, true);
 
             // Add option for new official if the search text does not match any existing official
-            if (!filteredOfficials.some(off => off.toLowerCase() === searchText.toLowerCase()) && searchText.trim() !== '') {
+            if (
+                ![...availableOfficials, ...unavailableOfficials].some(
+                    off => off.toLowerCase() === searchText.toLowerCase()
+                ) && searchText.trim() !== ''
+            ) {
                 const div = document.createElement('div');
                 div.textContent = `Add new: ${searchText}`;
                 div.style.cursor = 'pointer';
@@ -255,7 +275,7 @@ function showMatchinfo(matchDiv, match){
                     const input = dropdownList.previousElementSibling;
                     const matchIndex = matches.findIndex(m => m.id === match.id);
                     const previousOfficial = matches[matchIndex].official;
-                    
+
                     // Update input and match
                     input.value = searchText;
                     matches[matchIndex].official = searchText;
@@ -274,8 +294,11 @@ function showMatchinfo(matchDiv, match){
                 dropdownList.appendChild(div);
             }
 
-            dropdownList.style.display = (filteredOfficials.length > 0 || searchText.trim() === '') ? 'block' : 'none';
-            dropdownList.addEventListener('mousedown', (event) => {
+            dropdownList.style.display =
+                (availableOfficials.length > 0 || unavailableOfficials.length > 0 || searchText.trim() === '')
+                    ? 'block'
+                    : 'none';
+            dropdownList.addEventListener('mousedown', event => {
                 event.stopPropagation();
             });
         }

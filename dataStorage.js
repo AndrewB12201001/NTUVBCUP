@@ -4,8 +4,8 @@ function fetchMatches() {
     let matchesJSON = localStorage.getItem("matches");
     if (!matchesJSON) {
         console.log("No matches found.");
-        saveMatches([]);
-        matchesJSON = localStorage.getItem("matches");
+        //saveMatches([]);
+        //matchesJSON = localStorage.getItem("matches");
     }
     try {
         return JSON.parse(matchesJSON);
@@ -226,19 +226,20 @@ function calculatePreliminaryScore() {
         let scoreTotalResult = [0, 0];
 
         team.preliminaryScore = 0;
+        if (!((matches === undefined || matches === null || Object.keys(matches).length === 0) )){
+            Object.values(matches).forEach(match => {
+                if (match.preliminary === true){
+                    const matchResult = matchSetsWonLoss(match, team.teamID); // Fixed function call
+                    const scoreResult = matchScoreWonLoss(match, team.teamID);
 
-        Object.values(matches).forEach(match => {
-            if (match.preliminary === true){
-                const matchResult = matchSetsWonLoss(match, team.teamID); // Fixed function call
-                const scoreResult = matchScoreWonLoss(match, team.teamID);
-
-                if (matchResult[0] > matchResult[1]) gamesWon++;
-                setsTotalResult[0] += matchResult[0];
-                setsTotalResult[1] += matchResult[1];
-                scoreTotalResult[0] += scoreResult[0];
-                scoreTotalResult[1] += scoreResult[1];
-            }
-        });
+                    if (matchResult[0] > matchResult[1]) gamesWon++;
+                    setsTotalResult[0] += matchResult[0];
+                    setsTotalResult[1] += matchResult[1];
+                    scoreTotalResult[0] += scoreResult[0];
+                    scoreTotalResult[1] += scoreResult[1];
+                }
+            });
+        }
         //console.log(team.teamID, 'gamesWon', gamesWon, setsTotalResult, scoreTotalResult, scoreTotalResult[0]/scoreTotalResult[1]);
         team.preliminaryScore = (gamesWon * 100000000 + ratioWonLoss(setsTotalResult[0], setsTotalResult[1]) * 10000 + ratioWonLoss(scoreTotalResult[0], scoreTotalResult[1]));
         // console.log(`Final preliminary score for ${team.teamID}: ${team.preliminaryScore}`);
