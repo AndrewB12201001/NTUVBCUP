@@ -10,3 +10,8 @@ Currently, two official plugins are available:
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Attributes for each item(Storage in google sheets)
+- Team: {teamUUID, teamID, teamName, games[], preliminaryScore, preliminaryGroup, availableDays[], availableNights}
+- Matches: {id, teamAID, teamBID, set1:[], set2:[], set3[], winner, loser, status, nextMatch, preliminary, group, official, date, availableDays}
+- Brackets: {name, rounds, matchIds[], roundMatchIds[[]]}
