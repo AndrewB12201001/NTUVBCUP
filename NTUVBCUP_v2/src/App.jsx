@@ -6,7 +6,6 @@ import SortMatchings from './components/SortMatchings';
 import TeamProfiles from './components/TeamProfiles';
 import OfficialProfiles from './components/OfficialProfiles';
 import Visual from './components/Visual';
-import InputPlayGroups from './components/InputPlayGroups';
 import Navbar from './components/Navbar';
 
 function App() {
@@ -20,7 +19,6 @@ function App() {
         <Route path="/team-profiles" element={<TeamProfiles />} />
         <Route path="/official-profiles" element={<OfficialProfiles />} />
         <Route path="/visual" element={<Visual />} />
-        <Route path="/input-play-groups" element={<InputPlayGroups />} />
       </Routes>
     </Router>
   );
