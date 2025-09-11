@@ -202,7 +202,11 @@
             teams[currentID].teamName = row.cells[3].innerText.trim();
             
             saveNewbieTeams(teams);
+            const matches = fetchMatches(); // refresh matches
+            // Recalculate availableDays for all matches involving this team
+            saveMatches(matches); // in case team ID changed
             alert("Changes saved for " + currentID);
+            // edit all matches involving this team to reflect new team ID
             // Refresh the table
             window.location.reload();
             populateTable();
