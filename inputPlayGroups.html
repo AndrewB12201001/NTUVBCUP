@@ -217,12 +217,6 @@
         <i class="fas fa-arrow-left"></i>
         Back to Main Page
     </a>
-    <div class="input-mode-toggle">
-        <button id="toggle-input-mode" class="action-button">
-            <i class="fas fa-exchange-alt"></i>
-            Switch to Batch Input
-        </button>
-    </div>
     <h1>Input Playing Groups</h1>
     <div class="form-container">
         <div class="tier-form">
@@ -518,98 +512,12 @@
 
         // 綁定按鈕事件
         document.getElementById('submit-button').addEventListener('click', () => {
-            const formContainer = document.querySelector('.form-container');
-            const nameCount = {}
-            if (formContainer.classList.contains('hidden')) {
-                // We're in batch input mode
-                console.log('batchinput');
-                const input = document.getElementById('batchInput').value;
-                const resultDiv = document.getElementById('processResult');
-                resultDiv.innerHTML = '';
-                const teams = {};
-                const teamData = {'Tier1-input':'', 'Tier2-input':'', 'Tier3-input':'', 'Tier4-input':''};
-                input.split('\n').forEach((line, index) => {
-                    const cleanLine = line.trim();
-                    if (!cleanLine) return;
-                    
-                    try {
-                        const parts = cleanLine.match(/(.+?)\s+([\S]+)\s+([\S]+)$/);
-                        if (parts) {
-                            const [_, teamName, teamId, tierText] = parts;
-                            const tierMapping = { '一級': 'Tier1', '二級': 'Tier2', '三級': 'Tier3', '四級': 'Tier4' };
-                            const tier = tierMapping[tierText];
-                            
-                            if (!tier) {
-                                throw new Error(`Invalid tier: ${tierText}`);
-                            }
-
-                            if (nameCount[teamId] === undefined) {
-                                nameCount[teamId] = 0;
-                                console.log(`First occurrence of ${teamId}:`, {...nameCount});
-                                teams[teamId] = {
-                                    teamID: teamId,
-                                    teamName: teamName,
-                                    games: [],
-                                    preliminaryScore: 0,
-                                    preliminaryGroup: tier,
-                                    availableDays: null
-                                };
-                            }else {
-                                nameCount[teamId] += 1;
-                                const letter = String.fromCharCode(65 + nameCount[teamId]);
-                                console.log(`Found duplicate ${teamId}, count now:`, nameCount[teamId], 'letter:', letter);
-                                teams[`${teamId}${letter}`] = {
-                                    teamID: `${teamId}${letter}`,
-                                    teamName: teamName,
-                                    games: [],
-                                    preliminaryScore: 0,
-                                    preliminaryGroup: tier,
-                                    availableDays: null
-                                };
-                            }
-                            // Increment existing count
-                            const resultItem = document.createElement('div');
-                            resultItem.className = 'result-item success';
-                            resultItem.innerHTML = `
-                                <span>✓ ${teamName}</span>
-                                <span>${teamId}${String.fromCharCode(65 + nameCount[teamId])} - ${tier}</span>
-                            `;
-                            resultDiv.appendChild(resultItem);
-                        } else {
-                            throw new Error('Invalid format');
-                        }
-                    } catch (error) {
-                        const resultItem = document.createElement('div');
-                        resultItem.className = 'result-item error';
-                        resultItem.textContent = `✗ Error in line ${index + 1}: ${error.message}`;
-                        resultDiv.appendChild(resultItem);
-                    }
-                });
-                
-                console.log('teams', teams);
-                // save batch input to tier input
-                Object.values(teams).forEach(team =>{
-                    teamData[`${team.preliminaryGroup}-input`] += team.teamID + '\n'
-                });
-                console.log('teamData', teamData);
-                if (Object.keys(teams).length > 0) {
-                    saveTeams(teams);
-                    saveTeamData(teamData);
-                    alert('Teams processed and saved successfully!');
-                    // go to tier input mode to finialize the input
-                    formContainer.classList.remove('hidden');
-
-                }
-                location.reload();
-            } else {
-                // We're in tier input mode - use existing submit functionality
-                console.log('regular input');
-                wipeEverything();
-                saveVisualTeamData();
-                markGamesStarted();
-                processAndSaveTeamData();
-                loadTeamData();
-            }
+            // We're in tier input mode - use existing submit functionality
+            console.log('regular input');
+            saveVisualTeamData();
+            markGamesStarted();
+            processAndSaveTeamData();
+            loadTeamData();
         });
 
         document.getElementById('download-json').addEventListener('click', () => {
@@ -632,30 +540,6 @@
 
         // 頁面載入時載入資料
         window.onload = loadTeamData();
-
-        document.getElementById('toggle-input-mode').addEventListener('click', function() {
-            const button = this;
-            const formContainer = document.querySelector('.form-container');
-            const batchContainer = document.getElementById('batch-input-container');
-            const batchPopup = document.getElementById('batch-popup');
-            const submitButton = document.getElementById('submit-button');
-            
-            if (formContainer.classList.contains('hidden')) {
-                // Switch to Tier input
-                formContainer.classList.remove('hidden');
-                batchContainer.style.display = 'none';
-                batchPopup.classList.remove('active');
-                button.innerHTML = '<i class="fas fa-exchange-alt"></i> Switch to Batch Input';
-                submitButton.innerHTML = '<i class="fas fa-save"></i> 儲存';
-            } else {
-                // Switch to Batch input
-                formContainer.classList.add('hidden');
-                batchContainer.style.display = 'block';
-                batchPopup.classList.add('active');
-                button.innerHTML = '<i class="fas fa-exchange-alt"></i> Switch to Tier Input';
-                submitButton.innerHTML = '<i class="fas fa-save"></i> 儲存';
-            }
-        });
 
         function processTeamNames(teams) {
             const nameCount = {};
