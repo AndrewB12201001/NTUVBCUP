@@ -1,11 +1,13 @@
 // Fetch Data
 
 function fetchMatches() {
+    
     let matchesJSON = localStorage.getItem("matches");
     if (!matchesJSON) {
         console.log("No matches found.");
-        saveMatches([]);
-        matchesJSON = localStorage.getItem("matches");
+        localStorage.setItem("matches", "[]");
+        console.log("Initialized empty matches.");
+        return [];
     }
     try {
         return JSON.parse(matchesJSON);
@@ -21,6 +23,21 @@ function fetchTeams(){
         console.log("No teams found.");
         saveTeams({});
         teamsJSON = localStorage.getItem("teams");
+    }
+    try {
+        return JSON.parse(teamsJSON);
+    } catch (error) {
+        console.error("Error parsing teams JSON:", error);
+        return {};
+    }
+}
+
+function fetchNewbieTeams(){
+    let teamsJSON = localStorage.getItem("newbieTeams");
+    if (!teamsJSON) {
+        console.log("No teams found.");
+        saveNewbieTeams({});
+        teamsJSON = localStorage.getItem("newbieTeams");
     }
     try {
         return JSON.parse(teamsJSON);
@@ -59,6 +76,11 @@ function fetchGamesStarted(){
     return hasGamesStarted;
 }
 
+function fetchNewbieStarted(){
+    const hasNewbieStarted = localStorage.getItem('newbieStarted') || false;
+    return hasNewbieStarted;
+}
+
 function fetchGameIDCounter(){
     const gameIDCounter = localStorage.getItem('gameIDCounter') || 0;
     return gameIDCounter;
@@ -83,6 +105,15 @@ function saveTeams(teams){
     try {
         const teamsJSON = JSON.stringify(teams);
         localStorage.setItem("teams", teamsJSON);
+    } catch (error) {
+        console.error("Error saving teams:", error);
+    }
+}
+
+function saveNewbieTeams(teams){
+    try {
+        const teamsJSON = JSON.stringify(teams);
+        localStorage.setItem("newbieTeams", teamsJSON);
     } catch (error) {
         console.error("Error saving teams:", error);
     }
@@ -126,6 +157,10 @@ function saveFirstClick(firstClickKey, state){
 // 標記比賽已開始
 function markGamesStarted(state) {
     localStorage.setItem('gamesStarted', state);
+}
+
+function markNewbieStarted(state) {
+    localStorage.setItem('newbieStarted', state);
 }
 
 function wipeEverything(){

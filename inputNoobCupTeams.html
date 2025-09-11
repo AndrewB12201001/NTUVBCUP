@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="volleyball.png" type="image/png">
+    <title>Input Playing Groups</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .form-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .tier-form {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 250px;
+            transition: transform 0.3s ease;
+        }
+
+        .tier-form:hover {
+            transform: translateY(-5px);
+        }
+
+        .tier-form h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        textarea {
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            resize: vertical;
+            font-family: inherit;
+            margin: 10px 0;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #submit-button {
+            background: #4CAF50;
+            color: white;
+        }
+
+        #download-json {
+            background: #2196F3;
+            color: white;
+        }
+
+        #delete-all-data {
+            background: #f44336;
+            color: white;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .input-mode-toggle {
+            margin: 20px 0;
+            text-align: right;
+        }
+
+        /* Hide batch input by default */
+        #batch-input-container {
+            display: none;
+        }
+
+        /* Hide tier input when batch is active */
+        .form-container.hidden {
+            display: none;
+        }
+
+        /* Hide popup by default */
+        .popup {
+            display: none;
+        }
+
+        /* Show popup only when batch mode is active */
+        .popup.active {
+            display: block;
+        }
+
+        .popup {
+            position: relative;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .batch-textarea {
+            width: 100%;
+            min-height: 200px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .process-button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .process-button:hover {
+            background: #45a049;
+        }
+
+        .result-item {
+            padding: 5px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+
+        .result-item.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .result-item.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .instructions {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .instructions pre {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <script src = 'dataStorage.js'></script>
+    <a href="index.html" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Main Page
+    </a>
+    <h1>Input Playing Groups</h1>
+    <div class="form-container">
+        <div class="tier-form">
+            <h3>新生盃</h3>
+            <label for="Tier5-input">Enter Team Names</label>
+            <textarea id="Tier5-input" rows="6"></textarea>
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="Tier5-random" name="Tier5-random" value="true">
+                <label for="Tier5-random">隨機分組</label>
+            </div>
+        </div>
+    </div>
+    <!-- Add this after your form-container div -->
+    <div id="batch-input-container">
+        <div class="popup" id="batch-popup">
+            <div class="input-container">
+                <h3>Batch Input for Teams</h3>
+                <div class="instructions">
+                    <p>Format: 隊名 系所 第幾級</p>
+                    <p>Example:</p>
+                    <pre>
+中壢億隆慈惠宮 會計系 一級
+嗨 工海 一級
+要防守有打點 生機 一級</pre>
+                </div>
+                <textarea 
+                    id="batchInput" 
+                    rows="10" 
+                    placeholder="Paste your team data here..."
+                    class="batch-textarea"
+                ></textarea>
+                <div id="processResult" class="process-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button id="submit-button" class="action-button">
+            <i class="fas fa-save"></i>
+            儲存
+        </button>
+        <button id="download-json" class="action-button">
+            <i class="fas fa-download"></i>
+            下載隊伍資訊
+        </button>
+        <button id="delete-all-data" class="action-button">
+            <i class="fas fa-trash"></i>
+            刪除所有資訊
+        </button>
+    </div>
+
+    <script>
+        class Team {
+            constructor(teamID, games = [], preliminaryScore = 0, preliminaryGroup = null, teamName = null) {
+                this.teamID = teamID;
+                this.teamName = "";
+                this.games = games; // List of Game IDs
+                this.preliminaryScore = preliminaryScore;
+                this.preliminaryGroup = preliminaryGroup;
+                this.availableDays = null;
+                this.availableNights = null;
+                this.teamName = teamName;
+            }
+        }
+    
+        // 隨機排列隊伍名稱
+        function shuffleTeams(teams) {
+            for (let i = teams.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [teams[i], teams[j]] = [teams[j], teams[i]];
+            }
+            console.log(teams);
+            return teams;
+        }
+    
+        // 載入儲存的隊伍資料
+        function loadTeamData() {
+            // Load saved team data
+            const savedData = fetchTeamData();
+            // Only extract the value of Tier5
+            const textarea = document.getElementById('Tier5-input');
+            if (textarea && savedData['Tier5-input'] !== undefined) {
+                textarea.value = savedData['Tier5-input'];
+            }
+
+            const checkbox = document.getElementById(`Tier5-random`);
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+        }
+    
+    
+        // save team data for visual in text box
+        function saveVisualTeamData() {
+
+            const teamData = fetchTeamData();
+            const nameCount = {};
+            const textarea = document.getElementById(`Tier5-input`);
+            const checkbox = document.getElementById(`Tier5-random`);
+            let teams = textarea.value.split('\n');
+            let count = 0;
+
+            // count number of teams in each group
+            for(let i = 0; i < teams.length; i++){
+                if(teams[i] !== ''){
+                    count++;
+                }
+            }
+            // remove empty lines
+            teams = teams.filter(line => line.trim() !== '');
+                
+            // Handle repeated team names
+            teams = teams.map(team => {
+                const trimmedTeam = team.trim();
+                
+                // Initialize if undefined
+                if (nameCount[trimmedTeam] === undefined) {
+                    nameCount[trimmedTeam] = 0;
+                    console.log(`First occurrence of ${trimmedTeam}:`, {...nameCount});
+                    return trimmedTeam;
+                }
+                // Increment existing count
+                nameCount[trimmedTeam] += 1;
+                const letter = String.fromCharCode(65 + nameCount[trimmedTeam]);
+                console.log(`Found duplicate ${trimmedTeam}, count now:`, nameCount[trimmedTeam], 'letter:', letter);
+                return `${trimmedTeam}${letter}`;
+            });
+            // Log final state after processing
+            console.log('Final nameCount:', {...nameCount});
+            // randomize teams
+            if (checkbox && checkbox.checked) {
+                console.log('start randomize teams');
+                teams = shuffleTeams(teams);
+            }
+            
+            teamData[`Tier5-input`] = teams.join('\n');
+
+            // Check if games have started
+            const hasGamesStarted = fetchNewbieStarted() === 'true';
+            if (hasGamesStarted) {
+                const confirmEdit = confirm('比賽已經開始，確認是否要編輯分組資訊？這將導致比賽結果被清除！');
+                if (!confirmEdit) {
+                    return;
+                }
+            }
+            markNewbieStarted('false');
+            saveTeamData(teamData);
+            alert('分組資訊已儲存！');
+        }
+
+
+        // save team data as json
+        function processAndSaveTeamData() {
+            const teamData = fetchTeamData();
+            const teamInstances = {}; // 用於儲存所有 Team 物件
+            console.log(teamData)
+            const groupID = "Tier5"; // 生成組別名稱，例如 Tier1-A
+            const teams = teamData['Tier5-input'].split('\n');
+            // 建立每個隊伍的 Team 實例
+            teams.forEach(teamID => {
+                teamInstances[teamID] = new Team(teamID, [], 0, groupID);
+            });
+            
+            console.log(teamInstances)
+            // 儲存
+            saveNewbieTeams(teamInstances);
+        }
+
+
+        // 綁定按鈕事件
+        document.getElementById('submit-button').addEventListener('click', () => {
+            // We're in tier input mode - use existing submit functionality
+            console.log('regular input');
+            saveVisualTeamData();
+            markNewbieStarted(false);
+            processAndSaveTeamData();
+            loadTeamData();
+        });
+
+        document.getElementById('download-json').addEventListener('click', () => {
+            downloadJSON(fetchTeams(), 'teams.json');
+        });
+
+        document.getElementById('delete-all-data').addEventListener('click', () => {
+            // Create a confirmation dialog
+            const userConfirmed = confirm("Are you sure you want to delete all data? This action cannot be undone.");
+            
+            if (userConfirmed) {
+                // Clear all data
+                wipeEverything();
+                alert("All data has been deleted successfully.");
+                location.reload()
+            } else {
+                alert("Data deletion canceled.");
+            }
+        });
+
+        // 頁面載入時載入資料
+        window.onload = loadTeamData();
+
+        function processTeamNames(teams) {
+            const nameCount = {};
+            let hasRepeats = true;
+            let processedTeams = [...teams];
+
+            while (hasRepeats) {
+                hasRepeats = false;
+                const currentNames = new Set();
+                
+                processedTeams = processedTeams.map(team => {
+                    const trimmedTeam = team.trim();
+                    
+                    // If this name was already seen in this iteration
+                    if (currentNames.has(trimmedTeam)) {
+                        hasRepeats = true;
+                        nameCount[trimmedTeam] = (nameCount[trimmedTeam] || 0) + 1;
+                        const letter = String.fromCharCode(65 + nameCount[trimmedTeam]);
+                        console.log(`Found duplicate ${trimmedTeam}, adding letter:`, letter);
+                        return `${trimmedTeam}${letter}`;
+                    }
+                    
+                    // First time seeing this name in this iteration
+                    currentNames.add(trimmedTeam);
+                    return trimmedTeam;
+                });
+                
+                console.log('After iteration:', processedTeams);
+            }
+            
+            return processedTeams;
+        }
+
+
+    </script>
+</body>
+</html>
