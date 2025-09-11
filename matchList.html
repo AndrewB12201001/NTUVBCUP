@@ -548,6 +548,10 @@
         
         <div class="action-container">
             <div class="action-buttons">
+                <button id="create-newbie-cup-matches" class="action-btn primary">
+                    <i class="fas fa-magic"></i>
+                    Create Matches (Newbie Cup)
+                </button>
                 <button id="create-matches-according-to-ntu-cup-rules" class="action-btn primary">
                     <i class="fas fa-magic"></i>
                     Create Matches (NTU Cup Rules)
@@ -638,6 +642,7 @@
         let matches = fetchMatches();
         renderMatches(matches);
         calculatePreliminaryScore();
+
 
         // Function to mark changes as unsaved
         function markUnsavedChanges() {
@@ -757,6 +762,7 @@
         function createMatchesAccordingToNTUCupRules() {
             try {
                 // Retrieve teams
+                const everyMatches = fetchMatches();
                 const teamsData = fetchTeams();
                 const allMatches = [];
                 const preliminaryGroups = {};
@@ -777,12 +783,39 @@
                 }
 
                 // Save matche
-                saveMatches(allMatches);
+                // Combine existing matches with new matches
+                saveMatches([...everyMatches, ...allMatches]);
 
             } catch (error) {
                 console.error('Error processing matches:', error);
             }
         }
+
+        function padToPowerOfTwo(arr, power) {
+            const length = arr.length;
+            if (length === 1) return [...arr, ...arr]; // Duplicate if only one team
+            if (length === Math.pow(2, power)) return arr; // Already a power of 2
+            // Split arr into two halves
+            const mid = Math.ceil(length / 2);
+            const array1 = arr.slice(0, mid);
+            const array2 = arr.slice(mid);
+            console.log("array1:", array1);
+            console.log("array2:", array2);
+            return [...padToPowerOfTwo(array1, power-1), ...padToPowerOfTwo(array2, power-1)];
+        }
+
+        function createNewbieCupMatches() {
+            const teams = fetchNewbieTeams();
+            // Filter for NewbieCup teams, e.g. by group or a flag
+            const newbieTeams = Object.values(teams)
+                .map(team => team.teamID);
+
+            // Pad to next power of 2 for a balanced bracket
+            const paddedTeams = padToPowerOfTwo(newbieTeams, Math.ceil(Math.log2(newbieTeams.length)));
+            console.log('Padded Teams:', paddedTeams);
+            createBracket(paddedTeams, 'NewbieCup');
+        }
+
 
         // Render matches in the container
         // don't pass in a null object
@@ -951,15 +984,23 @@
 
         // Add this function to check if matches exist and update button visibility
         function updateCreateMatchesButtonVisibility() {
-            const matches = fetchMatches();
             const createMatchesButton = document.getElementById('create-matches-according-to-ntu-cup-rules');
-            
-            if (matches.length > 0) {
-                createMatchesButton.style.display = 'none';
+            const createNewbieCupButton = document.getElementById('create-newbie-cup-matches');
+
+            if (fetchGamesStarted()==="true") {
+                createMatchesButton.style.backgroundColor = 'gray';
             } else {
                 createMatchesButton.style.display = 'block';
             }
+            if(fetchNewbieStarted()==="true"){
+                createNewbieCupButton.style.backgroundColor = 'gray';
+            } else {
+                createNewbieCupButton.style.display = 'block';
+            }
+            
         }
+
+        
 
         // Modify the create matches button click handler
         document.getElementById('create-matches-according-to-ntu-cup-rules').addEventListener('click', () => {
@@ -967,6 +1008,16 @@
             createMatchesAccordingToNTUCupRules()
             console.log('match creating......')
             markGamesStarted(true);
+            matches = fetchMatches();
+            renderMatches(matches);
+            updateCreateMatchesButtonVisibility();
+        });
+
+        document.getElementById('create-newbie-cup-matches').addEventListener('click', () => {
+            console.log('click!')
+            createNewbieCupMatches()
+            console.log('match creating......')
+            markNewbieStarted(true);
             matches = fetchMatches();
             renderMatches(matches);
             updateCreateMatchesButtonVisibility();
@@ -1020,6 +1071,7 @@
 
             let firstClickKey = `isTier${tierNumber}FirstClick`;
             let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+            if (!isFirstClick) finalsButton.style.backgroundColor = "#888";
 
             finalsButton.addEventListener("click", () => {
                 if (isFirstClick) {
@@ -1769,7 +1821,11 @@
             const button5to8 = document.createElement("button");
             button5to8.className = 'action-btn success';
             button5to8.textContent = "Generate Tier1 5-8 Bracket";
-            
+
+            let firstClickKey = `Tier1 5-8 matches FirstClick`;
+            let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+            if (!isFirstClick) button5to8.style.backgroundColor = "#888";
+
             button5to8.addEventListener("click", () => {
                 let firstClickKey = `Tier1 5-8 matches FirstClick`;
                 let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
@@ -1795,6 +1851,9 @@
             const button = document.createElement("button");
             button.className = 'action-btn success';
             button.textContent = "Generate Tier2 5-8 Bracket";
+            let firstClickKey = `Tier2 5-8 matches FirstClick`;
+            let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+            if (!isFirstClick) button.style.backgroundColor = "#888";
             button.addEventListener("click", () => {
                 let firstClickKey = `Tier2 5-8 matches FirstClick`;
                 let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
@@ -1819,6 +1878,9 @@
             const button = document.createElement("button");
             button.className = 'action-btn success';
             button.textContent = "Generate Tier1 9-12 Bracket";
+            let firstClickKey = `Tier2 9-12 matches FirstClick`;
+            let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+            if (!isFirstClick) button.style.backgroundColor = "#888";
             button.addEventListener("click", () => {
                 let firstClickKey = `Tier2 9-12 matches FirstClick`;
                 let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
@@ -1837,6 +1899,7 @@
 
         }
 
+        
         
     </script>
 </body>
