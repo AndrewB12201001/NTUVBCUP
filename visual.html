@@ -377,13 +377,13 @@
             const tier4Div = document.createElement("div");
             tier4Div.classList.add("tier");
   
-            
+            const tier5Div = document.createElement("div");
+            tier5Div.classList.add("tier");
 
             function createBracket(tierName, bracket) {
                 const title = document.createElement("h2");
                 title.textContent = tierName;
 
-                let tierDiv;
                 if (tierName.substring(0, 5) === 'Tier1') {
                     tierDiv = tier1Div;
                 } else if (tierName.substring(0, 5) === 'Tier2') {
@@ -392,6 +392,11 @@
                     tierDiv = tier3Div;
                 } else if (tierName.substring(0, 5) === 'Tier4') {
                     tierDiv = tier4Div;
+                } else if (tierName.substring(0, 9) === 'NewbieCup') {
+                    tierDiv = tier5Div;
+                } else {
+                    console.error(`Unknown tier name: ${tierName}`);
+                    return;
                 }
                 tierDiv.appendChild(title);
                 const bracketContainer = document.createElement("div");
@@ -466,6 +471,7 @@
             container.appendChild(tier2Div);
             container.appendChild(tier3Div);
             container.appendChild(tier4Div);
+            container.appendChild(tier5Div);
         }
     </script>
 </body>
