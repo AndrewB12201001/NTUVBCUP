@@ -392,7 +392,7 @@
                 }else if (tier === 'Tier3') {
                     groupTierSize = 3;
                 }else if (tier === 'Tier4') {
-                    groupTierSize = Math.floor(teamsLength / 5);  // Base size for each group
+                    groupTierSize = Math.floor(teamsLength / 4);  // Base size for each group
                 }
                 // randomize teams
                 if (checkbox && checkbox.checked) {
@@ -401,7 +401,7 @@
                     groupSize = [];
                     console.log('groupSize', groupSize);
                     if (tier === 'Tier4') {
-                        let extraTeams = teams.length % 5;
+                        let extraTeams = teams.length % 4;
                         while (teamsLength > 0) {
                             if (extraTeams > 0) {
                                 groupSize.push(groupTierSize + 1);
@@ -421,7 +421,7 @@
                     console.log('groupSize', groupSize);
                 }else{
                     if (tier === 'Tier4') {
-                        let extraTeams = teamsLength % 5;
+                        let extraTeams = teamsLength % 4;
 
                         while (teamsLength > 0) {
                             if (extraTeams > 0) {

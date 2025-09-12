@@ -1231,7 +1231,7 @@
         //四級分組一打排名賽 奇數個分組一，積分最高的當種子，偶數個但不是2^n分組一，前N-2^[floor_function(log(2,N))]有優勢，N= 2^n for some n 就積分最高打積分最低的。
             if (Tier === 4) {
                 // Tier 4: Ranking playoffs with seeding rules
-                const tier4Groups = ["Tier4-A", "Tier4-B", "Tier4-C", "Tier4-D", "Tier4-E"];
+                const tier4Groups = ["Tier4-A", "Tier4-B", "Tier4-C", "Tier4-D"];
                 let firstSeed = [];
                 let secondSeed = [];
                 tier4Groups.forEach((group) => {
@@ -1248,14 +1248,10 @@
                 console.log('firstSeed: ', firstSeed);
                 console.log('secondSeed: ', secondSeed);
                 let playoffMatches = [
-                    firstSeed[9].teamID, firstSeed[6].teamID, 
-                    firstSeed[0].teamID, firstSeed[0].teamID, //seed
-                    firstSeed[3].teamID, firstSeed[3].teamID,
-                    firstSeed[4].teamID, firstSeed[4].teamID, 
-                    firstSeed[5].teamID, firstSeed[5].teamID,
-                    firstSeed[2].teamID, firstSeed[2].teamID,
-                    firstSeed[1].teamID, firstSeed[1].teamID, //seed
-                    firstSeed[7].teamID, firstSeed[8].teamID,
+                    firstSeed[0].teamID, firstSeed[7].teamID, 
+                    firstSeed[4].teamID, firstSeed[3].teamID, 
+                    firstSeed[2].teamID, firstSeed[5].teamID, 
+                    firstSeed[6].teamID, firstSeed[1].teamID
                 ];
                 createBracket(playoffMatches, 'Tier4Finals')
             }
