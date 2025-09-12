@@ -526,10 +526,20 @@
         function createDayDiv(day, isOtherMonth, dateStr) {
             const dayDiv = document.createElement('div');
             dayDiv.className = `calendar-day${isOtherMonth ? ' other-month' : ''}`;
-            dayDiv.innerHTML = `
-                <div class="calendar-date">${day}</div>
-                <div class="calendar-matches"></div>
-            `;
+            if (dateStr === '2005-04-01'){
+                dayDiv.innerHTML = `
+                    <div class="calendar-date">${day}</div>
+                    <p> Andrew Kuo's Birthday 🎉</p>
+                    <p> Site Made by Andrew Kuo</p>
+                    <div class="calendar-matches"></div>
+                `;
+            }else{
+                dayDiv.innerHTML = `
+                    <div class="calendar-date">${day}</div>
+                    <div class="calendar-matches"></div>
+                `;
+            }
+            
             dayDiv.style.cursor = 'pointer';
             dayDiv.addEventListener('dragover', (e) => {
                 e.preventDefault();
