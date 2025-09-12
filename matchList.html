@@ -1044,7 +1044,6 @@
                     return;
                 }
             }
-            console.log('click!')
             createMatchesAccordingToNTUCupRules()
             console.log('match creating......')
             markGamesStarted(true);
@@ -1059,7 +1058,6 @@
                     return;
                 }
             }
-            console.log('click!')
             createNewbieCupMatches()
             console.log('match creating......')
             markNewbieStarted(true);
@@ -1073,30 +1071,8 @@
         });
 
         document.getElementById('sort-matchings').addEventListener('click', () => {
-            console.log('click!');
             window.location.href = 'sortMatchings.html';
         });
-
-        /*document.getElementById('opButton').addEventListener('click', ()=>{
-            console.log('click!');
-            let matches = fetchMatches();
-            
-            // Update all matches
-            matches = matches.map(match => {
-                if(match.preliminary === true){
-                    match.set1 = [25, 0];
-                    match.set2 = [25, 0];
-                    match.set3 = [0, 0];  // Optional: reset set3 if needed
-                    
-                    return match;
-                };
-            });
-            
-            // Save updated matches
-            saveMatches(matches);
-            renderMatches(matches);
-        });*/
-
 
 
         /* Generate Final Matches */
@@ -1351,7 +1327,7 @@
             
             // Track matches by round for easier referencing
             const matchesByRound = [];
-            
+            console.log(teams) ;
             // First round matches
             let currentRound = [];
             for (let i = 0; i < teams.length; i += 2) {
@@ -1564,7 +1540,7 @@
                 saveOfficialStats({});
                 
                 // Reset game ID counter
-                saveGameIDCounter('0');
+                saveGameIDCounter(0);
                 
                 // Reset finals Button
                 for (let i = 1;i<=tierNumber;i++){

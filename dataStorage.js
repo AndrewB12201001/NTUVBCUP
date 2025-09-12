@@ -83,6 +83,10 @@ function fetchNewbieStarted(){
 
 function fetchGameIDCounter(){
     const gameIDCounter = localStorage.getItem('gameIDCounter') || 0;
+    if (gameIDCounter === null) {
+        localStorage.setItem("gameIDCounter", JSON.stringify(0));
+        return 0;
+    }
     return gameIDCounter;
 }
 
