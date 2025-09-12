@@ -1211,15 +1211,13 @@
                 // Creatematches
                 let rankingMatch1 = [
                     rankingGroups.first[0].teamID, rankingGroups.first[0].teamID,//seed
-                    rankingGroups.first[4].teamID, rankingGroups.first[5].teamID,
-                    rankingGroups.first[2].teamID, rankingGroups.first[3].teamID,
+                    rankingGroups.second[5].teamID, rankingGroups.second[4].teamID,
+                    rankingGroups.second[0].teamID, rankingGroups.first[4].teamID, 
+                    rankingGroups.first[3].teamID, rankingGroups.first[3].teamID,//seed
+                    rankingGroups.first[2].teamID, rankingGroups.first[2].teamID,//seed
+                    rankingGroups.first[5].teamID, rankingGroups.second[1].teamID, 
+                    rankingGroups.second[3].teamID, rankingGroups.second[2].teamID, 
                     rankingGroups.first[1].teamID, rankingGroups.first[1].teamID,//seed
-                ];
-                let rankingMatch2 = [
-                    rankingGroups.second[0].teamID, rankingGroups.second[0].teamID,//seed
-                    rankingGroups.second[4].teamID, rankingGroups.second[5].teamID,
-                    rankingGroups.second[2].teamID, rankingGroups.second[3].teamID,
-                    rankingGroups.second[1].teamID, rankingGroups.second[1].teamID,//seed
                 ];
                 let rankingMatch3 = [
                     rankingGroups.third[0].teamID, rankingGroups.third[0].teamID,//seed
@@ -1228,7 +1226,6 @@
                     rankingGroups.third[1].teamID, rankingGroups.third[1].teamID,//seed
                 ];
                 createBracket(rankingMatch1, 'Tier3Finals');
-                createBracket(rankingMatch2, 'Tier3Finals7-12');
                 createBracket(rankingMatch3, 'Tier3Relegation');
             }
         //四級分組一打排名賽 奇數個分組一，積分最高的當種子，偶數個但不是2^n分組一，前N-2^[floor_function(log(2,N))]有優勢，N= 2^n for some n 就積分最高打積分最低的。
