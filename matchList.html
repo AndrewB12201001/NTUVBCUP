@@ -560,6 +560,10 @@
                     <i class="fas fa-plus"></i>
                     Add New Game
                 </button>
+                <button id="add-game-button-newbie" class="action-btn success">
+                    <i class="fas fa-plus"></i>
+                    Add Newbie Game
+                </button>
                 <button id="download-matches" class="action-btn info">
                     <i class="fas fa-download"></i>
                     Download Matches
@@ -605,10 +609,9 @@
                 <input type="text" id="search-teamB" class="search-input" placeholder="Search Team B">
                 <div id="teamB-list" class="scrolling-list"></div>
             </div>
-
             <div class="form-group">
-                <label for="group-attribute">Group Name:</label>
-                <input type="text" id="group-attribute" class="search-input" placeholder="Enter group name">
+                <label for="group-attribute" style="margin-bottom: 0;">Group Name:</label>
+                <input type="text" id="group-attribute" class="search-input" placeholder="Enter group name" style="width: 140px; margin-bottom: 0;">
             </div>
 
             <div class="popup-buttons">
@@ -617,6 +620,39 @@
                     Create Game
                 </button>
                 <button id="close-popup-button" class="btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- newbie cup popup -->
+    <div class="popup hidden" id="popup-newbie">
+        <div class="popup-content">
+            <h3 class="popup-title">Create New Newbie Game</h3>
+            
+            <div class="form-group">
+                <label for="teamA">Team A:</label>
+                <input type="text" id="search-teamA-newbie" class="search-input" placeholder="Search Team A">
+                <div id="teamA-list-newbie" class="scrolling-list"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="teamB">Team B:</label>
+                <input type="text" id="search-teamB-newbie" class="search-input" placeholder="Search Team B">
+                <div id="teamB-list-newbie" class="scrolling-list"></div>
+            </div>
+            <div class="form-group">
+                <label for="group-attribute" style="margin-bottom: 0;">Group Name:</label>
+                <input type="text" id="group-attribute-newbie" class="search-input" placeholder="Enter group name" style="width: 140px; margin-bottom: 0;">
+            </div>
+
+            <div class="popup-buttons">
+                <button id="create-game-button-newbie" class="btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Create Game
+                </button>
+                <button id="close-popup-button-newbie" class="btn-secondary">
                     <i class="fas fa-times"></i>
                     Cancel
                 </button>
@@ -699,7 +735,7 @@
             return gameIDCounter;
         }
 
-        function createGames(teamA, teamB, preliminary, group = null) {
+        function createGames(teamA, teamB, preliminary, group = null, boolNewbie) {
             // Generate new game ID
             const gameId = generateGameID();
             
@@ -716,7 +752,8 @@
                 nextMatch: null,
                 preliminary: preliminary,
                 group: group,
-                availableDays: calculateMatchAvailableDays(teamA, teamB),
+                newbie: boolNewbie, 
+                availableDays: calculateMatchAvailableDays(teamA, teamB, boolNewbie),
                 official: ""
             };
 
@@ -752,7 +789,7 @@
             if (matchType === 'round-robin') {
                 for (let i = 0; i < teamIDs.length; i++) {
                     for (let j = i + 1; j < teamIDs.length; j++) {
-                        matches.push(createGames(teamIDs[i], teamIDs[j], preliminary = true, group = groupName));
+                        matches.push(createGames(teamIDs[i], teamIDs[j], preliminary = true, group = groupName, 0));
                     }
                 }
             }
@@ -799,8 +836,6 @@
             const mid = Math.ceil(length / 2);
             const array1 = arr.slice(0, mid);
             const array2 = arr.slice(mid);
-            console.log("array1:", array1);
-            console.log("array2:", array2);
             return [...padToPowerOfTwo(array1, power-1), ...padToPowerOfTwo(array2, power-1)];
         }
 
@@ -957,8 +992,8 @@
             if (confirmDelete) {
                 // Get the match to be deleted and teams data
                 const matchToDelete = matches[index];
-                const teams = fetchTeams();
-                
+                const teams = matches[index].newbie === true ? fetchNewbieTeams() : fetchTeams();
+
                 // Remove game ID from both teams' games arrays
                 if (teams[matchToDelete.teamAID]) {
                     teams[matchToDelete.teamAID].games = teams[matchToDelete.teamAID].games.filter(id => id !== matchToDelete.id);
@@ -968,8 +1003,8 @@
                 }
                 
                 // Update teams
-                saveTeams(teams);
-                
+                matches[index].newbie ? saveNewbieTeams(teams) : saveTeams(teams);
+
                 // Delete the match
                 deletedMatches.push({
                     match: {...matches[index]},
@@ -1314,7 +1349,8 @@
                     teams[i],
                     teams[i + 1] || null,
                     false,
-                    `${bracketName}-Round1`
+                    `${bracketName}-Round1`,
+                    teams[i].newbie
                 );
                 currentRound.push(match);
                 matches.push(match);
@@ -1331,7 +1367,8 @@
                         null,
                         null,
                         false,
-                        `${bracketName}-Round${round}`
+                        `${bracketName}-Round${round}`,
+                        teams[0].newbie
                     );
                     nextRound.push(match);
                     matches.push(match);
@@ -1341,7 +1378,8 @@
                         null,
                         null,
                         false,
-                        `${bracketName}-Round${round}`
+                        `${bracketName}-Round${round}`,
+                        teams.newbie
                     );
                     nextRound.push(match);
                     matches.push(match);
@@ -1449,16 +1487,59 @@
                 return;
             }
 
-            const newGame = createGames(teamAID, teamBID, preliminary = null, groupName);
+            const newGame = createGames(teamAID, teamBID, preliminary = null, groupName, false);
             const matches = fetchMatches();
             matches.push(newGame);
-            saveMatches(matches);
+            saveMatches(matches, false);
             renderMatches(matches);
             // Mark beginning for matches
             markGamesStarted(true);
             // Close the popup
             document.getElementById("popup-overlay").style.display = 'none';
             document.getElementById("popup").style.display = 'none';
+        });
+
+        // add new Newbie Cup match
+        // Show the popup
+        document.getElementById("add-game-button-newbie").addEventListener("click", () => {
+            const teams = fetchNewbieTeams();
+            generateScrollingList("search-teamA-newbie", "teamA-list-newbie", teams);
+            generateScrollingList("search-teamB-newbie", "teamB-list-newbie", teams);
+            document.getElementById("popup-overlay").style.display = 'block';
+            document.getElementById("popup-newbie").style.display = 'block';
+        });
+
+        // Close the popup
+        document.getElementById("close-popup-button-newbie").addEventListener("click", () => {
+            document.getElementById("popup-overlay").style.display = 'none';
+            document.getElementById("popup-newbie").style.display = 'none';
+        });
+
+        // Create a game and update matches
+        document.getElementById("create-game-button-newbie").addEventListener("click", () => {
+            const teamAID = document.getElementById("search-teamA-newbie").value;
+            const teamBID = document.getElementById("search-teamB-newbie").value;
+            const groupName = document.getElementById("group-attribute-newbie").value;
+            if (!teamAID || !teamBID) {
+                alert("Please select both teams.");
+                return;
+            }
+
+            const newGame = createGames(teamAID, teamBID, preliminary = null, groupName, true);
+            const matches = fetchMatches();
+            matches.push(newGame);
+            saveMatches(matches, true);
+            renderMatches(matches);
+            // Mark beginning for matches
+            markGamesStarted(true);
+            // Close the popup
+            document.getElementById("popup-overlay").style.display = 'none';
+            document.getElementById("popup-newbie").style.display = 'none';
+        });
+
+        document.getElementById("popup-overlay").addEventListener("click", () => {
+            document.getElementById("popup-overlay").style.display = 'none';
+            document.getElementById("popup-newbie").style.display = 'none';
         });
 
         document.getElementById('delete-all-games').addEventListener('click', async () => {
