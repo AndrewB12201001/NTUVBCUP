@@ -22,6 +22,7 @@
             background: white;
             border-radius: 10px;
             overflow: hidden;
+            margin-bottom: 90px; /* Space so last row is not hidden behind fixed save bar */
         }
         th, td {
             padding: 12px;
@@ -135,21 +136,21 @@
             tableBody.innerHTML = "";
         
             Object.keys(stats).forEach(officialName => {
-            const officialData = stats[officialName];
-            // If availableDays is not defined or empty, default to "1,2,3,4,5"
-            const availableDays = (Array.isArray(officialData.availableDays) && officialData.availableDays.length > 0)
-                ? officialData.availableDays.join(', ')
-                : "1,2,3,4,5";
-            const matchCount = officialData.count || 0;
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${officialName}</td>
-                <td contenteditable="true">${availableDays}</td>
-                <td>${matchCount}</td>
-                <td><button class="match-btn" onclick="showMatchesForOfficial('${officialName}')">View Matches</button></td>
-                <td><button class="edit-btn" onclick="saveOfficialChanges('${officialName}', this)">Save</button></td>
-            `;
-            tableBody.appendChild(row);
+                const officialData = stats[officialName];
+                // If availableDays is not defined or empty, default to "1,2,3,4,5"
+                const availableDays = (Array.isArray(officialData.availableDays) && officialData.availableDays.length > 0)
+                    ? officialData.availableDays.join(', ')
+                    : "1,2,3,4,5";
+                const matchCount = officialData.count || 0;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${officialName}</td>
+                    <td contenteditable="true">${availableDays}</td>
+                    <td>${matchCount}</td>
+                    <td><button class="match-btn" onclick="showMatchesForOfficial('${officialName}')">View Matches</button></td>
+                    <td><button class="edit-btn" onclick="saveOfficialChanges('${officialName}', this)">Save</button></td>
+                `;
+                tableBody.appendChild(row);
             });
         }
 
