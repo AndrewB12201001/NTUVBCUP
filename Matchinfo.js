@@ -50,13 +50,12 @@ function showMatchinfo(matchDiv, match){
             console.log('Saving match:', match.id);
             
             const matches = fetchMatches();
-            const teams = fetchTeams();
             let updated = false;
 
             // Find the current match in the stored data
             const matchIndex = matches.findIndex(m => m.id === match.id);
             if (matchIndex === -1) return;
-
+            const teams = matches[matchIndex].newbie ? fetchNewbieTeams() : fetchTeams();
             // Get inputs from the popup
             const inputs = popup.querySelectorAll('input');
             inputs.forEach(input => {
@@ -117,7 +116,11 @@ function showMatchinfo(matchDiv, match){
 
             // Save match Save teams
             saveMatches(matches);
-            saveTeams(teams);
+            if (matches[matchIndex].newbie) {
+                saveNewbieTeams(teams);
+            }else{
+                saveTeams(teams);
+            }
             // Debug
             console.log('Match saved:', matches[matchIndex]);
             // close the popup
