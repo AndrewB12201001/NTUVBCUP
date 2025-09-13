@@ -1369,12 +1369,12 @@
         document.getElementById('undated-matches').addEventListener('drop', e => {
             e.preventDefault();
             if (selectedMatch) {
-                const key = `${match.id}`;
-                tempAssignments.delete(key);
                 const matches = fetchMatches();
                 const match = matches.find(m => 
-                    selectedMatch.teamAID === m.teamAID && selectedMatch.teamBID === m.teamBID
+                    selectedMatch.id === m.id
                 );
+                const key = `${selectedMatch.id}`;
+                tempAssignments.delete(key);
 
                 if (match) { // Only modify if match exists
                     match.date = null;
