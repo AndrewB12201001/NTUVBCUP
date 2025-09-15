@@ -13,6 +13,14 @@
             margin: 0px;
             background-color: #f4f4f9;
         }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -61,27 +69,10 @@
             align-items: flex-start; /* ← aligns rounds to the top */
         }
         .tier {
-            padding: 40px;
             display: flex;
-            gap: 80px;
+            flex-direction: column;
             align-items: flex-start; /* ← aligns rounds to the top */
         }
-        .match {
-            width: 120px;
-            height: 40px;
-            padding: 10px;
-            background: #ddd;
-            border-radius: 5px;
-            text-align: center;
-            position: relative;
-        }
-        
-        .match:hover, .champMatch:hover {
-            background: #b7b7b7;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
         .round {
             align-items: center;
             position: relative;
@@ -94,16 +85,6 @@
             width: 40px;
             height: 2px;
             background: black;
-        }
-        .champMatch{
-            width: 120px;
-            height: 40px;
-            padding: 10px;
-            margin: 40px 0; /* Controls spacing between matches */
-            background: #ddd;
-            border-radius: 5px;
-            text-align: center;
-            position: relative;
         }
         .champMatch::before{
             content: "";
@@ -138,12 +119,24 @@
 
         .match, .champMatch {
             width: 160px;
+            height: 40px;
+            background: #ddd;
             padding: 12px;
+            margin: 40px 0; /* Controls spacing between matches */
             min-height: 60px;
             font-size: 14px;
             word-wrap: break-word;
             white-space: pre-line;
             overflow-wrap: break-word;
+            border-radius: 5px;
+            position: relative;
+            text-align: center;
+        }
+
+        .match:hover, .champMatch:hover {
+            background: #b7b7b7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
         /* Basic styles for the popup */
@@ -317,7 +310,7 @@
     <script src = 'dataStorage.js'></script>
     <script src = 'Matchinfo.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <div style="display: flex; justify-content: space-between; position: sticky; top: 0; z-index: 100; background: #f4f4f9; padding: 10px 20px;">
+    <div class="topbar">
         <a href="index.html" class="back-link">
             <i class="fas fa-arrow-left"></i>
             Back to Main Page
@@ -467,11 +460,11 @@
             // Append the tier containers to the main container in the desired numeric order:
             container.style.display = "flex";
             container.style.flexDirection = "column";
-            container.appendChild(tier1Div);
+            container.appendChild(tier5Div);
             container.appendChild(tier2Div);
             container.appendChild(tier3Div);
             container.appendChild(tier4Div);
-            container.appendChild(tier5Div);
+            container.appendChild(tier1Div);
         }
     </script>
 </body>
