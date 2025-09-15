@@ -6,10 +6,10 @@ function showMatchinfo(matchDiv, match){
         document.getElementById('popup-content').innerHTML = `
             <h3 class="popup-title">${match.teamAID} vs ${match.teamBID}</h3>
             <div class="match-container">
-                <label>Game ID: ${match.id}</label>
-                <label class="group-label">Group: ${match.group}</label>
-                <label class="group-lavel">Date: ${match.date}</label>
-                
+               <div style="display: flex; justify-content: space-between; margin: 0 10px;">
+                    <label class="group-label" style="font-weight: bold;">Group: ${match.group}</label>
+                    <label class="group-label" style="font-weight: bold;">Date: ${match.date}</label>
+                </div>
                 <div class="set-container">
                     <label>Set 1:</label>
                     <input type="text" maxlength="2" class="score-input" data-set="set1" data-team="0" value="${match.set1[0] || ''}">
