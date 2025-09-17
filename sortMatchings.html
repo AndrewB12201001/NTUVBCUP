@@ -12,44 +12,6 @@
         padding: 20px;
         background-color: #f4f4f9;
         }
-        /* Popup styles */
-        .popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border: 1px solid #ccc;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        .popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-        }
-
-        /* Day button styles */
-        .day-button {
-            margin: 5px;
-            padding: 10px;
-            background-color: lightgreen;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .day-button.selected {
-            background-color: lightcoral;
-        }
 
         .team-selector {
             margin: 20px 0;
@@ -492,20 +454,6 @@
             background: #f8d7da;
         }
 
-        /* Enhance popup styling */
-        .popup.resizable-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 2px solid #ccc;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            resize: both;
-            overflow: auto;
-            min-width: 500px;
-            min-height: 500px;
-        }
 
         .copy-button {
             position: absolute;
@@ -521,6 +469,7 @@
         }
 
     </style>
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
     <script src = 'dataStorage.js'></script>
@@ -538,10 +487,6 @@
         <button id="batch-input" class="action-btn primary">
             <i class="fas fa-list"></i>
             Batch Input Available Days
-        </button>
-        <button id="individual-input" class="action-btn success">
-            <i class="fas fa-user-clock"></i>
-            Individual Team Input
         </button>
         <button id="reset-availability" class="action-btn danger">
             <i class="fas fa-trash"></i>
@@ -597,25 +542,6 @@
         </div>
     </div>
 
-    <!-- Individual Input Popup -->
-    <div class="popup-overlay" id="individual-popup-overlay"></div>
-    <div class="popup" id="individual-popup">
-        <h2>Select Unavailable Days</h2>
-        <div class="team-selector">
-            Current Team: <span id="current-team"></span>
-        </div>
-        <div class="day-buttons">
-            <button class="day-button" data-day="1">Monday</button>
-            <button class="day-button" data-day="2">Tuesday</button>
-            <button class="day-button" data-day="3">Wednesday</button>
-            <button class="day-button" data-day="4">Thursday</button>
-            <button class="day-button" data-day="5">Friday</button>
-        </div>
-        <div class="navigation-buttons">
-            <button id="previous-team">Previous</button>
-            <button id="skip-team">Skip</button>
-        </div>
-    </div>
     <!-- Add this after the existing popups -->
     <div class="container">
         <div class="match-list">
@@ -674,8 +600,6 @@
             return mapping[num] || num;
         }
 
-
-        // Batch Input Implementation
         document.getElementById('batch-input').addEventListener('click', () => {
             document.getElementById('batch-popup-overlay').style.display = 'block';
             document.getElementById('batch-popup').style.display = 'block';
@@ -747,6 +671,7 @@
             renderUndatedMatchCount();
         });
 
+
         document.getElementById('batch-popup-overlay').addEventListener('click', () => {
             document.getElementById('batch-popup-overlay').style.display = 'none';
             document.getElementById('batch-popup').style.display = 'none';
@@ -754,7 +679,7 @@
 
         // Newbie Batch Input Implementation
 
-    document.getElementById('batch-input-newbie').addEventListener('click', () => {
+        document.getElementById('batch-input-newbie').addEventListener('click', () => {
             document.getElementById('batch-popup-overlay-newbie').style.display = 'block';
             document.getElementById('batch-popup-newbie').style.display = 'block';
         });
@@ -830,95 +755,6 @@
             document.getElementById('batch-popup-newbie').style.display = 'none';
         });
 
-        // Individual Input Implementation
-        let currentTeamIndex = 0;
-        let teamsList = [];
-        let selectedDays = [];
-
-        function updateCurrentTeam() {
-            const teams = fetchTeams()
-            const currentTeam = teamsList[currentTeamIndex];
-            document.getElementById('current-team').textContent = `${teams[currentTeam].preliminaryGroup}: ${teams[currentTeam].teamID}` || 'No more teams';
-            // Reset day buttons
-            document.querySelectorAll('.day-button').forEach(button => {
-                button.classList.remove('selected');
-            });
-            selectedDays = [];
-        }
-
-        function saveCurrentTeamAndMoveNext() {
-            if (selectedDays.length === 2) {
-                const teams = fetchTeams();
-                const currentTeam = teamsList[currentTeamIndex];
-                if (teams[currentTeam]) {
-                    teams[currentTeam].availableDays = calculateAvailableDays(selectedDays);
-                    
-                    // Update matches involving this team
-                    const matches = fetchMatches();
-                    Object.values(matches).forEach((match, index) => {
-                        if (match.teamAID === currentTeam || match.teamBID === currentTeam) {
-                            matches[index].availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, teams);
-                        }
-                    });
-                    
-                    // Save both teams and matches
-                    saveTeams(teams);
-                    saveMatches(matches);
-                }
-                currentTeamIndex++;
-                updateCurrentTeam();
-            }
-        }
-
-        document.getElementById('individual-input').addEventListener('click', () => {
-            const teams = fetchTeams();
-            //console.log("All teams:", teams); // Debug log
-            
-            teamsList = Object.keys(teams).filter(teamId => 
-                teams[teamId].availableDays === null || 
-                teams[teamId].availableDays === undefined
-            );
-            //console.log("Filtered teams:", teamsList); // Debug log
-            
-            currentTeamIndex = 0;
-            updateCurrentTeam();
-            
-            document.getElementById('individual-popup-overlay').style.display = 'block';
-            document.getElementById('individual-popup').style.display = 'block';
-        });
-
-        document.querySelectorAll('.day-button').forEach(button => {
-            button.addEventListener('click', () => {
-                if (selectedDays.length < 2 && !button.classList.contains('selected')) {
-                    button.classList.add('selected');
-                    selectedDays.push(Number(button.dataset.day));
-                    
-                    if (selectedDays.length === 2) {
-                        setTimeout(saveCurrentTeamAndMoveNext, 10);
-                    }
-                }
-            });
-        });
-
-        document.getElementById('previous-team').addEventListener('click', () => {
-            if (currentTeamIndex > 0) {
-                currentTeamIndex--;
-                updateCurrentTeam();
-            }
-        });
-
-        document.getElementById('skip-team').addEventListener('click', () => {
-            currentTeamIndex++;
-            updateCurrentTeam();
-        });
-
-        document.getElementById('individual-popup-overlay').addEventListener('click', () => {
-            document.getElementById('individual-popup-overlay').style.display = 'none';
-            document.getElementById('individual-popup').style.display = 'none';
-            updateWeekView();
-            renderUndatedMatches();
-        });
-        // End of Individual input implementation
         
         // WeekView
         let currentWeekStart = new Date();
@@ -1395,12 +1231,16 @@
             
             if (userConfirmed) {
                 const teams = fetchTeams();
+                const teamsNewbie = fetchNewbieTeams();
                 //console.log("Teams before reset:", teams); // Debug log
                 
                 Object.keys(teams).forEach(teamId => {
                     teams[teamId].availableDays = null;
                 });
                 
+                Object.keys(teamsNewbie).forEach(teamId => {
+                    teamsNewbie[teamId].availableDays = null;
+                });
                 //console.log("Teams after reset:", teams); // Debug log
                 
                 // Update matches with new available days
@@ -1411,13 +1251,8 @@
                 
                 // Save both teams and matches
                 saveTeams(teams);
+                saveNewbieTeams(teamsNewbie);
                 saveMatches(matches);
-                
-                // Reset the current selection if in individual input mode
-                selectedDays = [];
-                document.querySelectorAll('.day-button').forEach(button => {
-                    button.classList.remove('selected');
-                });
                 
                 alert('All teams availability has been reset successfully!');
                 

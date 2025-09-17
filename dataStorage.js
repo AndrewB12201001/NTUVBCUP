@@ -281,7 +281,7 @@ function calculatePreliminaryScore() {
         });
         //console.log(team.teamID, 'gamesWon', gamesWon, setsTotalResult, scoreTotalResult, scoreTotalResult[0]/scoreTotalResult[1]);
         team.preliminaryScore = (gamesWon * 100000000 + ratioWonLoss(setsTotalResult[0], setsTotalResult[1]) * 10000 + ratioWonLoss(scoreTotalResult[0], scoreTotalResult[1]));
-        console.log(`Final preliminary score for ${team.teamID}: ${team.preliminaryScore}`);
+        //console.log(`Final preliminary score for ${team.teamID}: ${team.preliminaryScore}`);
     });
 
     saveTeams(teams);
