@@ -520,16 +520,6 @@
             font-size: 14px;
         }
 
-        .newbie-cup{
-            background: #b3e6ff;
-        }
-        .newbie-cup{
-            background: #b3e6ff;
-            transition: background 0.2s;
-        }
-        .newbie-cup:hover {
-            background: #7fd0fa;
-        }
     </style>
 </head>
 <body>
@@ -1028,7 +1018,7 @@
                     }
                     const dayBox = document.querySelectorAll('.day-matches')[dayIndex];
                     const matchDiv = document.createElement('div');
-                    matchDiv.className = assignment.previouslyAssigned ? 'past-assigned-match' : 'assigned-match';
+                    matchDiv.className = assignment.previouslyAssigned === false ? "assigned-match" : "past-assigned-match";
                     matchDiv.textContent = `${assignment.match.teamAID} vs ${assignment.match.teamBID}`;
                     matchDiv.style.background = assignment.match.status ? '#63d67e' : (assignment.match.set1[0] !== 0 && assignment.match.set1[1] !== 0) ? '#CCCCFF': '';
                     
@@ -1327,6 +1317,7 @@
         // Replace your fb-announcement listener with this:
         document.getElementById('fb-announcement').addEventListener('click', () => {
             let teams = fetchTeams();
+            let teamsNewbie = fetchNewbieTeams();
             let announcementText = "[臺大盃公告]\n**本週臺大盃賽程**\n";
 
             // Build a map dateString -> array of assignments
@@ -1354,8 +1345,8 @@
                     const prefix = groupPart.substring(0, 5);
                     const matchTier = tierMap[prefix] ?? '未定級';
                     // Use "場"+(index+1) as the match number
-                    const teamAName = teams[assignment.match.teamAID]?.teamName || assignment.match.teamAID;
-                    const teamBName = teams[assignment.match.teamBID]?.teamName || assignment.match.teamBID;
+                    const teamAName = assignment.match.newbie ? teamsNewbie[assignment.match.teamAID]?.teamName || assignment.match.teamAID : teams[assignment.match.teamAID]?.teamName || assignment.match.teamAID;
+                    const teamBName = assignment.match.newbie ? teamsNewbie[assignment.match.teamBID]?.teamName || assignment.match.teamBID : teams[assignment.match.teamBID]?.teamName || assignment.match.teamBID;
                     announcementText += `場${matchNumberToChinese(index + 1)} (${matchTier}) ${teamAName} vs ${teamBName}\n`;
                 });
             });
