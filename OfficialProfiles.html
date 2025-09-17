@@ -114,6 +114,7 @@
                 <th>Matches Officiated</th>
                 <th>Action</th>
                 <th>Edit</th>
+                <th>Delete</th>
             </tr>
         </thead>
         <tbody id="officials-table-body"></tbody>
@@ -149,11 +150,27 @@
                     <td>${matchCount}</td>
                     <td><button class="match-btn" onclick="showMatchesForOfficial('${officialName}')">View Matches</button></td>
                     <td><button class="edit-btn" onclick="saveOfficialChanges('${officialName}', this)">Save</button></td>
+                    <td><button class="delete-btn" onclick="deleteOfficial('${officialName}')">Delete</button></td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
+        // Delete an official from stats
+        function deleteOfficial(official) {
+            if (confirm(`Are you sure you want to delete ${official}? This action cannot be undone.`)) {
+                const stats = fetchOfficialStats();
+                if (stats[official]) {
+                    delete stats[official];
+                    saveOfficialStats(stats);
+                    populateOfficialsTable();
+                    alert(`${official} has been deleted.`);
+                } 
+                matches = fetchMatches();
+                matches.map(m => m.official === official ? m.official = "" : m.official = m.official);
+                saveMatches(matches);
+            }
+        }
         // Save changes to availableDays
         function saveOfficialChanges(official, button) {
             const row = button.parentElement.parentElement;

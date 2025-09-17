@@ -346,8 +346,7 @@ function calculateMatchAvailableDays(teamA, teamB, boolNewbie) {
     return Object.values(teamADays).filter(day => Object.values(teamBDays).includes(day));
 }
 // save Matches sub functions
-function recalculateOfficialStats() {
-    const matches = fetchMatches();
+function recalculateOfficialStats(matches) {
     const officialStats = {};
     
     // Count officials from all matches
@@ -362,6 +361,12 @@ function recalculateOfficialStats() {
     const allOfficialStats = fetchOfficialStats()
     // Save updated stats
     // Update count for each official while preserving availableDays if already set
+    // Remove officials from allOfficialStats that are not in officialStats
+    for (let official in allOfficialStats) {
+        if (!officialStats.hasOwnProperty(official)) {
+            delete allOfficialStats[official];
+        }
+    }
     for (let official in officialStats) {
         if (allOfficialStats.hasOwnProperty(official)) {
             allOfficialStats[official].count = officialStats[official].count;
@@ -619,9 +624,10 @@ function saveMatches(matches, Newbie = false){
         
         
         if (JSON.stringify(refMatches) !== JSON.stringify(matches)) updated = true;
+        recalculateOfficialStats(matches);
         const matchesJSON = JSON.stringify(matches);
         localStorage.setItem("matches", matchesJSON);
-        recalculateOfficialStats();
+        
     } while (updated === true);
 }
 
