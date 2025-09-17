@@ -1469,7 +1469,7 @@
             const newGame = createGames(teamAID, teamBID, preliminary = null, groupName, false);
             const matches = fetchMatches();
             matches.push(newGame);
-            saveMatches(matches, false);
+            saveMatches(matches);
             renderMatches(matches);
             // Mark beginning for matches
             markGamesStarted(true);
@@ -1507,7 +1507,7 @@
             const newGame = createGames(teamAID, teamBID, preliminary = null, groupName, true);
             const matches = fetchMatches();
             matches.push(newGame);
-            saveMatches(matches, true);
+            saveMatches(matches);
             renderMatches(matches);
             // Mark beginning for matches
             markGamesStarted(true);

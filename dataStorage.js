@@ -323,7 +323,7 @@ function calculateAvailableDays(unavailableDays) {
 }
 
 // Add this new function to calculate intersection of available days
-function calculateMatchAvailableDays(teamA, teamB, boolNewbie) {
+function calculateMatchAvailableDays(teamA, teamB, boolNewbie = false) {
     const teams = boolNewbie ? fetchNewbieTeams() : fetchTeams();
     // Check if both teams exist and have availableDays
     if (!teams[teamA] || !teams[teamB]) {
@@ -421,7 +421,7 @@ function updateMatchWinner(match){
     return match;
 }
 // save Matches main function
-function saveMatches(matches, Newbie = false){
+function saveMatches(matches){
     const teams = fetchTeams();
     let updated = false
     do {
@@ -437,7 +437,7 @@ function saveMatches(matches, Newbie = false){
             const previousTeamAID = matches[index].teamAID;
             const previousTeamBID = matches[index].teamBID;
             match = updateMatchWinner(match);
-            match.availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, Newbie);
+            match.availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, match.newbie);
             // update brackets
             if (matches[index].status) {
                 // Handle next match updates
