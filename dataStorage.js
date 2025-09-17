@@ -267,7 +267,7 @@ function calculatePreliminaryScore() {
         team.preliminaryScore = 0;
 
         Object.values(matches).forEach(match => {
-            if (match.preliminary === true){
+            if ( match.status === true && match.preliminary === true){
                 const matchResult = matchSetsWonLoss(match, team.teamID); // Fixed function call
                 const scoreResult = matchScoreWonLoss(match, team.teamID);
 
