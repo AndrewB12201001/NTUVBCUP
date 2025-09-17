@@ -735,7 +735,7 @@
             return gameIDCounter;
         }
 
-        function createGames(teamA, teamB, preliminary, group = null, boolNewbie) {
+        function createGames(teamA, teamB, preliminary, group = null, boolNewbie=false) {
             // Generate new game ID
             const gameId = generateGameID();
             
@@ -848,7 +848,7 @@
             // Pad to next power of 2 for a balanced bracket
             const paddedTeams = padToPowerOfTwo(newbieTeams, Math.ceil(Math.log2(newbieTeams.length)));
             console.log('Padded Teams:', paddedTeams);
-            createBracket(paddedTeams, 'NewbieCup');
+            createBracket(paddedTeams, 'NewbieCup', boolNewbie=true);
         }
 
 
@@ -1314,7 +1314,7 @@
         }
 
         // Bracket creation passing in an array of teams
-        function createBracket(teams, bracketName) {
+        function createBracket(teams, bracketName, boolNewbie = false) {
             const matches = [];
             const numRounds = Math.ceil(Math.log2(teams.length));
             
@@ -1329,7 +1329,7 @@
                     teams[i + 1] || null,
                     false,
                     `${bracketName}-Round1`,
-                    teams[i].newbie
+                    boolNewbie
                 );
                 currentRound.push(match);
                 matches.push(match);
@@ -1347,7 +1347,7 @@
                         null,
                         false,
                         `${bracketName}-Round${round}`,
-                        teams[0].newbie
+                        boolNewbie = boolNewbie
                     );
                     nextRound.push(match);
                     matches.push(match);
@@ -1358,7 +1358,7 @@
                         null,
                         false,
                         `${bracketName}-Round${round}`,
-                        teams.newbie
+                        boolNewbie = boolNewbie
                     );
                     nextRound.push(match);
                     matches.push(match);

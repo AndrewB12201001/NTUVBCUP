@@ -105,10 +105,22 @@
             cursor: pointer;
             transition: background 0.2s;
         }
+        .match-item-dated-newbie{
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            background: #7fd0fa;
+;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
         .match-item-dated:hover {
             background: #818181;
         }
 
+        .match-item-dated-newbie:hover {
+            background: #4fa7d1;
+        }
         .popup-buttons {
             display: flex;
             gap: 12px;
@@ -700,6 +712,7 @@
                 const matchDiv = document.createElement("div");
                 matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
                 matchDiv.classList.add("match-item");
+                if (match.newbie) matchDiv.classList.add('newbie-cup');
                 // Add click event to select match
                 matchDiv.addEventListener("click", () => addMatchToSelection(match, dateStr));
                 matchList.appendChild(matchDiv);
@@ -720,6 +733,7 @@
                 const matchDiv = document.createElement("div");
                 matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
                 matchDiv.classList.add("match-item-dated");
+                if (match.newbie) matchDiv.classList.add('match-item-dated-newbie');
                 // Add click event to select match
                 matchDiv.addEventListener("click", () => addMatchToSelection(match, dateStr));
                 matchList.appendChild(matchDiv);
