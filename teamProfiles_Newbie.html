@@ -271,7 +271,7 @@
             document.getElementById("batch-popup-overlay-newbie").style.display = "block";
             document.getElementById("batch-popup-newbie").style.display = "block";
         }
-        
+
         document.getElementById('processBatchInputNewbie').addEventListener('click', () => {
             let teams = fetchNewbieTeams();
             const matches = fetchMatches();
@@ -342,6 +342,8 @@
             document.getElementById('batch-popup-overlay-newbie').style.display = 'none';
             document.getElementById('batch-popup-newbie').style.display = 'none';
         });
+
+        document.getElementById('batch-input-overlay').addEventListener('click', closeBatchInputModal);
 
         window.onload = populateTable;
     </script>
