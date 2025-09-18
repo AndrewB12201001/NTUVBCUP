@@ -590,18 +590,35 @@
             }
             // Long press to lock/unlock the match
             let longPressTimer;
+            // Support both mouse and touch long-press to lock/unlock
             matchDiv.addEventListener('mousedown', () => {
-                if (!matchDiv.classList.contains('dragging')) { // Check if not dragging
+                if (!matchDiv.classList.contains('dragging')) {
                     longPressTimer = setTimeout(() => {
                         match.locked = !match.locked;
                         const matches = fetchMatches();
                         const existingMatchIndex = matches.findIndex(m => m.id === match.id);
-                        matches[existingMatchIndex] = { ...match }; // Overwrite the existing match
-                        saveMatches(matches); // Save updated matches
-                        renderCalendar(); // Re-render calendar
-                    }, 600); // 1 second for long press
+                        matches[existingMatchIndex] = { ...match };
+                        saveMatches(matches);
+                        renderCalendar();
+                    }, 600);
                 }
             });
+            matchDiv.addEventListener('touchstart', (e) => {
+                if (!matchDiv.classList.contains('dragging')) {
+                    longPressTimer = setTimeout(() => {
+                        match.locked = !match.locked;
+                        const matches = fetchMatches();
+                        const existingMatchIndex = matches.findIndex(m => m.id === match.id);
+                        matches[existingMatchIndex] = { ...match };
+                        saveMatches(matches);
+                        renderCalendar();
+                    }, 600);
+                }
+            });
+            matchDiv.addEventListener('mouseup', () => clearTimeout(longPressTimer));
+            matchDiv.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
+            matchDiv.addEventListener('touchend', () => clearTimeout(longPressTimer));
+            matchDiv.addEventListener('touchcancel', () => clearTimeout(longPressTimer));
             matchDiv.addEventListener('mouseup', () => clearTimeout(longPressTimer));
             matchDiv.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
             matchDiv.addEventListener('dragenter', (e) => {

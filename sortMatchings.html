@@ -860,14 +860,28 @@
                     
                     // Long press to lock/unlock the match
                     let longPressTimer;
+                    // Support both mouse and touch long-press for locking on iPad and desktop
                     matchDiv.addEventListener('mousedown', () => {
-                        if (!matchDiv.classList.contains('dragging')) { // Check if not dragging
+                        if (!matchDiv.classList.contains('dragging')) {
                             longPressTimer = setTimeout(() => {
                                 assignment.match.locked = !assignment.match.locked;
                                 displayAssignedMatches();
-                            }, 600); // 1 second for long press
+                            }, 600);
                         }
-                        
+                    });
+                    matchDiv.addEventListener('touchstart', (e) => {
+                        if (!matchDiv.classList.contains('dragging')) {
+                            longPressTimer = setTimeout(() => {
+                                assignment.match.locked = !assignment.match.locked;
+                                displayAssignedMatches();
+                            }, 600);
+                        }
+                    });
+                    matchDiv.addEventListener('touchend', () => {
+                        if (longPressTimer) clearTimeout(longPressTimer);
+                    });
+                    matchDiv.addEventListener('touchmove', () => {
+                        if (longPressTimer) clearTimeout(longPressTimer);
                     });
                     if (assignment.match.locked) {
                         const lockIcon = document.createElement('i');
