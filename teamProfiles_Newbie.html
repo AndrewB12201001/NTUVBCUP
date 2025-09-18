@@ -116,6 +116,7 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.2);
         }
     </style>
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
     <script src = 'dataStorage.js'></script>
@@ -128,8 +129,8 @@
         <thead>
             <tr>
                 <th>Team ID</th>
-                <th>Available Days</th>
-                <th>Available Nights</th>
+                <th class="clickable-header" onclick="openBatchInputAvailableDaysNewbie()">Available Days</th>
+                <th class="clickable-header">Available Nights</th>
                 <th class="clickable-header" onclick="openBatchInputModal()">Team Name</th>
                 <th>Edit</th>
             </tr>
@@ -151,6 +152,30 @@
         <br>
         <button onclick="saveBatchInput()">Save</button>
         <button onclick="closeBatchInputModal()">Cancel</button>
+    </div>
+
+    <!-- Newbie Batch Input Popup -->
+    <div class="popup-overlay" id="batch-popup-overlay-newbie"></div>
+    <div class="popup" id="batch-popup-newbie">
+        <div class="input-container">
+            <h3>Batch Input for Newbie Team Availability</h3>
+            <div class="instructions">
+                <p>Format: Team Name 不可比賽日1 不可比賽日2</p>
+                <p>Example:</p>
+                <pre>
+資工 五 四
+森林 二 四
+心理 二 四</pre>
+            </div>
+            <textarea 
+                id="batchInputNewbie" 
+                rows="10" 
+                placeholder="Paste your team availability data here..."
+                class="batch-textarea"
+            ></textarea>
+            <button id="processBatchInputNewbie" class="process-button">Process Teams</button>
+            <div id="processResultNewbie" class="process-result"></div>
+        </div>
     </div>
 
     <script>
@@ -240,6 +265,83 @@
             closeBatchInputModal();
             populateTable();
         }
+
+        //popup
+        function openBatchInputAvailableDaysNewbie() {
+            document.getElementById("batch-popup-overlay-newbie").style.display = "block";
+            document.getElementById("batch-popup-newbie").style.display = "block";
+        }
+        
+        document.getElementById('processBatchInputNewbie').addEventListener('click', () => {
+            let teams = fetchNewbieTeams();
+            const matches = fetchMatches();
+            const input = document.getElementById('batchInputNewbie').value;
+            const resultDiv = document.getElementById('processResultNewbie');
+            resultDiv.innerHTML = '';
+            
+            input.split('\n').forEach((line, index) => {
+                const cleanLine = line.trim().replace(/\s+/g, ' ');
+                if (!cleanLine) return;
+                
+                const parts = cleanLine.split(/[\s\t]+/);
+                if (parts.length >= 3) {
+                    const [teamId, day1, day2] = parts;
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    
+                    try {
+                        if (teams[teamId]) {
+                            const unavailableDays = [
+                                Number(convertChineseNumberToArabic(day1)),
+                                Number(convertChineseNumberToArabic(day2))
+                            ];
+                            teams[teamId].availableDays = calculateAvailableDays(unavailableDays);
+                            
+                            resultItem.classList.add('success');
+                            resultItem.innerHTML = `
+                                <span>✓ ${teamId}</span>
+                                <span>不可比賽日: ${day1}, ${day2}</span>
+                            `;
+                            // Update matches involving this team
+                            Object.values(matches).forEach((match, index) => {
+                                if (match.teamAID === teamId || match.teamBID === teamId) {
+                                    matches[index].availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, teams);
+                                }
+                            });
+                            
+                            // Save both teams and matches
+                            saveTeams(teams);
+                            saveMatches(matches);
+                        } else {
+                            resultItem.classList.add('error');
+                            resultItem.textContent = `✗ Team not found: ${teamId}`;
+                        }
+                    } catch (error) {
+                        resultItem.classList.add('error');
+                        resultItem.textContent = `✗ Error processing line ${index + 1}: ${cleanLine}`;
+                    }
+                    
+                    resultDiv.appendChild(resultItem);
+                } else if (cleanLine) {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item error';
+                    resultItem.textContent = `✗ Invalid format in line ${index + 1}: ${cleanLine}`;
+                    resultDiv.appendChild(resultItem);
+                }
+            });
+            
+            
+            // Save both teams and matches
+            saveNewbieTeams(teams);
+            updateWeekView();
+            renderUndatedMatches();
+            renderUndatedMatchCount();
+        });
+
+        document.getElementById('batch-popup-overlay-newbie').addEventListener('click', () => {
+            document.getElementById('batch-popup-overlay-newbie').style.display = 'none';
+            document.getElementById('batch-popup-newbie').style.display = 'none';
+        });
 
         window.onload = populateTable;
     </script>
