@@ -603,22 +603,8 @@
                     }, 600);
                 }
             });
-            matchDiv.addEventListener('touchstart', (e) => {
-                if (!matchDiv.classList.contains('dragging')) {
-                    longPressTimer = setTimeout(() => {
-                        match.locked = !match.locked;
-                        const matches = fetchMatches();
-                        const existingMatchIndex = matches.findIndex(m => m.id === match.id);
-                        matches[existingMatchIndex] = { ...match };
-                        saveMatches(matches);
-                        renderCalendar();
-                    }, 600);
-                }
-            });
             matchDiv.addEventListener('mouseup', () => clearTimeout(longPressTimer));
             matchDiv.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
-            matchDiv.addEventListener('touchend', () => clearTimeout(longPressTimer));
-            matchDiv.addEventListener('touchcancel', () => clearTimeout(longPressTimer));
             matchDiv.addEventListener('mouseup', () => clearTimeout(longPressTimer));
             matchDiv.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
             matchDiv.addEventListener('dragenter', (e) => {
