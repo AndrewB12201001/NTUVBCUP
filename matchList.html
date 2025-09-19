@@ -1566,11 +1566,13 @@
 
         document.getElementById('delete-ntucup-games').addEventListener('click', async () => {
             const userConfirmed = confirm("Are you sure you want to delete all NtuCup matches? This action cannot be undone.");
-
+            const teams = fetchTeams();
             if (userConfirmed) {
                 // Clear NtuCup matches
                 matches = matches.filter(match => match.newbie === true);
                 saveMatches(matches);
+                teams = teams.map(team => team.games = []);
+                saveTeams(teams);
 
                 alert("All NtuCup matches have been deleted successfully.");
                 renderMatches(matches);
