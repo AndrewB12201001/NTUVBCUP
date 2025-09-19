@@ -222,6 +222,10 @@ function matchSetsWonLoss(game, teamID) {
 
     return [setsWon, setsLost]; // Fixed typo
 }
+function convertChineseNumberToArabic(num) {
+    const mapping = { '一': 1, '二': 2, '三': 3, '四': 4, '五': 5 };
+    return mapping[num] || num;
+}
 
 function ratioWonLoss(setsWon, setsLost) {
     //console.log('W/L', setsWon, setsLost);
