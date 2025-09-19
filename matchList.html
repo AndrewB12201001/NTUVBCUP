@@ -1571,7 +1571,9 @@
                 // Clear NtuCup matches
                 matches = matches.filter(match => match.newbie === true);
                 saveMatches(matches);
-                teams = teams.map(team => team.games = []);
+                Object.keys(teams).forEach(teamId => {
+                    teams[teamId].games = [];
+                });
                 saveTeams(teams);
 
                 alert("All NtuCup matches have been deleted successfully.");
