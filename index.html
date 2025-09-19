@@ -584,7 +584,7 @@
             matchDiv.className = 'calendar-match';
             if (match.newbie) matchDiv.classList.add('newbie-cup');
             matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID} - ${match.official || 'No Official'}`;
-            matchDiv.style.background = match.status ? '#63d67e' : (match.set1[0] !== 0 && match.set1[1] !== 0) ? '#CCCCFF': '';
+            matchDiv.style.background = match.status ? '#90ee90' : (match.set1[0] !== 0 && match.set1[1] !== 0) ? '#CCCCFF' : '';
             if (match.locked === undefined) {
                 match.locked = false; // Initialize if undefined
             }

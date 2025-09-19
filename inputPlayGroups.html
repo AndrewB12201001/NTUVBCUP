@@ -277,13 +277,13 @@
 
     <script>
         class Team {
-            constructor(teamID, games = [], preliminaryScore = 0, preliminaryGroup = null, teamName = null) {
+            constructor(teamID, games = [], preliminaryScore = 0, preliminaryGroup = null) {
                 this.teamID = teamID;
                 this.games = games; // List of Game IDs
                 this.preliminaryScore = preliminaryScore;
                 this.preliminaryGroup = preliminaryGroup;
                 this.availableDays = null;
-                this.teamName = teamName;
+                this.teamName = teamID; //default to teamID
             }
         }
     
