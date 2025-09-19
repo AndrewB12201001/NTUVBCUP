@@ -1575,7 +1575,7 @@
                     teams[teamId].games = [];
                 });
                 saveTeams(teams);
-
+                markGamesStarted(false);
                 alert("All NtuCup matches have been deleted successfully.");
                 renderMatches(matches);
             } else {
