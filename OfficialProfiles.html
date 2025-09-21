@@ -101,10 +101,17 @@
 </head>
 <body>
     <script src="dataStorage.js"></script>
-    <a href="index.html" class="back-link">
-        <i class="fas fa-arrow-left"></i>
-        Back to Main Page
-    </a>
+    <div style=" display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Main Page
+        </a>
+        <div style="background-color: rgb(159, 201, 251); border-radius: 10%; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <p>Current Pay Per Match</p>
+            <textarea id="pay-per-match" rows="1" style="width:80px;"></textarea>
+            <button onclick="savePayPerMatch()">Save</button>
+        </div>
+    </div>
     <h1>Official Profiles</h1>
     <table>
         <thead>
@@ -112,7 +119,9 @@
                 <th>Official Name</th>
                 <th>Available Days</th>
                 <th>Matches Officiated</th>
-                <th>Action</th>
+                <th>Adjust Payment</th>
+                <th>Current Payment</th>
+                <th>Matches</th>
                 <th>Edit</th>
                 <th>Delete</th>
             </tr>
@@ -148,6 +157,8 @@
                     <td>${officialName}</td>
                     <td contenteditable="true">${availableDays}</td>
                     <td>${matchCount}</td>
+                    <td contenteditable="true">${officialData.adjustment !== undefined ? officialData.adjustment : 0}</td>
+                    <td>${(matchCount * (parseInt(document.getElementById("pay-per-match").value) || 0) + officialData.adjustment || 0)}</td>
                     <td><button class="match-btn" onclick="showMatchesForOfficial('${officialName}')">View Matches</button></td>
                     <td><button class="edit-btn" onclick="saveOfficialChanges('${officialName}', this)">Save</button></td>
                     <td><button class="delete-btn" onclick="deleteOfficial('${officialName}')">Delete</button></td>
@@ -185,9 +196,15 @@
             }
             const stats = fetchOfficialStats(); 
             stats[official].availableDays = availableDays;
+            // Adjust payment
+            const adjustmentText = row.cells[3].innerText.trim();
+            const adjustment = parseInt(adjustmentText, 10);
+            stats[official].adjustment = isNaN(adjustment) ? 0 : adjustment;
             saveOfficialStats(stats);
             alert("Changes saved for " + official);
+            location.reload(); // Reload to update current payment
         }
+
 
         function showMatchesForOfficial(official) {
             const matches = fetchMatches();
@@ -235,11 +252,18 @@
                 if (stats[officialName]) {
                     stats[officialName].availableDays = availableDays;
                 }
+                const adjustmentText = row.cells[3].innerText.trim();
+                const adjustment = parseInt(adjustmentText, 10);
+                stats[officialName].adjustment = isNaN(adjustment) ? 0 : adjustment;
             });
             saveOfficialStats(stats);
-            alert("All officials' available days saved successfully.");
+            alert("All officials' data saved successfully.");
+            location.reload(); // Reload to update current payment
         });
-        window.onload = populateOfficialsTable;
+        window.onload = function() {
+            loadPayPerMatch();
+            populateOfficialsTable();
+        };
     </script>
 </body>
 </html>

@@ -704,3 +704,19 @@ function updateTeamID(originalTeamID, newTeamID) {
 
     console.log(`Team ID updated from "${originalTeamID}" to "${newTeamID}".`);
 }
+
+
+//officials
+// Load pay per match from localStorage
+function loadPayPerMatch() {
+    const pay = localStorage.getItem('payPerMatch') || '250';
+    document.getElementById('pay-per-match').value = pay;
+}
+
+// Save pay per match to localStorage
+function savePayPerMatch() {
+    const pay = document.getElementById('pay-per-match').value.trim();
+    localStorage.setItem('payPerMatch', pay);
+    alert('Pay per match saved.');
+    location.reload(); // Reload to update current payment
+}
