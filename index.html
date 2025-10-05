@@ -612,7 +612,10 @@
                 matchDiv.classList.add('dragging');
             });
             // Add lock icon if match is locked
-            if (match.locked) {
+            if (match.teamAID === match.teamBID) {
+                matchDiv.textContent = match.teamAID;
+                matchDiv.style.background = '#888888'; // Highlight in dark grey for same team matches
+            }else if (match.locked) {
                 matchDiv.textContent = `🔒${match.group}: ${match.teamAID} vs ${match.teamBID} - ${match.official || 'No Official'}`;
                 matchDiv.draggable = false; // Disable dragging
             } else {
