@@ -1181,13 +1181,27 @@
             });
 
             // Sort each day's assignments and build text lines
-            Object.keys(dayAssignments).sort().forEach(dateKey => {
+            Object.keys(dayAssignments).sort((a, b) => {
+                // Extract month and day from "M/D 星期X"
+                const [am, ad] = a.split(/[\/ ]/);
+                const [bm, bd] = b.split(/[\/ ]/);
+                // Use current year for sorting
+                const year = new Date().getFullYear();
+                const dateA = new Date(year, Number(am) - 1, Number(ad));
+                const dateB = new Date(year, Number(bm) - 1, Number(bd));
+                return dateA - dateB;
+            })
+            .forEach(dateKey => {
                 announcementText += `${dateKey}\n`;
                 dayAssignments[dateKey].forEach((assignment, index) => {
                     const groupPart = assignment.match.group?.split('-')[0] || '';
                     const prefix = groupPart.substring(0, 5);
                     const matchTier = tierMap[prefix] ?? '未定級';
                     // Use "場"+(index+1) as the match number
+                    if (groupPart === '假日') {
+                        announcementText += `${assignment.match.teamAID}\n`;
+                        return; // Skip further processing for "假日"
+                    }
                     const teamAName = assignment.match.newbie ? teamsNewbie[assignment.match.teamAID]?.teamName || assignment.match.teamAID : teams[assignment.match.teamAID]?.teamName || assignment.match.teamAID;
                     const teamBName = assignment.match.newbie ? teamsNewbie[assignment.match.teamBID]?.teamName || assignment.match.teamBID : teams[assignment.match.teamBID]?.teamName || assignment.match.teamBID;
                     announcementText += `場${matchNumberToChinese(index + 1)} (${matchTier}) ${teamAName} vs ${teamBName}\n`;
