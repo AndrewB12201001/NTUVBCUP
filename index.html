@@ -56,6 +56,19 @@
             max-width: 500px;
             width: 90%;
         }
+        .popup-holiday{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 1002;
+            max-width: 400px;
+            width: 90%;
+        }
 
         .popup-title {
             color: #2c3e50;
@@ -97,6 +110,14 @@
 
         .match-item:hover {
             background: #b0a3ff;
+        }
+
+        .match-item-separator{
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            background: #fff;
+            font-weight: bold;
+            color: black;
         }
 
         .match-item-dated{
@@ -243,6 +264,16 @@
             z-index: 999;
             display: none;
         }
+        .popup-overlay-holiday{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            display: none;
+        }
         
         /* Calendar Styles */
         .calendar-container {
@@ -336,14 +367,17 @@
         .search-container {
             position: relative;
             display: flex;
+            justify-content: space-between; /* spread items as far apart as possible */
             align-items: center;
+            gap: 12px;
+            width: 100%;
         }
 
         .match-search {
             padding: 8px 10px;
             font-size: 14px;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 8px;
             width: 200px;
         }
 
@@ -452,6 +486,12 @@
     <div class="popup-overlay hidden" id="popup-overlay"></div>
     <div class="popup hidden" id="popup">
         <div class="popup-content" id="popup-content"></div>
+    </div>
+
+    <!-- Popup structure -->
+    <div class="popup-overlay-holiday hidden" id="holiday-popup-overlay"></div>
+    <div class="popup-holiday hidden" id="holiday-popup">
+        <div class="popup-content" id="holiday-content"></div>
     </div>
 
     <!-- Add Calendar View -->
@@ -644,18 +684,21 @@
             document.getElementById("popup-overlay").style.display = 'block';
             document.getElementById("popup").style.display = 'block';
             document.getElementById('popup-content').innerHTML = `
-            <div class='search-container'>
-                <input type="text" id="match-search" class="match-search" placeholder="Search matches...">
-            </div>
-            <div id="match-list" class = 'scrollable-matches'>
-                <!-- Matches will be inserted here -->
-            </div>
-            
-            <div id="selected-matches" class = 'scrollable-matches'>
-                <!-- Selected matches will appear here -->
-            </div>
+            <div style="max-height: 80vh; overflow-y: auto; gap: 15px; display: flex; flex-direction: column;">
+                <div class='search-container'>
+                    <input type="text" id="match-search" class="match-search" placeholder="Search matches...">
+                    <button class="action-btn" id="add-holiday-btn">Add Holiday</button>
+                </div>
+                <div id="match-list" class = 'scrollable-matches'>
+                    <!-- Matches will be inserted here -->
+                </div>
+                
+                <div id="selected-matches" class = 'scrollable-matches'>
+                    <!-- Selected matches will appear here -->
+                </div>
 
-            <button id="save-match" class="btn-primary">Save</button>
+                <button id="save-match" class="btn-primary">Save</button>
+            </div>
             `;
             const matchList = document.getElementById("match-list");
             
@@ -691,6 +734,43 @@
                 const searchText = event.target.value.toLowerCase();
                 renderFilteredUndatedMatches(dateStr, searchText);
             });
+            document.getElementById('add-holiday-btn').addEventListener('click', () => {
+                document.getElementById("holiday-popup-overlay").style.display = 'block';
+                document.getElementById("holiday-popup").style.display = 'block';
+                document.getElementById('holiday-content').innerHTML = `
+                    <h2 class="popup-title">Add Holiday on ${dateStr}</h2>
+                    <div>
+                        <label for="holiday-name">Holiday Name:</label>
+                        <input type="text" id="holiday-name" placeholder="Enter holiday name">
+                    </div>
+                    <div class="popup-buttons">
+                        <button id="save-holiday" class="btn-primary">Save Holiday</button>
+                    </div>
+                `;
+                // Attach save handler after the element exists
+                document.getElementById('save-holiday').addEventListener('click', () => {
+                    const holidayNameElem = document.getElementById('holiday-name');
+                    const holidayName = holidayNameElem ? holidayNameElem.value.trim() : '';
+                    if (holidayName) {
+                        const matches = fetchMatches();
+                        const holiday = createGames(holidayName, holidayName, "", null, false, dateStr);
+                        saveMatches([...matches, holiday]);
+                        console.log(fetchMatches());
+                        document.getElementById("holiday-popup-overlay").style.display = 'none';
+                        document.getElementById("holiday-popup").style.display = 'none';
+                        document.getElementById("popup-overlay").style.display = 'none';
+                        document.getElementById("popup").style.display = 'none';
+                        renderCalendar();
+                    } else {
+                        alert('Please enter a holiday name.');
+                    }
+                });
+            });
+            // Close popupup
+            document.getElementById("holiday-popup-overlay").addEventListener("click", () => {
+                document.getElementById("holiday-popup-overlay").style.display = 'none';
+                document.getElementById("holiday-popup").style.display = 'none';
+            });
         }
 
         
@@ -704,6 +784,11 @@
             matchList.innerHTML = ``; // Clear previous matches
             const matches = fetchMatches();
             const keywords = searchText.toLowerCase().trim().split(/\s+/); // Split by spaces
+            // add seperator
+            const starter = document.createElement("div");
+            starter.textContent = "Undated Matches";
+            starter.classList.add("match-item-separator");
+            matchList.appendChild(starter);
             // undated match
             const undatedMatches = matches.filter(match => {
                 const key = `${match.id}`;
@@ -725,6 +810,12 @@
                 matchDiv.addEventListener("click", () => addMatchToSelection(match, dateStr));
                 matchList.appendChild(matchDiv);
             });
+            // add seperator
+            const separator = document.createElement("div");
+            separator.textContent = "Dated Matches";
+            separator.classList.add("match-item-separator");
+            matchList.appendChild(separator);
+
             // now append dated match
             const datedMatches = matches.filter(match => {
                 const key = `${match.id}`;

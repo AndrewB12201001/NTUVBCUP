@@ -720,3 +720,73 @@ function savePayPerMatch() {
     alert('Pay per match saved.');
     location.reload(); // Reload to update current payment
 }
+
+
+// Match creation
+function generateGameID() {
+    // Retrieve the current gameIDCounter
+    let gameIDCounter = fetchGameIDCounter();
+
+    // If no gameIDCounter exists, initialize it to 1
+    if (!gameIDCounter) {
+        gameIDCounter = 1;
+        console.log('set gameIDCounter to one')
+    } else {
+        // Convert the stored value to a number and increment it
+        gameIDCounter = parseInt(gameIDCounter, 10) + 1;
+    }
+
+    // Save the updated gameIDCounter 
+    saveGameIDCounter(gameIDCounter);
+
+    // Return the current gameIDCounter
+    return gameIDCounter;
+}
+
+function createGames(teamA, teamB, preliminary, group = null, boolNewbie=false, date="") {
+    // Generate new game ID
+    const gameId = generateGameID();
+    
+    // Create the match object
+    const match = {
+        id: gameId,
+        teamAID: teamA,
+        teamBID: teamB,
+        set1: [0, 0],
+        set2: [0, 0],
+        set3: [0, 0],
+        winner: null,
+        status: false,
+        nextMatch: null,
+        preliminary: preliminary,
+        group: group,
+        newbie: boolNewbie, 
+        availableDays: calculateMatchAvailableDays(teamA, teamB, boolNewbie),
+        official: "",
+        date: date
+    };
+
+    // Update teams' games arrays
+    const teams = fetchTeams()
+    
+    // Update teamA's games array
+    if (teams[teamA]) {
+        if (!teams[teamA].games) {
+            teams[teamA].games = [];
+        }
+        teams[teamA].games.push(gameId);
+    }
+    
+    // Update teamB's games array
+    if (teams[teamB]) {
+        if (!teams[teamB].games) {
+            teams[teamB].games = [];
+        }
+        teams[teamB].games.push(gameId);
+    }
+    
+    // Save updated teams
+    saveTeams(teams);
+
+    return match;
+}
