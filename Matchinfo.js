@@ -4,12 +4,13 @@ function showMatchinfo(matchDiv, match){
         document.getElementById("popup-overlay").style.display = 'block';
         document.getElementById("popup").style.display = 'block';
         document.getElementById('popup-content').innerHTML = `
+            <button id="close-popup" class="close-popup-button" style="position: absolute; top: 8px; right: 8px; font-size: 24px; background: transparent; border: none; cursor: pointer;">&times;</button>
             <h3 class="popup-title">${match.teamAID} vs ${match.teamBID}</h3>
+            <div style="display: flex; justify-content: space-between; margin: 0 10px;">
+                <label class="group-label" style="font-weight: bold;">Group: ${match.group}</label>
+                <label class="group-label" style="font-weight: bold;">Date: ${match.date}</label>
+            </div>
             <div class="match-container">
-               <div style="display: flex; justify-content: space-between; margin: 0 10px;">
-                    <label class="group-label" style="font-weight: bold;">Group: ${match.group}</label>
-                    <label class="group-label" style="font-weight: bold;">Date: ${match.date}</label>
-                </div>
                 <div class="set-container">
                     <label>Set 1:</label>
                     <input type="text" maxlength="2" class="score-input" data-set="set1" data-team="0" value="${match.set1[0] || ''}">
@@ -160,6 +161,14 @@ function showMatchinfo(matchDiv, match){
             document.getElementById("popup-overlay").style.display = 'none';
             document.getElementById("popup").style.display = 'none';
         })
+        // Close the popup by clicking the close button
+        document.getElementById("close-popup").addEventListener("click", () => {
+            document.getElementById("popup-overlay").style.display = 'none';
+            document.getElementById("popup").style.display = 'none';
+            // Remove fade effect from header
+            const header = document.getElementById("sticky-header");
+            if (header) header.classList.remove("popup-fade");
+        });
 
         // Add these new functions to handle the official dropdown functionality
 
