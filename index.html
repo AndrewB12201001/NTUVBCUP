@@ -249,7 +249,7 @@
 
         @media (max-width: 768px) {
             .popup {
-                width: 95%;
+                width: 75%;
                 padding: 20px;
             }
         }
@@ -389,12 +389,11 @@
         }
 
         /* Make it more responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
             .action-container {
                 flex-direction: column;
                 align-items: stretch;
             }
-
             .search-container {
                 width: 100%;
                 margin-top: 10px;
@@ -403,7 +402,54 @@
             .match-search {
                 width: 100%;
             }
+            .nav-link{
+                flex: 1 1 5%;
+                justify-content: center;
+            }
+            .nav-text{
+                display: none;
+            }
+            .ntucup{
+                display: none;
+            }
+            .newbiecup{
+                display: none;
+            }
+            .weekday-header{
+                padding: 4px;
+            }
+            .h3{
+                font-size: 1.2em;
+            }
+            .calendar-header {
+            flex-direction: row;
+            gap: 4px;
+            }
+            .calendar-grid,
+            #calendar-days {
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            }
+            .weekday-header {
+            font-size: 0.95fr;
+            padding: 7px;
+            }
+            .calendar-day {
+            min-height: 50px;
+            padding: 3px;
+            font-size: 0.3em;
+            }
+            .calendar-date {
+            font-size: 0.9em;
+            }
+            .calendar-match {
+            font-size: 8px;
+            padding: 1px;
+            border-radius: 1.5px;
+            }
+            
         }
+
 
         .newbie-cup{
             background: #b3e6ff;
@@ -416,14 +462,20 @@
             background: #7fd0fa;
         }
         .navigation h4 {
+            font-size: 0.6em;
             margin: 0 15px 0 0;
             align-self: center;
             color: #2c3e50;
+        }
+        .finished {
+            background: #888888;
+            color: black;
         }
     </style>
 
     <!-- Add Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="darkmode.css">
 </head>
 <body>
     <script>
@@ -437,35 +489,38 @@
     </script>
     <script src = 'dataStorage.js'></script>
     <script src = 'Matchinfo.js'></script>
-    <h1>Welcome to the NTU Cup System</h1>
+    <h1>NTU Cup Admin</h1>
     <div class = "navigation">
-        <a href="sortMatchings.html" class="nav-link">
-            <i class="fas fa-sort"></i>
-            Sort Matchings
-        </a>
-        <a href="matchList.html" class="nav-link">
-            <i class="fas fa-calendar-alt"></i>
-            Matches List
-        </a>
-        <a href="visual.html" class="nav-link">
-            <i class="fas fa-chart-bar"></i>
-            Visual Matches
-        </a>
-        <a href="OfficialProfiles.html" class="nav-link">
-            <i class="fas fa-user-group"></i>
-            Official Profiles
-        </a>
-        <span>
-        <button class="action-btn" style="margin-left:auto;" id="export-btn">
-            <i class="fas fa-database"></i>
-            Data Backup
-        </button>
-        <button class = action-btn style="margin-left:auto;" id="import-btn">
-            <i class="fas fa-file-import"></i>
-            Upload Backup
-        </button>
+        <div style="display: flex; gap: 15px;">
+            <a href="sortMatchings.html" class="nav-link">
+                <i class="fas fa-sort"></i>
+                <span class="nav-text">Sort Matchings</span>
+            </a>
+            <a href="matchList.html" class="nav-link">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="nav-text">Matches List</span>
+            </a>
+            <a href="visual.html" class="nav-link">
+                <i class="fas fa-chart-bar"></i>
+                <span class="nav-text">Brackets</span>
+            </a>
+            <a href="OfficialProfiles.html" class="nav-link">
+                <i class="fas fa-user-group"></i>
+                <span class="nav-text">Official Profiles</span>
+            </a>
+        </div>
+        <div style="justify-content: space-between; display:flex; gap:5em; align-items:center;">
+            <button class="action-btn" id="export-btn">
+                <i class="fas fa-download"></i>
+                Download
+            </button>
+            <button class="action-btn" id="import-btn">
+                <i class="fas fa-file-import"></i>
+                Upload
+            </button>
+        </div>
     </div>
-    <div class="navigation">
+    <div class="navigation ntucup">
         <h4> NTU CUP </h4>
         <a href="inputPlayGroups.html" class="nav-link">
             <i class="fas fa-users"></i>
@@ -476,7 +531,7 @@
             Team Profiles
         </a>
     </div>
-    <div class="navigation">
+    <div class="navigation newbiecup">
         <h4> Newbie Cup </h4>
         <a href="inputNoobCupTeams.html" class="nav-link">
             <i class="fas fa-users"></i>
@@ -501,11 +556,15 @@
 
     <!-- Add Calendar View -->
     <div class="calendar-container">
-        <div class="calendar-header">
-            <button id="prev-month" class="action-btn">Previous Month</button>
-            <h2 id="current-month"></h2>
-            <button id="next-month" class="action-btn">Next Month</button>
-        </div>
+        <header class="calendar-header" role="banner" aria-label="Calendar controls">
+            <button id="prev-month" class="action-btn" aria-label="Previous month">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <h2 id="current-month" class="calendar-title" aria-live="polite"></h2>
+            <button id="next-month" class="action-btn" aria-label="Next month">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </header>
         <div class="calendar-grid">
             <div class="weekday-header">Sun</div>
             <div class="weekday-header">Mon</div>
@@ -629,7 +688,7 @@
             matchDiv.className = 'calendar-match';
             if (match.newbie) matchDiv.classList.add('newbie-cup');
             matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID} - ${match.official || 'No Official'}`;
-            matchDiv.style.background = match.status ? '#90ee90' : (match.set1[0] !== 0 && match.set1[1] !== 0) ? '#CCCCFF' : '';
+            if (match.status) matchDiv.classList.add('finished');
             if (match.locked === undefined) {
                 match.locked = false; // Initialize if undefined
             }
@@ -657,7 +716,12 @@
                 matchDiv.classList.add('dragging');
             });
             // Add lock icon if match is locked
-            if (match.teamAID === match.teamBID) {
+            // Parse the first two characters of team IDs
+            const teamAFirst2 = match.teamAID ? match.teamAID.substring(0, 2) : '';
+            const teamBFirst2 = match.teamBID ? match.teamBID.substring(0, 2) : '';
+            if(window.innerWidth <= 600) {
+                matchDiv.textContent = `${teamAFirst2} ${teamBFirst2}`;
+            }else if (match.teamAID === match.teamBID) {
                 matchDiv.textContent = match.teamAID;
                 matchDiv.style.background = '#888888'; // Highlight in dark grey for same team matches
             }else if (match.locked) {
@@ -676,6 +740,7 @@
                     renderCalendar();
                 });
             }
+            
             matchesContainer.appendChild(matchDiv);
             // Show the popup
             showMatchinfo(matchDiv, match);

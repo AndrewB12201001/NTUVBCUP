@@ -68,13 +68,6 @@
             width: 90%;
         }
 
-        .popup-title {
-            color: #2c3e50;
-            margin: 0 0 25px 0;
-            font-size: 1.5em;
-            text-align: center;
-        }
-
         .form-group {
             margin-bottom: 20px;
         }
@@ -298,12 +291,6 @@
             margin-bottom: 30px;
         }
 
-        .page-header h1 {
-            color: #2c3e50;
-            margin: 0 0 10px 0;
-            font-size: 2.2em;
-        }
-
         .subtitle {
             color: #666;
             margin: 0 0 20px 0;
@@ -497,7 +484,6 @@
         }
 
         .group-label, .team-label {
-            flex: 1 1 120px; /* Grow and shrink, min width 120px */
             text-align: center;
         }
 
@@ -513,6 +499,10 @@
             align-items: center;
             gap: 10px;
         }
+        .date-input-container {
+            min-width: 100px;
+            flex: 1;
+        }
 
         .official-search {
             min-width: 150px;
@@ -520,26 +510,64 @@
         }
 
         /* Make the layout adjust for smaller screens */
-        @media (max-width: 768px) {
-            .match-container {
-                flex-direction: column;
-                align-items: stretch;
-            }
+        @media (max-width: 600px) {
 
             .group-label, .team-label, .set-container, .date-official-container {
                 width: 100%;
-            }
-
-            .set-container {
-                justify-content: center;
             }
 
             .delete-match {
                 align-self: center;
                 width: 100%;
             }
+            .action-btn{
+                display: none;
+            }
+            .match-container {
+                flex-direction: column;
+                align-items: center;
+                padding: 2px;
+                border: 1px solid #ddd;
+                background: #f9f9f9;
+                font-size: 12px;
+            }
+            .set-container{
+                font-size: 12px
+            }
+            .score-input{
+                width: 12px;
+                text-align: center;
+                border: 1px solid #ccc;
+                border-radius: 2px;
+            }
+            .set-container{
+                justify-content: center;
+                left: 50%;
+            }
+            .date-input-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                margin: 0 auto;
+            }
+
+            .date-input-container input {
+                margin: 0 auto;
+                max-width: 220px; /* keep your existing max width */
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .date-official-container{
+                justify-content: center;
+                left: 50%;
+            }
+            .official-label{
+                display: none;
+            }
         }
     </style>
+    <link rel="stylesheet" href="darkmode.css">
     </head>
 <body>
     <script src = 'dataStorage.js'></script>
@@ -836,8 +864,7 @@
                     <div class="match-container">
                         <label>Game ID: ${match.id}</label>
                         <label class="group-label">${match.group}</label>
-                        <label class="team-label">Team A: ${match.teamAID}</label>
-                        <label class="team-label">Team B: ${match.teamBID}</label>
+                        <label class="team-label">Team A: ${match.teamAID} Team B: ${match.teamBID}</label>
                         
                         <div class="set-container">
                             <label>Set 1:</label>
@@ -845,26 +872,25 @@
                             <span>:</span>
                             <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set1" data-team="1" value="${match.set1[1] || ''}">
                         </div>
-
                         <div class="set-container">
                             <label>Set 2:</label>
                             <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set2" data-team="0" value="${match.set2[0] || ''}">
                             <span>:</span>
                             <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set2" data-team="1" value="${match.set2[1] || ''}">
                         </div>
-
                         <div class="set-container">
                             <label>Set 3:</label>
                             <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set3" data-team="0" value="${match.set3[0] || ''}">
                             <span>:</span>
                             <input type="text" maxlength="2" class="score-input" data-index="${index}" data-set="set3" data-team="1" value="${match.set3[1] || ''}">
                         </div>
-                        <label class="team-label">Availabledays : ${match.availableDays}</label>
                         <div class="date-official-container">
-                            <label>Match date:</label>
-                            <input type="date" value="${match.date}" data-index="${index}" data-field="date">
-
-                            <label>Official: </label>
+                            <div class="date-input-container">
+                                <input type="date" value="${match.date}" data-index="${index}" data-field="date"
+                                       style="max-width:220px; width:100%; padding:6px 8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+                            </div>
+                            <label class="team-label">Availabledays : ${match.availableDays}</label>
+                            <label class="official-label">Official: </label>
                             <div class="official-dropdown">
                                 <input type="text" class="official-search" value="${match.official || ''}" data-index="${index}" data-field="official" placeholder="Search official...">
                                 <div class="official-list"></div>
@@ -874,7 +900,6 @@
                         <button class="delete-match" data-index="${index}">Delete</button>
                     </div>
                 `;
-                
                 container.appendChild(matchDiv);
             });
 

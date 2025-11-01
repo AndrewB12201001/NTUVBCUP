@@ -469,20 +469,27 @@
         }
 
         .team-selector {
+            background: white;
             border-radius: 24px;
-            border: 2px solid #4CAF50;
             font-size: 18px;
-            color: #2c3e50;
             box-shadow: 0 2px 8px rgba(76,175,80,0.08);
             transition: border-color 0.3s, box-shadow 0.3s;
             outline: none;
         }
-        .team-selector:focus {
-            border-color: #2196F3;
-            box-shadow: 0 4px 16px rgba(33,150,243,0.12);
-            background: linear-gradient(90deg, #e3f2fd 0%, #e0ffe8 100%);
+        .finished {
+            background: #888888;
+            color: black;
+        }
+        .locked {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            color: #555;
+            right: 5px;
+            left: auto;
         }
     </style>
+    <link rel="stylesheet" href="darkmode.css">
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -878,13 +885,7 @@
                     });
                     if (assignment.match.locked) {
                         const lockIcon = document.createElement('i');
-                        lockIcon.className = 'fas fa-lock';
-                        lockIcon.style.position = 'absolute';
-                        lockIcon.style.top = '5px';
-                        lockIcon.style.left = '5px';
-                        lockIcon.style.color = '#555';
-                        lockIcon.style.right = '5px';
-                        lockIcon.style.left = 'auto';
+                        lockIcon.className = 'fas fa-lock locked';
                         matchDiv.appendChild(lockIcon);
                         matchDiv.draggable = false; // Disable dragging
                     }else{
@@ -1004,7 +1005,7 @@
         function createMatchBox(match) {
             const box = document.createElement('div');
             box.className = 'match-box'; // Default style
-            box.style.background = match.status ? '#63d67e' : (match.set1[0] !== 0 && match.set1[1] !== 0) ? '#CCCCFF': '';
+            if (match.status) box.classList.add('match-box-sameweek');
             tempAssignments.forEach((assignment, key) => {
                 const date = assignment.date;
                 const dayIndex = Math.floor((date - currentWeekStart) / (1000 * 60 * 60 * 24));

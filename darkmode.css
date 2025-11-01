@@ -1,0 +1,185 @@
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+    }
+    .back-link {
+        background: #2d2d2d;
+        color: #e0e0e0;
+    }
+    .match-container {
+        background-color: #2d2d2d;
+        border-color: #555;
+        color: #e0e0e0;
+    }
+    .match, .champMatch{
+        background-color: #2d2d2d;
+    }
+    .calendar-day {
+        background-color: #2d2d2d;
+        border-color: #555;
+        color: #e0e0e0;
+    }
+    .calendar-day.other-month {
+        background-color: #1f1f1f;
+        color: #999;
+    }
+    .weekday-header {
+        background-color: #1f1f1f;
+        color: #e0e0e0;
+    }
+    .navigation {
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+    }
+    .sticky-header {
+        background-color: #1a1a1a !important;
+        color: #e0e0e0;
+    }
+    .sticky-header.popup-fade {
+        background: rgba(0, 0, 0, 0.8) !important;
+    }
+    .sticky-header h2 {
+        color: #e0e0e0;
+    }
+    .popup {
+        background: #242424;
+        color: #e0e0e0;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.9);
+    }
+    .popup-title {
+        color: #e0e0e0;
+    }
+    .scrollable-matches {
+        background: #2d2d2d;
+        border-color: #555;
+        color: #e0e0e0;
+    }
+    .match-item {
+        border-bottom-color: #444;
+    }
+    .match-item:hover {
+        background: #3a3a3a;
+    }
+    .match-item-dated {
+        background: #3a3a3a;
+        border-bottom-color: #555;
+    }
+    .match-item-dated:hover {
+        background: #333;
+    }
+    .calendar-match {
+        background: #845ab4;
+        color: #cecece;
+    }
+    .calendar-match:hover {
+        background: #6f3baa;
+    }
+    .newbie-cup {
+        background: #276baf;
+    }
+    .newbie-cup:hover {
+        background: #0b62b9;
+    }
+    .nav-link {
+        background: #2d2d2d;
+        color: #e0e0e0;
+    }
+    .nav-link:hover {
+        background: #3a3a3a;
+    }
+    .action-btn {
+        background: #2d2d2d;
+        color: #e0e0e0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .calendar-date {
+        color: #ccc;
+    }
+    .match-search {
+        background: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+    .search-icon {
+        color: #ccc;
+    }
+    input, textarea {
+        background: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+    .modal {
+        background: #242424;
+        color: #e0e0e0;
+    }
+    table {
+        background: #2d2d2d;
+    }
+    th {
+        background: #1f1f1f;
+        color: #e0e0e0;
+    }
+    td {
+        background: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+    button {
+        background: #3a3a3a;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+    button:hover {
+        background: #4a4a4a;
+    }
+    .download-link{
+        color: #e0e0e0;
+        background: #3a3a3a;
+        border-color: #555;
+    }
+    .finished {
+        background: #666666;
+        color: #cecece;
+    }
+    .finish-preliminary {
+        background: forestgreen;
+    }
+    .navigation h4 {
+        color: #cecece;
+    }
+
+    .match-list{
+        background: #303030;
+    }
+    .match-box {
+        background: #3b3b3b;
+    }
+    .match-box-sameweek {
+        background: #1b1b1b;
+    }
+    .calendar{
+        background: #303030;
+    }
+    .day-box{
+        background: #3b3b3b;
+    }
+    .past-assigned-match{
+        background: #4d4d4d;
+        color: #ccc;
+    }
+    .locked{
+        color: #ccc;
+    }
+    .team-selector {
+        background: #2d2d2d;
+        color: #e0e0e0;
+    }
+
+    .page-header {
+        background: #1e1e1e;
+    }
+    .tier-form {
+        background: #2d2d2d;
+    }
+}

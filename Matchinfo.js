@@ -13,23 +13,23 @@ function showMatchinfo(matchDiv, match){
             <div class="match-container">
                 <div class="set-container">
                     <label>Set 1:</label>
-                    <input type="text" maxlength="2" class="score-input" data-set="set1" data-team="0" value="${match.set1[0] || ''}">
+                    <input type="text" maxlength="2" class="score-input" inputmode="numeric" data-set="set1" data-team="0" value="${match.set1[0] || ''}">
                     <span>:</span>
-                    <input type="text" maxlength="2" class="score-input" data-set="set1" data-team="1" value="${match.set1[1] || ''}">
+                    <input type="text" maxlength="2" class="score-input" inputmode="numeric" data-set="set1" data-team="1" value="${match.set1[1] || ''}">
                 </div>
 
                 <div class="set-container">
                     <label>Set 2:</label>
-                    <input type="text" maxlength="2" class="score-input" data-set="set2" data-team="0" value="${match.set2[0] || ''}">
+                    <input type="text" maxlength="2" class="score-input" inputmode="numeric" data-set="set2" data-team="0" value="${match.set2[0] || ''}">
                     <span>:</span>
-                    <input type="text" maxlength="2" class="score-input" data-set="set2" data-team="1" value="${match.set2[1] || ''}">
+                    <input type="text" maxlength="2" class="score-input" inputmode="numeric" data-set="set2" data-team="1" value="${match.set2[1] || ''}">
                 </div>
 
                 <div class="set-container">
                     <label>Set 3:</label>
-                    <input type="text" maxlength="2" class="score-input" data-set="set3" data-team="0" value="${match.set3[0] || ''}">
+                    <input type="text" maxlength="2" class="score-input" inputmode="numeric" data-set="set3" data-team="0" value="${match.set3[0] || ''}">
                     <span>:</span>
-                    <input type="text" maxlength="2" class="score-input" data-set="set3" data-team="1" value="${match.set3[1] || ''}">
+                    <input type="text" maxlength="2" class="score-input" inputmode="numeric" data-set="set3" data-team="1" value="${match.set3[1] || ''}">
                 </div>
 
                 <div class="date-official-container">

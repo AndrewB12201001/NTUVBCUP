@@ -98,6 +98,7 @@
             z-index: 1000;
         }
     </style>
+    <link rel="stylesheet" href="darkmode.css">
 </head>
 <body>
     <script src="dataStorage.js"></script>
@@ -139,6 +140,20 @@
         <button id="save-all-official" class="save-all-button">Save All Changes</button>
     </div>
     <script>
+
+        function updateViewport() {
+            const meta = document.querySelector('meta[name="viewport"]');
+            if (!meta) return;
+            const width = Math.max(window.innerWidth || 0, screen.width || 0);
+            if (width < 600) {
+                meta.setAttribute('content', 'width=device-width, initial-scale=0.5');
+            } else {
+                meta.setAttribute('content', 'width=device-width, initial-scale=1.0');
+            }
+        }
+        window.addEventListener('resize', updateViewport);
+        window.addEventListener('orientationchange', updateViewport);
+        updateViewport();
         // Populate the table by merging official stats and profiles.
         function populateOfficialsTable() {
             const stats = fetchOfficialStats(); // {"蔡定恩":{"count":20,"availableDays":[1,2,3,4,5]}, ...}
