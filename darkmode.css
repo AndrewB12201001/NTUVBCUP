@@ -182,4 +182,9 @@
     .tier-form {
         background: #2d2d2d;
     }
+
+    .fixed-save-bar {
+        background: #1a1a1a;
+        color: #e0e0e0;
+    }
 }
