@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="volleyball.png" type="image/png">
+    <link rel="icon" href="../utility/volleyball.png" type="image/png">
     <title>Sort Matchings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -497,6 +497,9 @@
             right: 5px;
             left: auto;
         }
+        .phone-only {
+            display: none;
+        }
         @media (max-width: 600px) {
             .action-buttons {
                 flex-direction: column;
@@ -516,14 +519,19 @@
             .phone-hidden {
                 display: none;
             }
+            .phone-only {
+                display: block;
+            }
         }
     </style>
     <link rel="stylesheet" href="darkmode.css">
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <script src = 'dataStorage.js'></script>
-    <a href="index.html" class="back-link">
+    <script src = '../utility/dataStorage.js'></script>
+    <script src = '../utility/renderMatchInDayBox.js'></script>
+    <script src = '../utility/Matchinfo.js'></script>
+    <a href="../../index.html" class="back-link">
         <i class="fas fa-arrow-left"></i>
         Back to Main Page
     </a>
@@ -626,8 +634,14 @@
                 </div>
             </div>
             <div id="week-view"></div>
-            
+            <div id="week-view-phone" class="phone-only"></div>
         </div>
+    </div>
+
+    <!-- Popup structure for match info -->
+    <div class="popup-overlay hidden" id="popup-overlay"></div>
+    <div class="popup hidden" id="popup">
+        <div class="popup-content" id="popup-content"></div>
     </div>
 
     <!-- Add a new popup for announcements (place it anywhere near your other popups) -->
@@ -710,10 +724,10 @@
             // Save both teams and matches
             saveTeams(teams);
             updateWeekView();
+            updateWeekViewPhone();
             renderUndatedMatches();
             renderUndatedMatchCount();
         });
-
 
         document.getElementById('batch-popup-overlay').addEventListener('click', () => {
             document.getElementById('batch-popup-overlay').style.display = 'none';
@@ -789,6 +803,7 @@
             // Save both teams and matches
             saveNewbieTeams(teams);
             updateWeekView();
+            updateWeekViewPhone();
             renderUndatedMatches();
             renderUndatedMatchCount();
         });
@@ -800,6 +815,7 @@
 
         
         // WeekView
+
         let currentWeekStart = new Date();
         currentWeekStart.setHours(0, 0, 0, 0); // Reset to midnight
         currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 8);
@@ -821,11 +837,11 @@
                 const date = new Date(currentWeekStart);
                 date.setDate(date.getDate() + i);
                 const dayBox = document.createElement('div');
-                dayBox.className = 'day-box';
+                dayBox.className = 'day-box phone-hidden';
                 dayBox.innerHTML = `
-                    <div class="day-name">${date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                    <div class="day-date">${formatDate(date)}</div>
-                    <div class="day-matches"></div>
+                    <div class="day-name phone-hidden">${date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                    <div class="day-date phone-hidden">${formatDate(date)}</div>
+                    <div class="day-matches phone-hidden"></div>
                 `;
                 
                 dayBox.addEventListener('dragover', e => {
@@ -846,6 +862,33 @@
             // Show existing assignments
             displayAssignedMatches();
             renderUndatedMatches(); 
+        }
+        
+        function updateWeekViewPhone() {
+            const matches = fetchMatches();
+            
+            const date = new Date(currentWeekStart);
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const weekView = document.getElementById('week-view');  
+
+            weekView.innerHTML = ''; // Clear previous content
+            // Add current month days
+            for (let day = 0; day < 7; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayDiv = createDayDiv(day, false, dateStr);
+                // Add matches for this day
+                const dayMatches = Object.values(matches).filter(match => match.date === dateStr);
+                const matchesContainer = dayDiv.querySelector('.calendar-matches');
+                dayMatches.forEach(match => {
+                    createMatchDiv(match, dayDiv, matchesContainer, dateStr);
+                });
+                weekView.appendChild(dayDiv);
+                document.getElementById(dateStr).addEventListener("click", async () => {
+                    showPopup(dateStr);  //for add match to date
+                });
+            }
+
         }
 
         function handleMatchDrop(match, dayOfWeek, date) {
@@ -888,6 +931,7 @@
             
             
             // Display assignments 
+
             tempAssignments.forEach((assignment, key) => {
                 const date = assignment.date;
                 const dayIndex = Math.floor((date - currentWeekStart) / (1000 * 60 * 60 * 24));
@@ -1119,12 +1163,14 @@
             currentWeekStart.setDate(currentWeekStart.getDate() - 7);
             firstRender = true;
             updateWeekView();
+            updateWeekViewPhone();
         });
 
         document.getElementById('next-week').addEventListener('click', () => {
             currentWeekStart.setDate(currentWeekStart.getDate() + 7);
             firstRender = true;
             updateWeekView();
+            updateWeekViewPhone();
         });
 
         document.getElementById('sort-type').addEventListener('click', function() {
@@ -1174,6 +1220,7 @@
             firstRender = true;
             renderUndatedMatches();
             updateWeekView();
+            updateWeekViewPhone();
             renderUndatedMatchCount();
             alert('Match assignments saved successfully!');
         });
@@ -1322,6 +1369,7 @@
 
         // Initial render
         updateWeekView();
+        updateWeekViewPhone();
         renderUndatedMatches();
         renderUndatedMatchCount();
 
