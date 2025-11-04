@@ -317,6 +317,12 @@
             font-size: 0.8em;
             color: #666;
             margin-bottom: 5px;
+            border-radius: 3px;
+        }
+        .calendar-date:hover {
+            font-weight: bold;
+            color: #333;
+            background: #bcbcbc;
         }
 
         .calendar-matches {
@@ -360,7 +366,13 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
+            background: #858585;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .action-btn:hover {
+            background: #646464;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
         /* second popup */
@@ -610,10 +622,10 @@
                 dayMatches.forEach(match => {
                     createMatchDiv(match, dayDiv, matchesContainer, dateStr);
                 });
-                dayDiv.addEventListener("dblclick", async () => {
+                daysContainer.appendChild(dayDiv);
+                document.getElementById(dateStr).addEventListener("click", async () => {
                     showPopup(dateStr);  //for add match to date
                 });
-                daysContainer.appendChild(dayDiv);
             }
             
             // Add current month days
@@ -626,10 +638,10 @@
                 dayMatches.forEach(match => {
                     createMatchDiv(match, dayDiv, matchesContainer, dateStr);
                 });
-                dayDiv.addEventListener("dblclick", async () => {
+                daysContainer.appendChild(dayDiv);
+                document.getElementById(dateStr).addEventListener("click", async () => {
                     showPopup(dateStr);  //for add match to date
                 });
-                daysContainer.appendChild(dayDiv);
             }
             
             // Add padding days from next month
@@ -644,10 +656,10 @@
                 dayMatches.forEach(match => {
                     createMatchDiv(match, dayDiv, matchesContainer, dateStr);
                 });
-                dayDiv.addEventListener("dblclick", async () => {
+                daysContainer.appendChild(dayDiv);
+                document.getElementById(dateStr).addEventListener("click", async () => {
                     showPopup(dateStr);  //for add match to date
                 });
-                daysContainer.appendChild(dayDiv);
             }
         }
 
@@ -663,7 +675,7 @@
                 `;
             }else{
                 dayDiv.innerHTML = `
-                    <div class="calendar-date">${day}</div>
+                    <div class="calendar-date" id="${dateStr}">${day}</div>
                     <div class="calendar-matches"></div>
                 `;
             }
@@ -871,10 +883,23 @@
                     (m.teamBID || '').toLowerCase().includes(keyword)
                 )
             );
-            filteredUndatedMatches.forEach(match => {
+            const dow = new Date(dateStr).getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+            const filteredUndatedMatchesAvailable = filteredUndatedMatches.filter(m => (m.availableDays.includes(dow)));
+            const filteredUndatedMatchesUnavailable = filteredUndatedMatches.filter(m => (!m.availableDays.includes(dow)));
+            filteredUndatedMatchesAvailable.forEach(match => {
                 const matchDiv = document.createElement("div");
                 matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
                 matchDiv.classList.add("match-item");
+                if (match.newbie) matchDiv.classList.add('newbie-cup');
+                // Add click event to select match
+                matchDiv.addEventListener("click", () => addMatchToSelection(match, dateStr));
+                matchList.appendChild(matchDiv);
+            });
+            filteredUndatedMatchesUnavailable.forEach(match => {
+                const matchDiv = document.createElement("div");
+                matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID} (Unavailable)`;
+                matchDiv.classList.add("match-item");
+                matchDiv.style.opacity = '0.5'; // Dim the unavailable matches
                 if (match.newbie) matchDiv.classList.add('newbie-cup');
                 // Add click event to select match
                 matchDiv.addEventListener("click", () => addMatchToSelection(match, dateStr));
@@ -898,10 +923,22 @@
                     (m.teamBID || '').toLowerCase().includes(keyword)
                 )
             );
-            filteredDatedMatches.forEach(match => {
+            const filteredDatedMatchesAvailable = filteredDatedMatches.filter(m => (m.availableDays.includes(dow)));
+            const filteredDatedMatchesUnavailable = filteredDatedMatches.filter(m => (!m.availableDays.includes(dow)));
+            filteredDatedMatchesAvailable.forEach(match => {
                 const matchDiv = document.createElement("div");
                 matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
                 matchDiv.classList.add("match-item-dated");
+                if (match.newbie) matchDiv.classList.add('match-item-dated-newbie');
+                // Add click event to select match
+                matchDiv.addEventListener("click", () => addMatchToSelection(match, dateStr));
+                matchList.appendChild(matchDiv);
+            });
+            filteredDatedMatchesUnavailable.forEach(match => {
+                const matchDiv = document.createElement("div");
+                matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID} (Unavailable)`;
+                matchDiv.classList.add("match-item-dated");
+                matchDiv.style.opacity = '0.5'; // Dim the unavailable matches
                 if (match.newbie) matchDiv.classList.add('match-item-dated-newbie');
                 // Add click event to select match
                 matchDiv.addEventListener("click", () => addMatchToSelection(match, dateStr));

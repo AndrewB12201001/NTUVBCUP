@@ -277,17 +277,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
-        @media (max-width: 768px) {
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .action-btn, .back-link {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
         .calendar-controls {
             display: flex;
             gap: 12px;
@@ -312,11 +301,43 @@
         }
 
         .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             background: #2196F3;
         }
 
         .nav-btn:hover {
             background: #1e88e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .nav-btn-week {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #858585;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn-week:hover {
+            background: #646464;
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
@@ -329,18 +350,6 @@
             background: #45a049;
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        @media (max-width: 768px) {
-            .calendar-controls {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .nav-btn, .save-btn {
-                width: 100%;
-                justify-content: center;
-            }
         }
 
         .input-container {
@@ -488,6 +497,26 @@
             right: 5px;
             left: auto;
         }
+        @media (max-width: 600px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-btn, .back-link {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-btn, .save-btn {
+                justify-content: center;
+            }
+            .nav-text{
+                display: none;
+            }
+            .phone-hidden {
+                display: none;
+            }
+        }
     </style>
     <link rel="stylesheet" href="darkmode.css">
     <link rel="stylesheet" href="popup.css">
@@ -501,15 +530,15 @@
     <h1>Sort Matchings</h1>
     <div id = 'matches-left'></div>
     <div class="action-buttons">
-        <button id="batch-input-newbie" class="action-btn primary">
+        <button id="batch-input-newbie" class="action-btn primary phone-hidden">
             <i class="fas fa-list"></i>
             Batch Input Newbie Days
         </button>
-        <button id="batch-input" class="action-btn primary">
+        <button id="batch-input" class="action-btn primary phone-hidden">
             <i class="fas fa-list"></i>
             Batch Input Available Days
         </button>
-        <button id="reset-availability" class="action-btn danger">
+        <button id="reset-availability" class="action-btn danger phone-hidden">
             <i class="fas fa-trash"></i>
             Reset All Teams Availability
         </button>
@@ -565,7 +594,7 @@
 
     <!-- Add this after the existing popups -->
     <div class="container">
-        <div class="match-list">
+        <div class="match-list phone-hidden">
             <select id="sort-type" class="team-selector">
                 <option value="tier">Sort by Group</option>
                 <option value="day">Sort by Day</option>
@@ -577,21 +606,21 @@
         <div class="calendar">
             <div class="calendar-nav">
                 <div class="calendar-controls">
-                    <button id="prev-week" class="nav-btn">
+                    <button id="prev-week" class="nav-btn-week">
                         <i class="fas fa-chevron-left"></i>
-                        Previous Week
+                        <span class="nav-text">Previous Week</span>
                     </button>
-                    <button id="next-week" class="nav-btn">
-                        Next Week
+                    <button id="next-week" class="nav-btn-week">
+                        <span class="nav-text">Next Week</span>
                         <i class="fas fa-chevron-right"></i>
                     </button>
                     <button id="save-assignments" class="save-btn">
                         <i class="fas fa-save"></i>
-                        Save Assignments
+                        <span class="nav-text">Save Assignments</span>
                     </button>
                     <button id="fb-announcement" class="nav-btn">
                         <i class="fas fa-sync"></i>
-                        FB Announcement Generator
+                        <span class="nav-text">FB Announcement Generator</span>
                     </button>
                     
                 </div>

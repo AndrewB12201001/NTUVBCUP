@@ -150,22 +150,22 @@
     }
 
     .match-list{
-        background: #303030;
+        background: #2b2b2b;
     }
     .match-box {
-        background: #3b3b3b;
+        background: #525252;
     }
     .match-box-sameweek {
         background: #1b1b1b;
     }
     .calendar{
-        background: #303030;
+        background: #2b2b2b;
     }
     .day-box{
         background: #3b3b3b;
     }
     .past-assigned-match{
-        background: #4d4d4d;
+        background: #1b1b1b;
         color: #ccc;
     }
     .locked{
@@ -186,5 +186,14 @@
     .fixed-save-bar {
         background: #1a1a1a;
         color: #e0e0e0;
+    }
+    .assigned-match {
+        background: #525252;
+    }
+    .assigned-match:hover {
+        background: #626262;
+    }
+    .past-assigned-match:hover {
+        background: #333333;
     }
 }
