@@ -216,9 +216,30 @@ function renderFilteredUndatedMatches(dateStr, searchText){
             (m.teamBID || '').toLowerCase().includes(keyword)
         )
     );
-    const dow = new Date(dateStr).getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
-    const filteredUndatedMatchesAvailable = filteredUndatedMatches.filter(m => (m.availableDays.includes(dow)));
-    const filteredUndatedMatchesUnavailable = filteredUndatedMatches.filter(m => (!m.availableDays.includes(dow)));
+
+    const date = new Date(dateStr);
+    const dow = date.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+    const currentWeekStart = new Date(date);
+    currentWeekStart.setDate(currentWeekStart.getDate() - dow);
+    currentWeekStart.setHours(0,0,0,0); // optional: normalize to midnight
+    const monday = new Date(currentWeekStart);
+    monday.setDate(currentWeekStart.getDate() + 1);
+    monday.setHours(0, 0, 0, 0);
+
+    const friday = new Date(monday);
+    friday.setDate(monday.getDate() + 4);
+    friday.setHours(23, 59, 59, 999);
+
+    const currentWeekMatches = matches.filter(m => {
+        if (!m.date) return false;
+        const matchDate = new Date(m.date);
+        matchDate.setHours(12, 0, 0, 0); // normalize to avoid timezone issues
+        return matchDate >= monday && matchDate <= friday;
+    });
+    const currentWeekTeams = new Set(currentWeekMatches.map(cm => cm.teamAID).concat(currentWeekMatches.map(cm => cm.teamBID)).flat());
+    const filteredUndatedMatchesAvailable = filteredUndatedMatches.filter(m => m.availableDays.includes(dow) && !currentWeekTeams.has(m.teamAID) && !currentWeekTeams.has(m.teamBID));
+    const availableIds = new Set(filteredUndatedMatchesAvailable.map(m => m.id));
+    const filteredUndatedMatchesUnavailable = filteredUndatedMatches.filter(m => !availableIds.has(m.id));
     filteredUndatedMatchesAvailable.forEach(match => {
         const matchDiv = document.createElement("div");
         matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
