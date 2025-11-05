@@ -106,6 +106,7 @@ function showPopup(dateStr) {
     document.getElementById("popup").style.display = 'block';
     document.getElementById('popup-content').innerHTML = `
     <div style="max-height: 80vh; overflow-y: auto; gap: 15px; display: flex; flex-direction: column;">
+        <button id="close-popup" class="close-popup-button" style="position: absolute; top: 4px; right: 4px; font-size: 24px; background: transparent; border: none; cursor: pointer;">&times;</button>
         <div class='search-container'>
             <input type="text" id="match-search" class="match-search" placeholder="Search matches...">
             <button class="action-btn" id="add-holiday-btn">Add Holiday</button>
@@ -125,6 +126,15 @@ function showPopup(dateStr) {
     
     
     renderFilteredUndatedMatches(dateStr, '');
+
+    // Close button
+    document.getElementById("close-popup").addEventListener("click", () => {
+        document.getElementById("popup-overlay").style.display = 'none';
+        document.getElementById("popup").style.display = 'none';
+        // Remove fade effect from header
+        const header = document.getElementById("sticky-header");
+        if (header) header.classList.remove("popup-fade");
+    });
 
     // Close the popup by clicking outside the popup
     document.getElementById("popup-overlay").addEventListener("click", () => {

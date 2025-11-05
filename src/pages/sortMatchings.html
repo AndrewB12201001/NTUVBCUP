@@ -106,7 +106,7 @@
         #week-view-phone {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
+            gap: 5px;
         }
 
         .day-box {
@@ -536,6 +536,9 @@
         }
 
         @media (max-width: 768px) {
+            .body{
+                padding: 0px;
+            }
             .action-buttons {
                 flex-direction: column;
             }
@@ -555,6 +558,15 @@
             }
             .phone-only {
                 display: block;
+            }
+            .calendar {
+                padding: 4px;
+            }
+            .day-box {
+                padding: 5px;
+            }
+            .calendar-nav {
+                margin-bottom: 0px;
             }
         }
     </style>
@@ -1422,6 +1434,7 @@
             alert('Text Copied!');
         }
 
+        
     </script>
 </body>
 </html>

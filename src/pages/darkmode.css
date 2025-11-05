@@ -211,7 +211,7 @@
         This value defines the color used by the calendar's match box UI.
         Order matters — the sequence determines priority/appearance and must not be rearranged. */
     .calendar-matches { 
-        background: #2b2b2b;
+        background: #3b3b3b;
     }
     .calendar-match {
         background: #6f3baa;
