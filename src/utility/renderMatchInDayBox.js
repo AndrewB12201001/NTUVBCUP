@@ -3,43 +3,44 @@ const selectedMatchHerees = new Map();
 // For date dragging 
 let selectedMatchHere = null;
 function createDayDiv(day, isOtherMonth, dateStr) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = `calendar-day${isOtherMonth ? ' other-month' : ''}`;
-            if (dateStr === '2005-04-01'){
-                dayDiv.innerHTML = `
-                    <div class="calendar-date">${day}</div>
-                    <p> Andrew Kuo's Birthday 🎉</p>
-                    <p> Site Made by Andrew Kuo</p>
-                    <div class="calendar-matches"></div>
-                `;
-            }else{
-                dayDiv.innerHTML = `
-                    <div class="calendar-date" id="${dateStr}">${day}</div>
-                    <div class="calendar-matches"></div>
-                `;
-            }
-            
-            dayDiv.style.cursor = 'pointer';
-            dayDiv.addEventListener('dragover', (e) => {
-                e.preventDefault();
-            });
-            dayDiv.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const matches = fetchMatches();
-                const matchIndex = matches.findIndex(m => m.id === selectedMatchHere.id);
-                matches[matchIndex].date = dateStr;
-                saveMatches(matches);
-                renderCalendar();
-            });
-            return dayDiv;
-        }
+    const date = new Date(dateStr);
+    const dayDiv = document.createElement('div');
+    dayDiv.className = `calendar-day${isOtherMonth ? ' other-month' : ''}`;
+    if (dateStr === '2005-04-01'){
+        dayDiv.innerHTML = `
+            <div class="calendar-date">${day}</div>
+            <p> Andrew Kuo's Birthday 🎉</p>
+            <p> Site Made by Andrew Kuo</p>
+            <div class="calendar-matches"></div>
+        `;
+    }else{
+        dayDiv.innerHTML = `
+            <div class="calendar-date" id="${dateStr}">${day}</div>
+            <div class="day-date indexpage-hidden">${formatDate(date)}</div>
+            <div class="calendar-matches"></div>
+        `;
+    }
+    
+    dayDiv.style.cursor = 'pointer';
+    dayDiv.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+    dayDiv.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const matches = fetchMatches();
+        const matchIndex = matches.findIndex(m => m.id === selectedMatchHere.id);
+        matches[matchIndex].date = dateStr;
+        saveMatches(matches);
+        renderCalendar();
+    });
+    return dayDiv;
+}
 
 
 function createMatchDiv(match, dayDiv, matchesContainer, dateStr){
     const matchDiv = document.createElement('div');
     matchDiv.className = 'calendar-match';
     if (match.newbie) matchDiv.classList.add('newbie-cup');
-    matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID} - ${match.official || 'No Official'}`;
     if (match.status) matchDiv.classList.add('finished');
     if (match.locked === undefined) {
         match.locked = false; // Initialize if undefined
@@ -71,7 +72,7 @@ function createMatchDiv(match, dayDiv, matchesContainer, dateStr){
     // Parse the first two characters of team IDs
     const teamAFirst2 = match.teamAID ? match.teamAID.substring(0, 2) : '';
     const teamBFirst2 = match.teamBID ? match.teamBID.substring(0, 2) : '';
-    if(window.innerWidth <= 600) {
+    if(window.innerWidth <= 768) {
         matchDiv.textContent = `${teamAFirst2} ${teamBFirst2}`;
     }else if (match.teamAID === match.teamBID) {
         matchDiv.textContent = match.teamAID;
@@ -296,5 +297,12 @@ function renderSelectedMatches() {
         const div = document.createElement("div");
         div.textContent = `${assignment.match.teamAID} vs ${assignment.match.teamBID} on ${assignment.match.date}`;
         selectedList.appendChild(div);
+    });
+}
+
+ function formatDate(date) {
+    return date.toLocaleDateString('en-US', { 
+        month: 'numeric', 
+        day: 'numeric'
     });
 }

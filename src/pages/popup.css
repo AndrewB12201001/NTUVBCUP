@@ -34,12 +34,14 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     resize: both;
     overflow: auto;
-    min-width: 500px;
-    min-height: 500px;
+    max-width: 700px;
+    max-height: 700px;
+    max-width: 80%;
+    max-height: 80%;
 }
 
 .input-container {
-    max-width: 600px;
+    max-width: 70%;
     margin: 20px auto;
     padding: 20px;
     background: white;

@@ -337,7 +337,7 @@
             const meta = document.querySelector('meta[name="viewport"]');
             if (!meta) return;
             const width = Math.max(window.innerWidth || 0, screen.width || 0);
-            if (width < 600) {
+            if (width < 768) {
                 meta.setAttribute('content', 'width=device-width, initial-scale=0.2');
             } else {
                 meta.setAttribute('content', 'width=device-width, initial-scale=1.0');
