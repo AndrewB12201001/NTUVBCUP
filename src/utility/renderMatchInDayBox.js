@@ -5,7 +5,7 @@ let selectedMatchHere = null;
 function createDayDiv(day, isOtherMonth, dateStr) {
     const date = new Date(dateStr);
     const dayDiv = document.createElement('div');
-    dayDiv.className = `calendar-day${isOtherMonth ? ' other-month' : ''}`;
+    dayDiv.className = `calendar-day${isOtherMonth ? ' other-month phone-only' : 'phone-only'}`;
     if (dateStr === '2005-04-01'){
         dayDiv.innerHTML = `
             <div class="calendar-date">${day}</div>
@@ -15,9 +15,9 @@ function createDayDiv(day, isOtherMonth, dateStr) {
         `;
     }else{
         dayDiv.innerHTML = `
-            <div class="calendar-date" id="${dateStr}">${day}</div>
-            <div class="day-date indexpage-hidden">${formatDate(date)}</div>
-            <div class="calendar-matches"></div>
+            <div class="calendar-date phone-only" id="${dateStr}">${day}</div>
+            <div class="day-date indexpage-hidden phone-only">${formatDate(date)}</div>
+            <div class="calendar-matches phone-only"></div>
         `;
     }
     
@@ -39,7 +39,7 @@ function createDayDiv(day, isOtherMonth, dateStr) {
 
 function createMatchDiv(match, dayDiv, matchesContainer, dateStr){
     const matchDiv = document.createElement('div');
-    matchDiv.className = 'calendar-match';
+    matchDiv.className = 'calendar-match phone-only';
     if (match.newbie) matchDiv.classList.add('newbie-cup');
     if (match.status) matchDiv.classList.add('finished');
     if (match.locked === undefined) {

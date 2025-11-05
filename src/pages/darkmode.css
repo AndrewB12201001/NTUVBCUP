@@ -219,17 +219,32 @@
     .calendar-match:hover {
         background: #845ab4;
     }
-     .newbie-cup {
+    .newbie-cup {
         background: #276baf;
     }
     .newbie-cup:hover {
         background: #0b62b9;
+    }
+    .newbie-cup.finished {
+        background: #666666;
+        color: #cecece;
+    }
+    .newbie-cup.finished:hover {
+        background: #555555;
+        color: #cecece;
     }
     .calendar-match.newbie-cup {
         background: #276baf;
     }
     .calendar-match.newbie-cup:hover {
         background: #0b62b9;
+    }
+    .calendar-match.newbie-cup.finished {
+        background: #666666;
+        color: #cecece;
+    }
+    .calendar-match.newbie-cup.finished:hover {
+         background: #0b62b9;
     }
     .finished {
         background: #666666;
