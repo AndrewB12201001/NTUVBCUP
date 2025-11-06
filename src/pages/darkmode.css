@@ -209,6 +209,29 @@
     .scrolling-list {
         background: #2d2d2d;
     }
+    .input-container {
+        background: #2d2d2d;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.9);
+    }
+    /* Lines connecting matches in the bracket */
+    .round:not(:first-child) .match::before {
+        background: rgb(204, 204, 204);
+    }
+    .champMatch::before{
+        background: rgb(204, 204, 204);
+    }
+    /* Horizontal Line */
+    .match::after {
+        background: rgb(204, 204, 204);
+    }
+    
+    /* Vertical Line */
+    .vertical-line {
+        background: rgb(204, 204, 204);
+    }
+    .inbetween-vertical-line {
+        background-color: rgb(204, 204, 204);
+    }
 
     /* Color for the calendar match box.
         This value defines the color used by the calendar's match box UI.
