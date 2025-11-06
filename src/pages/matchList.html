@@ -12,6 +12,10 @@
             padding: 20px;
             background-color: #f4f4f9;
         }
+        .label{
+            font-weight: bold;
+            margin-right: 10px;
+        }
         .match {
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -75,12 +79,11 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #2c3e50;
             font-weight: 500;
         }
 
         .search-input {
-            width: 100%;
+            width: 85%;
             padding: 10px 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -107,7 +110,6 @@
         .popup-buttons {
             display: flex;
             gap: 12px;
-            margin-top: 25px;
         }
 
         .btn-primary, .btn-secondary {
@@ -151,11 +153,11 @@
             display: none;
         }
 
-        @media (max-width: 768px) {
-            .popup {
-                width: 95%;
-                padding: 20px;
-            }
+        .popup-content {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border-radius: 8px;
         }
 
         .popup-overlay {
@@ -251,6 +253,7 @@
             flex-grow: 1;
             overflow-y: auto;
             padding-bottom: 70px; /* Space for fixed save bar */
+            border-radius: 8px;
         }
 
         .fixed-save-bar {
@@ -299,11 +302,23 @@
 
         .action-container {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
             gap: 10px;
             padding: 10px;
+        }
+
+        .phone-toggle-action-btn-visibility-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .action-buttons {
@@ -394,36 +409,11 @@
             align-items: center;
         }
 
-        .match-search {
-            padding: 8px 10px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 200px;
-        }
-
         .search-icon {
             position: absolute;
             right: 10px;
             color: #888;
             cursor: pointer;
-        }
-
-        /* Make it more responsive */
-        @media (max-width: 768px) {
-            .action-container {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-container {
-                width: 100%;
-                margin-top: 10px;
-            }
-
-            .match-search {
-                width: 100%;
-            }
         }
 
         .header-top {
@@ -508,20 +498,39 @@
             min-width: 150px;
             flex: 1;
         }
+        .div-for-form-groups{
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            justify-content: space-between;
+        }
+        .phone-hidden{
+            display: block;
+        }
 
         /* Make the layout adjust for smaller screens */
         @media (max-width: 768px) {
-
+            .phone-hidden {
+                display: none;
+            }
+            .action-btn {
+                font-size: 0.8em;
+            }
+            .action-buttons {
+                display: none;
+                flex-direction: column;
+                align-items: flex-end;
+                justify-content: flex-start;
+                right: 12px;
+                top: 72px;
+                z-index: 998;
+            }
             .group-label, .team-label, .set-container, .date-official-container {
                 width: 100%;
             }
-
             .delete-match {
                 align-self: center;
                 width: 100%;
-            }
-            .action-btn{
-                display: none;
             }
             .match-container {
                 flex-direction: column;
@@ -565,6 +574,38 @@
             .official-label{
                 display: none;
             }
+            .popup{
+                width:75%;
+                height:55%;
+                padding: 10px;
+            }
+            /* popup content */
+            .search-input{
+                width: 70%;
+            }
+            .scrolling-list{
+                max-height: 100px;
+            }
+            .btn-primary, .btn-secondary {
+                display: inline-flex;
+                width: auto;
+                min-width: 48px;
+                min-height: 44px; /* comfortable touch target on phones */
+                padding: 8px 12px; /* reasonable internal spacing */
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                align-items: center;
+                justify-content: center;
+                gap: 8px; /* space between icon and text */
+                box-sizing: border-box;
+                transition: all 0.2s ease;
+            }
+            .page-header {
+                padding: 8px;
+                margin-bottom: 20px;
+            }
         }
     </style>
     <link rel="stylesheet" href="darkmode.css">
@@ -578,10 +619,13 @@
                 Back to Main Page
             </a>
         </div>
-        
-        <h1>Matches List</h1>
-        <p class="subtitle">Here, you can view all upcoming matches in a list format.</p>
-        
+
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <h1>Matches List</h1>
+            <button id="phone-toggle-action-btn-visibility-btn" class="phone-toggle-action-btn-visibility-btn phone-only">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
         <div class="action-container">
             <div class="action-buttons">
                 <button id="create-newbie-cup-matches" class="action-btn primary">
@@ -594,42 +638,27 @@
                 </button>
                 <button id="add-game-button" class="action-btn success">
                     <i class="fas fa-plus"></i>
-                    Add New Game
+                    Add NtuCup Game
+                </button>
+                <button id="delete-ntucup-games" class="action-btn warningbutmoresubtle">
+                    <i class="fas fa-trash"></i>
+                    Delete NtuCup Games
                 </button>
                 <button id="add-game-button-newbie" class="action-btn success">
                     <i class="fas fa-plus"></i>
                     Add Newbie Game
                 </button>
-                <button id="download-matches" class="action-btn info">
-                    <i class="fas fa-download"></i>
-                    Download Matches
-                </button>
-                <button id="sort-matchings" class="action-btn warning">
-                    <i class="fas fa-sort"></i>
-                    Sort Matchings
-                </button>
-                <button id="delete-ntucup-games" class="action-btn warningbutmoresubtle">
+                <button id="delete-newbie-games" class="action-btn warningbutmoresubtle">
                     <i class="fas fa-trash"></i>
-                    Delete NtuCup Games
+                    Delete Newbie Games
                 </button>
                 <button id="delete-all-games" class="action-btn danger">
                     <i class="fas fa-trash"></i>
                     Delete All Games
                 </button>
             </div>
-        
-            <div class="search-container">
-                <input type="text" id="match-search" class="match-search" placeholder="Search matches...">
-                <i class="fas fa-search search-icon"></i>
-            </div>
-            <br>
             <div id="final-matches-container" class = 'action-buttons'></div>
         </div>
-        
-        <br>
-        
-        
-        
     </div>
     <div id="undo-container"></div>
     <!-- Popup structure -->
@@ -638,31 +667,31 @@
         <div class="popup-content">
             <h3 class="popup-title">Create New Game</h3>
             
-            <div class="form-group">
-                <label for="teamA">Team A:</label>
-                <input type="text" id="search-teamA" class="search-input" placeholder="Search Team A">
-                <div id="teamA-list" class="scrolling-list"></div>
-            </div>
+            <div class="div-for-form-groups">
+                <div class="form-group">
+                    <label for="teamA">Team A:</label>
+                    <input type="text" id="search-teamA" class="search-input" placeholder="Team A">
+                    <div id="teamA-list" class="scrolling-list"></div>
+                </div>
 
-            <div class="form-group">
-                <label for="teamB">Team B:</label>
-                <input type="text" id="search-teamB" class="search-input" placeholder="Search Team B">
-                <div id="teamB-list" class="scrolling-list"></div>
+                <div class="form-group">
+                    <label for="teamB">Team B:</label>
+                    <input type="text" id="search-teamB" class="search-input" placeholder="Team B">
+                    <div id="teamB-list" class="scrolling-list"></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="group-attribute" style="margin-bottom: 0;">Group Name:</label>
-                <input type="text" id="group-attribute" class="search-input" placeholder="Enter group name" style="width: 140px; margin-bottom: 0;">
-            </div>
+            <div class="div-for-form-groups">
+                <div class="form-group">
+                    <span class="phone-hidden group-label">Group Name:</span>
+                    <input type="text" id="group-attribute" class="search-input" placeholder="group name">
+                </div>
 
-            <div class="popup-buttons">
-                <button id="create-game-button" class="btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Create Game
-                </button>
-                <button id="close-popup-button" class="btn-secondary">
-                    <i class="fas fa-times"></i>
-                    Cancel
-                </button>
+                <div class="popup-buttons">
+                    <button id="create-game-button" class="btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Create Game
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -670,32 +699,30 @@
     <div class="popup hidden" id="popup-newbie">
         <div class="popup-content">
             <h3 class="popup-title">Create New Newbie Game</h3>
-            
-            <div class="form-group">
-                <label for="teamA">Team A:</label>
-                <input type="text" id="search-teamA-newbie" class="search-input" placeholder="Search Team A">
-                <div id="teamA-list-newbie" class="scrolling-list"></div>
-            </div>
+            <div class="div-for-form-groups">
+                <div class="form-group">
+                    <label for="teamA">Team A:</label>
+                    <input type="text" id="search-teamA-newbie" class="search-input" placeholder="Team A">
+                    <div id="teamA-list-newbie" class="scrolling-list"></div>
+                </div>
 
-            <div class="form-group">
-                <label for="teamB">Team B:</label>
-                <input type="text" id="search-teamB-newbie" class="search-input" placeholder="Search Team B">
-                <div id="teamB-list-newbie" class="scrolling-list"></div>
+                <div class="form-group">
+                    <label for="teamB">Team B:</label>
+                    <input type="text" id="search-teamB-newbie" class="search-input" placeholder="Team B">
+                    <div id="teamB-list-newbie" class="scrolling-list"></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="group-attribute" style="margin-bottom: 0;">Group Name:</label>
-                <input type="text" id="group-attribute-newbie" class="search-input" placeholder="Enter group name" style="width: 140px; margin-bottom: 0;">
-            </div>
-
-            <div class="popup-buttons">
-                <button id="create-game-button-newbie" class="btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Create Game
-                </button>
-                <button id="close-popup-button-newbie" class="btn-secondary">
-                    <i class="fas fa-times"></i>
-                    Cancel
-                </button>
+            <div class="div-for-form-groups">
+                <div class="form-group">
+                    <span class="phone-hidden group-label">Group Name:</span>
+                    <input type="text" id="group-attribute-newbie" class="search-input" placeholder="group name">
+                </div>
+                <div class="popup-buttons">
+                    <button id="create-game-button-newbie" class="btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Create Game
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -945,18 +972,6 @@
             
         }
 
-        document.querySelector('.match-search').addEventListener('input', (event) => {
-            const searchText = event.target.value.toLowerCase();
-            const matches = fetchMatches();
-
-            const filteredMatches = matches.filter(m => 
-                m.teamAID.toLowerCase().includes(searchText) || 
-                m.teamBID.toLowerCase().includes(searchText)
-            );
-
-            renderMatches(filteredMatches);
-        });
-
         // Also modify deleteMatch to recalculate stats
         function deleteMatch(index) {
             const confirmDelete = true;//confirm("Are you sure you want to delete this match?");
@@ -1021,6 +1036,7 @@
             matches = fetchMatches();
             renderMatches(matches);
             updateCreateMatchesButtonVisibility();
+            alert('Matches created according to NTU Cup rules.');
         });
 
         document.getElementById('create-newbie-cup-matches').addEventListener('click', () => {
@@ -1035,14 +1051,7 @@
             matches = fetchMatches();
             renderMatches(matches);
             updateCreateMatchesButtonVisibility();
-        });
-
-        document.getElementById('download-matches').addEventListener('click', () => {
-            downloadJSON(fetchMatches(), 'Matches.json')
-        });
-
-        document.getElementById('sort-matchings').addEventListener('click', () => {
-            window.location.href = 'sortMatchings.html';
+            alert('Newbie Cup matches created.');
         });
 
 
@@ -1421,10 +1430,16 @@
             document.getElementById("popup").style.display = 'block';
         });
 
-        // Close the popup
-        document.getElementById("close-popup-button").addEventListener("click", () => {
-            document.getElementById("popup-overlay").style.display = 'none';
-            document.getElementById("popup").style.display = 'none';
+        // toggle action button visibility for phone
+        document.getElementById("phone-toggle-action-btn-visibility-btn").addEventListener("click", () => {
+            const actionBtnContainer = document.querySelectorAll(".action-buttons");
+            actionBtnContainer.forEach(container => {
+                if (container.style.display === "" || container.style.display === "none") {
+                    container.style.display = "flex";
+                } else {
+                    container.style.display = "none";
+                }
+            });
         });
 
         // Create a game and update matches
@@ -1459,12 +1474,6 @@
             document.getElementById("popup-newbie").style.display = 'block';
         });
 
-        // Close the popup
-        document.getElementById("close-popup-button-newbie").addEventListener("click", () => {
-            document.getElementById("popup-overlay").style.display = 'none';
-            document.getElementById("popup-newbie").style.display = 'none';
-        });
-
         // Create a game and update matches
         document.getElementById("create-game-button-newbie").addEventListener("click", () => {
             const teamAID = document.getElementById("search-teamA-newbie").value;
@@ -1490,6 +1499,7 @@
         document.getElementById("popup-overlay").addEventListener("click", () => {
             document.getElementById("popup-overlay").style.display = 'none';
             document.getElementById("popup-newbie").style.display = 'none';
+            document.getElementById("popup").style.display = 'none';
         });
 
         document.getElementById('delete-all-games').addEventListener('click', async () => {
@@ -1545,6 +1555,26 @@
                 markGamesStarted(false);
                 alert("All NtuCup matches have been deleted successfully.");
                 renderMatches(matches);
+                location.reload();
+            } else {
+                alert("Data deletion canceled.");
+            }
+        });
+        document.getElementById('delete-newbie-games').addEventListener('click', async () => {
+            const userConfirmed = confirm("Are you sure you want to delete all Newbie matches? This action cannot be undone.");
+            const teams = fetchTeams();
+            if (userConfirmed) {
+                // Clear Newbie matches
+                matches = matches.filter(match => match.newbie !== true);
+                saveMatches(matches);
+                Object.keys(teams).forEach(teamId => {
+                    teams[teamId].games = [];
+                });
+                saveTeams(teams);
+                markNewbieStarted(false);
+                alert("All Newbie matches have been deleted successfully.");
+                renderMatches(matches);
+                location.reload();
             } else {
                 alert("Data deletion canceled.");
             }
