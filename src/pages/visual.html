@@ -116,6 +116,9 @@
             height: 165%;
             background: black;
         }
+        .line-color{
+            background: black;
+        }
 
         .match, .champMatch {
             width: 160px;
@@ -304,7 +307,9 @@
             z-index: 999;
             display: none;
         }
+        
     </style>
+    <link rel="stylesheet" href="renderMatchInDayBox.css">
     <link rel="stylesheet" href="darkmode.css">
 </head>
 <body>
@@ -452,7 +457,7 @@
                                 verticalLine.style.bottom = Height + "px"; 
                                 verticalLine.style.width = "2px";
                                 verticalLine.style.height = `${mar + 2 * Height+ 6}px`;
-                                verticalLine.style.backgroundColor = "black";
+                                verticalLine.classList.add("line-color");
                                 matchDiv.appendChild(verticalLine);
                             }
                         }

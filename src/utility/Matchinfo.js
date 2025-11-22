@@ -8,6 +8,7 @@ function showMatchinfo(matchDiv, match){
             <h3 class="popup-title">${match.teamAID} vs ${match.teamBID}</h3>
             <div style="display: flex; justify-content: space-between; margin: 0 10px;">
                 <label class="group-label" style="font-weight: bold;">Group: ${match.group}</label>
+                <label class="group-label" style="font-weight: bold;">ID: ${match.id}</label>
                 <label class="group-label" style="font-weight: bold;">Date: ${match.date}</label>
             </div>
             <div class="match-container">

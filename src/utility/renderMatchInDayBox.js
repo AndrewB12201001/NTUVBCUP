@@ -41,7 +41,6 @@ function createMatchDiv(match, dayDiv, matchesContainer, dateStr){
     const matchDiv = document.createElement('div');
     matchDiv.className = 'calendar-match sort-hidden phone-only';
     if (match.newbie) matchDiv.classList.add('newbie-cup');
-    if (match.status) matchDiv.classList.add('finished');
     if (match.locked === undefined) {
         match.locked = false; // Initialize if undefined
     }
@@ -92,6 +91,15 @@ function createMatchDiv(match, dayDiv, matchesContainer, dateStr){
             matchDiv.classList.remove('dragging');
             renderCalendar();
         });
+    }
+    if (match.set1[0] !== 0 || match.set1[1] !== 0) {
+        if (match.status) {
+            matchDiv.classList.add('finished');
+            matchDiv.classList.remove('unfinished');
+        } else {
+            matchDiv.classList.add('unfinished');
+            matchDiv.classList.remove('finished');
+        }
     }
     
     matchesContainer.appendChild(matchDiv);

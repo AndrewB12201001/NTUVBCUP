@@ -405,6 +405,8 @@ function updateMatchStatus(match) {
     return match;
 }
 function updateMatchWinner(match){
+    match.winner = null;
+    match.loser = null;
     // Calculate sets won by each team
     let teamASets = 0;
     let teamBSets = 0;
@@ -420,13 +422,14 @@ function updateMatchWinner(match){
     else if (match.set3[1] > match.set3[0]) teamBSets++;
     
     // Update current match winner
-    match.winner = (match.teamAID == match.teamBID && match.teamAID !== null) ? match.teamAID : (teamASets === 0 && teamBSets === 0) ? null : (teamASets >= 2) ? match.teamAID : match.teamBID;
-    match.loser = (match.teamAID == match.teamBID && match.teamAID !== null) ? match.teamAID : (teamASets === 0 && teamBSets === 0) ? null : (teamASets >= 2) ? match.teamBID : match.teamAID;
+    match.winner = (match.teamAID == match.teamBID && match.teamAID !== null) ? match.teamAID : (teamASets < 2 && teamBSets < 2) ? null : (teamASets >= 2) ? match.teamAID : match.teamBID;
+    match.loser = (match.teamAID == match.teamBID && match.teamAID !== null) ? match.teamAID : (teamASets < 2 && teamBSets < 2) ? null : (teamASets >= 2) ? match.teamBID : match.teamAID;
     return match;
 }
 // save Matches main function
 function saveMatches(matches){
     const teams = fetchTeams();
+    const newbieTeams = fetchNewbieTeams();
     let updated = false
     do {
         const refMatches = fetchMatches();
@@ -443,162 +446,232 @@ function saveMatches(matches){
             match = updateMatchWinner(match);
             match.availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, match.newbie);
             // update brackets
+            console.log(matches[index].status);
             if (matches[index].status) {
                 // Handle next match updates
-                if (matches[index].nextMatch !== null) {
+                if (matches[index].nextMatch) {
                     const nextMatchId = matches[index].nextMatch;
                     const nextMatch = matches.find(m => m.id === nextMatchId);
-                    
-                    if (nextMatch) {
-                        // If winner changed, update next match
-                        if (previousWinner !== matches[index].winner) {
-                            // Remove previous winner from next match and update teams' games array
-                            if (nextMatch.teamAID === previousWinner) {
-                                // Remove game from previous winner's games array
+                    console.log('nextMatch', nextMatch);
+                    // If winner changed, update next match
+                    if (previousWinner !== matches[index].winner) {
+                        // Remove previous winner from next match and update teams' games array
+                        if (nextMatch.teamAID === previousWinner) {
+                            // Remove game from previous winner's games array
+                            if (match.newbie) {
+                                if (newbieTeams[previousWinner] && newbieTeams[previousWinner].games) {
+                                    newbieTeams[previousWinner].games = newbieTeams[previousWinner].games.filter(id => id !== nextMatchId);
+                                }
+                            } else {
                                 if (teams[previousWinner] && teams[previousWinner].games) {
                                     teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
                                 }
-                                
+                            }
+                            
+                            // Add game to new winner's games array
+                            if (teams[matches[index].winner] && !match.newbie) {
+                                if (!teams[matches[index].winner].games) {
+                                    teams[matches[index].winner].games = [];
+                                }
+                                if (!teams[matches[index].winner].games.includes(nextMatchId)) {
+                                    teams[matches[index].winner].games.push(nextMatchId);
+                                }
+                            }else if (newbieTeams[matches[index].winner] && match.newbie){
+                                if (!newbieTeams[matches[index].winner].games) {
+                                    newbieTeams[matches[index].winner].games = [];
+                                }
+                                if (!newbieTeams[matches[index].winner].games.includes(nextMatchId)) {
+                                    newbieTeams[matches[index].winner].games.push(nextMatchId);
+                                }
+                            }
+                            
+                            nextMatch.teamAID = matches[index].winner;
+                            //console.log(`Updated teamA in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
+                        } else if (nextMatch.teamBID === previousWinner) {
+                            // Remove game from previous winner's games array
+                            if(match.newbie){
+                                if (newbieTeams[previousWinner] && newbieTeams[previousWinner].games) {
+                                    newbieTeams[previousWinner].games = newbieTeams[previousWinner].games.filter(id => id !== nextMatchId);
+                                }
+                            }else{
+                                if (teams[previousWinner] && teams[previousWinner].games) {
+                                    teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
+                                }
+                            }
+                            
+                            
+                            // Add game to new winner's games array
+                            if (teams[matches[index].winner] && !match.newbie) {
+                                if (!teams[matches[index].winner].games) {
+                                    teams[matches[index].winner].games = [];
+                                }
+                                if (!teams[matches[index].winner].games.includes(nextMatchId)) {
+                                    teams[matches[index].winner].games.push(nextMatchId);
+                                }
+                            }else if (newbieTeams[matches[index].winner] && match.newbie){
+                                if (!newbieTeams[matches[index].winner].games) {
+                                    newbieTeams[matches[index].winner].games = [];
+                                }
+                                if (!newbieTeams[matches[index].winner].games.includes(nextMatchId)) {
+                                    newbieTeams[matches[index].winner].games.push(nextMatchId);
+                                }
+                            }
+                            
+                            nextMatch.teamBID = matches[index].winner;
+                            //console.log(`Updated teamB in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
+                        } else {
+                            // If previous winner not found, add to first empty slot
+                            if (nextMatch.teamAID === null || nextMatch.teamAID === '' || nextMatch.teamAID === undefined) {
                                 // Add game to new winner's games array
-                                if (teams[matches[index].winner]) {
+                                if (teams[matches[index].winner] && !match.newbie) {
                                     if (!teams[matches[index].winner].games) {
                                         teams[matches[index].winner].games = [];
                                     }
                                     if (!teams[matches[index].winner].games.includes(nextMatchId)) {
                                         teams[matches[index].winner].games.push(nextMatchId);
+                                    }
+                                }else if (newbieTeams[matches[index].winner] && match.newbie){
+                                    if (!newbieTeams[matches[index].winner].games) {
+                                        newbieTeams[matches[index].winner].games = [];
+                                    }
+                                    if (!newbieTeams[matches[index].winner].games.includes(nextMatchId)) {
+                                        newbieTeams[matches[index].winner].games.push(nextMatchId);
                                     }
                                 }
                                 
                                 nextMatch.teamAID = matches[index].winner;
-                                //console.log(`Updated teamA in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
-                            } else if (nextMatch.teamBID === previousWinner) {
-                                // Remove game from previous winner's games array
-                                if (teams[previousWinner] && teams[previousWinner].games) {
-                                    teams[previousWinner].games = teams[previousWinner].games.filter(id => id !== nextMatchId);
-                                }
-                                
+                                //.log(`Added winner to teamA in match ${nextMatchId}: ${matches[index].winner}`);
+                            } else if (nextMatch.teamBID === null || nextMatch.teamBID === '' || nextMatch.teamBID === undefined) {
                                 // Add game to new winner's games array
-                                if (teams[matches[index].winner]) {
+                                if (teams[matches[index].winner] && !match.newbie) {
                                     if (!teams[matches[index].winner].games) {
                                         teams[matches[index].winner].games = [];
                                     }
                                     if (!teams[matches[index].winner].games.includes(nextMatchId)) {
                                         teams[matches[index].winner].games.push(nextMatchId);
                                     }
+                                }else if (newbieTeams[matches[index].winner] && match.newbie){
+                                    if (!newbieTeams[matches[index].winner].games) {
+                                        newbieTeams[matches[index].winner].games = [];
+                                    }
+                                    if (!newbieTeams[matches[index].winner].games.includes(nextMatchId)) {
+                                        newbieTeams[matches[index].winner].games.push(nextMatchId);
+                                    }
                                 }
                                 
                                 nextMatch.teamBID = matches[index].winner;
-                                //console.log(`Updated teamB in match ${nextMatchId} from ${previousWinner} to ${matches[index].winner}`);
-                            } else {
-                                // If previous winner not found, add to first empty slot
-                                if (nextMatch.teamAID === null) {
-                                    // Add game to new winner's games array
-                                    if (teams[matches[index].winner]) {
-                                        if (!teams[matches[index].winner].games) {
-                                            teams[matches[index].winner].games = [];
-                                        }
-                                        if (!teams[matches[index].winner].games.includes(nextMatchId)) {
-                                            teams[matches[index].winner].games.push(nextMatchId);
-                                        }
-                                    }
-                                    
-                                    nextMatch.teamAID = matches[index].winner;
-                                    //.log(`Added winner to teamA in match ${nextMatchId}: ${matches[index].winner}`);
-                                } else if (nextMatch.teamBID === null) {
-                                    // Add game to new winner's games array
-                                    if (teams[matches[index].winner]) {
-                                        if (!teams[matches[index].winner].games) {
-                                            teams[matches[index].winner].games = [];
-                                        }
-                                        if (!teams[matches[index].winner].games.includes(nextMatchId)) {
-                                            teams[matches[index].winner].games.push(nextMatchId);
-                                        }
-                                    }
-                                    
-                                    nextMatch.teamBID = matches[index].winner;
-                                    //console.log(`Added winner to teamB in match ${nextMatchId}: ${matches[index].winner}`);
-                                }
+                                //console.log(`Added winner to teamB in match ${nextMatchId}: ${matches[index].winner}`);
                             }
                         }
                     }
                 }
 
-                if (matches[index].loserNextMatch !== null) {
+                if (matches[index].loserNextMatch) {
                     const nextMatchId = matches[index].loserNextMatch;
                     const nextMatch = matches.find(m => m.id === nextMatchId);
-                    
-                    if (nextMatch) {
-                        // If loser changed, update next match
-                        if (previousloser !== matches[index].loser) {
-                            // Remove previous loser from next match and update teams' games array
-                            if (nextMatch.teamAID === previousloser) {
-                                // Remove game from previous loser's games array
-                                if (teams[previousloser] && teams[previousloser].games) {
-                                    teams[previousloser].games = teams[previousloser].games.filter(id => id !== nextMatchId);
+                    console.log('loserNextMatch', nextMatch);
+                    // If loser changed, update next match
+                    if (previousloser !== matches[index].loser) {
+                        // Remove previous loser from next match and update teams' games array
+                        if (nextMatch.teamAID === previousloser) {
+                            // Remove game from previous loser's games array
+                            if (teams[previousloser] && teams[previousloser].games && !match.newbie) {
+                                teams[previousloser].games = teams[previousloser].games.filter(id => id !== nextMatchId);
+                            } else if (newbieTeams[previousloser] && newbieTeams[previousloser].games && match.newbie) {
+                                newbieTeams[previousloser].games = newbieTeams[previousloser].games.filter(id => id !== nextMatchId);
+                            }
+
+                            // Add game to new loser's games array
+                            if (teams[matches[index].loser] && !match.newbie) {
+                                if (!teams[matches[index].loser].games) {
+                                    teams[matches[index].loser].games = [];
                                 }
-                                
+                                if (!teams[matches[index].loser].games.includes(nextMatchId)) {
+                                    teams[matches[index].loser].games.push(nextMatchId);
+                                }
+                            }else if (newbieTeams[matches[index].loser] && match.newbie){
+                                if (!newbieTeams[matches[index].loser].games) {
+                                    newbieTeams[matches[index].loser].games = [];
+                                }
+                                if (!newbieTeams[matches[index].loser].games.includes(nextMatchId)) {
+                                    newbieTeams[matches[index].loser].games.push(nextMatchId);
+                                }
+                            }
+                            
+                            nextMatch.teamAID = matches[index].loser;
+                            //console.log(`Updated teamA in match ${nextMatchId} from ${previousloser} to ${matches[index].loser}`);
+                        } else if (nextMatch.teamBID === previousloser) {
+                            // Remove game from previous loser's games array
+                            if (teams[previousloser] && teams[previousloser].games && !match.newbie) {
+                                teams[previousloser].games = teams[previousloser].games.filter(id => id !== nextMatchId);
+                            } else if (newbieTeams[previousloser] && newbieTeams[previousloser].games && match.newbie) {
+                                newbieTeams[previousloser].games = newbieTeams[previousloser].games.filter(id => id !== nextMatchId);
+                            }
+                            
+                            // Add game to new loser's games array
+                            if (teams[matches[index].loser] && !match.newbie) {
+                                if (!teams[matches[index].loser].games) {
+                                    teams[matches[index].loser].games = [];
+                                }
+                                if (!teams[matches[index].loser].games.includes(nextMatchId)) {
+                                    teams[matches[index].loser].games.push(nextMatchId);
+                                }
+                            } else if (newbieTeams[matches[index].loser] && match.newbie) {
+                                if (!newbieTeams[matches[index].loser].games) {
+                                    newbieTeams[matches[index].loser].games = [];
+                                }
+                                if (!newbieTeams[matches[index].loser].games.includes(nextMatchId)) {
+                                    newbieTeams[matches[index].loser].games.push(nextMatchId);
+                                }
+                            }
+                            
+                            nextMatch.teamBID = matches[index].loser;
+                            //console.log(`Updated teamB in match ${nextMatchId} from ${previousloser} to ${matches[index].loser}`);
+                        } else {
+                            // If previous loser not found, add to first empty slot
+                            if (nextMatch.teamAID === null || nextMatch.teamAID === '' || nextMatch.teamAID === undefined) {
                                 // Add game to new loser's games array
-                                if (teams[matches[index].loser]) {
+                                if (teams[matches[index].loser] && !match.newbie) {
                                     if (!teams[matches[index].loser].games) {
                                         teams[matches[index].loser].games = [];
                                     }
                                     if (!teams[matches[index].loser].games.includes(nextMatchId)) {
                                         teams[matches[index].loser].games.push(nextMatchId);
+                                    }
+                                } else if (newbieTeams[matches[index].loser] && match.newbie) {
+                                    if (!newbieTeams[matches[index].loser].games) {
+                                        newbieTeams[matches[index].loser].games = [];
+                                    }
+                                    if (!newbieTeams[matches[index].loser].games.includes(nextMatchId)) {
+                                        newbieTeams[matches[index].loser].games.push(nextMatchId);
                                     }
                                 }
                                 
                                 nextMatch.teamAID = matches[index].loser;
-                                //console.log(`Updated teamA in match ${nextMatchId} from ${previousloser} to ${matches[index].loser}`);
-                            } else if (nextMatch.teamBID === previousloser) {
-                                // Remove game from previous loser's games array
-                                if (teams[previousloser] && teams[previousloser].games) {
-                                    teams[previousloser].games = teams[previousloser].games.filter(id => id !== nextMatchId);
-                                }
-                                
+                                //.log(`Added loser to teamA in match ${nextMatchId}: ${matches[index].loser}`);
+                            } else if (nextMatch.teamBID === null || nextMatch.teamBID === '' || nextMatch.teamBID === undefined) {
                                 // Add game to new loser's games array
-                                if (teams[matches[index].loser]) {
+                                if (teams[matches[index].loser] && !match.newbie) {
                                     if (!teams[matches[index].loser].games) {
                                         teams[matches[index].loser].games = [];
                                     }
                                     if (!teams[matches[index].loser].games.includes(nextMatchId)) {
                                         teams[matches[index].loser].games.push(nextMatchId);
                                     }
+                                } else if (newbieTeams[matches[index].loser] && match.newbie) {
+                                    if (!newbieTeams[matches[index].loser].games) {
+                                        newbieTeams[matches[index].loser].games = [];
+                                    }
+                                    if (!newbieTeams[matches[index].loser].games.includes(nextMatchId)) {
+                                        newbieTeams[matches[index].loser].games.push(nextMatchId);
+                                    }
                                 }
                                 
                                 nextMatch.teamBID = matches[index].loser;
-                                //console.log(`Updated teamB in match ${nextMatchId} from ${previousloser} to ${matches[index].loser}`);
-                            } else {
-                                // If previous loser not found, add to first empty slot
-                                if (nextMatch.teamAID === null) {
-                                    // Add game to new loser's games array
-                                    if (teams[matches[index].loser]) {
-                                        if (!teams[matches[index].loser].games) {
-                                            teams[matches[index].loser].games = [];
-                                        }
-                                        if (!teams[matches[index].loser].games.includes(nextMatchId)) {
-                                            teams[matches[index].loser].games.push(nextMatchId);
-                                        }
-                                    }
-                                    
-                                    nextMatch.teamAID = matches[index].loser;
-                                    //.log(`Added loser to teamA in match ${nextMatchId}: ${matches[index].loser}`);
-                                } else if (nextMatch.teamBID === null) {
-                                    // Add game to new loser's games array
-                                    if (teams[matches[index].loser]) {
-                                        if (!teams[matches[index].loser].games) {
-                                            teams[matches[index].loser].games = [];
-                                        }
-                                        if (!teams[matches[index].loser].games.includes(nextMatchId)) {
-                                            teams[matches[index].loser].games.push(nextMatchId);
-                                        }
-                                    }
-                                    
-                                    nextMatch.teamBID = matches[index].loser;
-                                    //console.log(`Added loser to teamB in match ${nextMatchId}: ${matches[index].loser}`);
-                                }
+                                //console.log(`Added loser to teamB in match ${nextMatchId}: ${matches[index].loser}`);
                             }
                         }
-                    }//console.log('nextMatch', nextMatch);
+                    }
                 }
             } else {
                 if (matches[index].nextMatch !== null) {
@@ -608,15 +681,20 @@ function saveMatches(matches){
                     if (nextMatch) {
                         if (nextMatch.teamAID === previousTeamAID || nextMatch.teamAID === previousTeamBID) {
                             // Remove game from previous winner's games array
-                            if (teams[nextMatch.teamAID] && teams[nextMatch.teamAID].games) {
+                            if (teams[nextMatch.teamAID] && teams[nextMatch.teamAID].games && !match.newbie) {
                                 teams[nextMatch.teamAID].games = teams[nextMatch.teamAID].games.filter(id => id !== nextMatchId);
+                            } else if (newbieTeams[nextMatch.teamAID] && newbieTeams[nextMatch.teamAID].games && match.newbie) {
+                                newbieTeams[nextMatch.teamAID].games = newbieTeams[nextMatch.teamAID].games.filter(id => id !== nextMatchId);
                             }
+
                             nextMatch.teamAID = null;
                             //console.log(`Removed ${previousWinner} from teamA in match ${nextMatchId}`);
                         } else if (nextMatch.teamBID === previousTeamAID || nextMatch.teamBID === previousTeamBID) {
                             // Remove game from previous winner's games array
-                            if (teams[nextMatch.teamBID] && teams[nextMatch.teamBID].games) {
+                            if (teams[nextMatch.teamBID] && teams[nextMatch.teamBID].games && !match.newbie) {
                                 teams[nextMatch.teamBID].games = teams[nextMatch.teamBID].games.filter(id => id !== nextMatchId);
+                            } else if (newbieTeams[nextMatch.teamBID] && newbieTeams[nextMatch.teamBID].games && match.newbie) {
+                                newbieTeams[nextMatch.teamBID].games = newbieTeams[nextMatch.teamBID].games.filter(id => id !== nextMatchId);
                             }
                             
                             nextMatch.teamBID = null;
@@ -629,11 +707,13 @@ function saveMatches(matches){
         
         
         if (JSON.stringify(refMatches) !== JSON.stringify(matches)) updated = true;
-        recalculateOfficialStats(matches);
+        saveTeams(teams);
+        saveNewbieTeams(newbieTeams);
         const matchesJSON = JSON.stringify(matches);
         localStorage.setItem("matches", matchesJSON);
         
     } while (updated === true);
+    recalculateOfficialStats(matches);
 }
 
 function prepareTeamID(teamID) {
