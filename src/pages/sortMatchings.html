@@ -502,6 +502,16 @@
             background: #888888;
             color: black;
         }
+        .finishecd:hover {
+            background: #777777;
+            color: black;
+        }
+        .unfinished{
+            background: #f39c12;
+        }
+        .unfinished:hover{
+            background: #e08e0b;
+        }
         .locked {
             position: absolute;
             top: 5px;
@@ -1018,8 +1028,11 @@
                     const matchDiv = document.createElement('div');
                     matchDiv.className = assignment.previouslyAssigned === false ? "assigned-match" : "past-assigned-match";
                     matchDiv.textContent = `${assignment.match.teamAID} vs ${assignment.match.teamBID}`;
-                    matchDiv.style.background = assignment.match.status ? '#63d67e' : (assignment.match.set1[0] !== 0 && assignment.match.set1[1] !== 0) ? '#CCCCFF': '';
-                    
+
+                    if (assignment.match.set1[0] !== 0 || assignment.match.set1[1] !== 0) {
+                        if (assignment.match.status) matchDiv.classList.add('finished');
+                        else matchDiv.classList.add('unfinished');
+                    }
                     // Long press to lock/unlock the match
                     let longPressTimer;
                     matchDiv.addEventListener('mousedown', () => {
