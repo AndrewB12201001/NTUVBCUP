@@ -180,7 +180,7 @@ function showPopup(dateStr) {
             <h2 class="popup-title">Add Holiday on ${dateStr}</h2>
             <div>
                 <label for="holiday-name">Holiday Name:</label>
-                <input type="text" id="holiday-name" placeholder="Enter holiday name">
+                <input style="width: 80%; border-radius: 5px;" type="text" id="holiday-name" placeholder="Enter holiday name">
             </div>
             <div class="popup-buttons">
                 <button id="save-holiday" class="btn-primary">Save Holiday</button>
