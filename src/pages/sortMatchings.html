@@ -148,13 +148,6 @@
             padding: 5px;
         }
 
-        .available {
-            background-color: lightgreen;
-        }
-
-        .unavailable {
-            background-color: lightcoral;
-        }
 
         .assigned-match {
             background: #e0e0e0;
@@ -606,6 +599,15 @@
     </style>
     <link rel="stylesheet" href="renderMatchInDayBox.css">
     <link rel="stylesheet" href="darkmode.css">
+    <style>
+        .available {
+            background-color: lightgreen;
+        }
+
+        .unavailable {
+            background-color: lightcoral;
+        }
+    </style>
 </head>
 <body>
     <script src = '../utility/dataStorage.js'></script>
@@ -1205,6 +1207,7 @@
             
             box.addEventListener('click', () => {
                 highlightAvailableDays(match);
+                console.log("clickedMatch", match);
             });
             return box;
         }

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../utility/volleyball.png" type="image/png">
+    <title>Tournament Bracket</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0px;
+            background-color: #f4f4f9;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .download-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: sticky;
+            top: 120px;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .download-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .bracket-container {
+            padding: 40px;
+            display: flex;
+            gap: 80px;
+            align-items: flex-start; /* ← aligns rounds to the top */
+        }
+        .tier {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* ← aligns rounds to the top */
+        }
+        .round {
+            align-items: center;
+            position: relative;
+        }
+        .round:not(:first-child) .match::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 100%;
+            width: 40px;
+            height: 2px;
+            background: black;
+        }
+        .champMatch::before{
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 100%;
+            width: 40px;
+            height: 2px;
+            background: black;
+        }
+        /* Horizontal Line */
+        .match::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 40px;
+            height: 2px;
+            background: black;
+        }
+        
+        /* Vertical Line */
+        .vertical-line {
+            content: "";
+            position: absolute;
+            left: 180px;
+            bottom: 30px;
+            width: 2px;
+            height: 165%;
+            background: black;
+        }
+
+        .match, .champMatch {
+            width: 160px;
+            height: 40px;
+            background: #ddd;
+            padding: 12px;
+            margin: 40px 0; /* Controls spacing between matches */
+            min-height: 60px;
+            font-size: 25px;
+            white-space: pre-line;
+            overflow-wrap: break-word;
+            border-radius: 5px;
+            position: relative;
+            text-align: center;
+        }
+
+        .match:hover, .champMatch:hover {
+            background: #b7b7b7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Basic styles for the popup */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .popup-title {
+            color: #2c3e50;
+            margin: 0 0 25px 0;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .match-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+
+        .scrollable-matches {
+            max-height: calc(8 * 40px); /* Assuming each match row is 40px tall */
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn-primary, .btn-secondary {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary{
+            background: red;
+            color: white;
+        }
+
+        .group-label, .team-label {
+            flex: 1 1 120px; /* Grow and shrink, min width 120px */
+            text-align: center;
+        }
+
+        .set-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;          /* allows wrapping if space runs out */
+        }
+        .set-container input {
+            flex: 1 1 40px;            /* allows shrinking */
+            max-width: 60px;          /* constrain size */
+        }
+
+        .date-official-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .official-search {
+            min-width: 150px;
+            flex: 1;
+        }
+        .delete-match {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #cf4d4d;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        /* Make the layout adjust for smaller screens */
+        @media (max-width: 768px) {
+            .match-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .group-label, .team-label, .set-container, .date-official-container {
+                width: 100%;
+            }
+
+            .set-container {
+                justify-content: center;
+            }
+
+            .delete-match {
+                align-self: center;
+                width: 100%;
+            }
+            .match .champMatch{
+                font-size: 25px;
+            }
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .btn-secondary:hover {
+            background: rgb(222, 1, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .popup {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        .line-color{
+            background: black;
+        }
+       /* Scale wrapper: everything inside #bracketContainer will be scaled down 1/6 (≈0.1666667) */
+       /* width:600% compensates so the scaled content still fills the viewport horizontally */
+       #bracketContainer {
+           transform: scale(0.6);     /* 0.6 */
+           transform-origin: 0 0;            /* keep top-left as origin so layout stays predictable */
+           /* use block formatting context so internal fixed/absolute elements behave consistently */
+           display: block;
+           position: relative;
+       }
+       /* Popups and overlays must still cover the viewport; make them paint relative to the viewport */
+       /* We reset position for those inside the scaled wrapper so they behave like fixed elements */
+       #bracketContainer .popup,
+       #bracketContainer .popup-overlay,
+       #bracketContainer .popup-overlay.hidden,
+       #bracketContainer .popup.hidden {
+           position: fixed !important;
+       }
+    </style>
+    <link rel="stylesheet" href="darkmode.css">
+</head>
+<body>
+    <script src = '../utility/dataStorage.js'></script>
+    <script src = '../utility/Matchinfo.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <div class="topbar">
+        <a href="../../index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Main Page
+        </a>
+        <a id="downloadPdfBtn" class="download-link">
+            <i class="fas fa-file-pdf"></i> 
+            Download Bracket as PDF
+        </a>
+    </div>
+    <h1>Tournament Bracket</h1>
+    <div id="bracketContainer" class="bracket-container"></div>
+    <!-- Popup structure -->
+    <div class="popup-overlay hidden" id="popup-overlay"></div>
+    <div class="popup hidden" id="popup">
+        <div class="popup-content" id="popup-content"></div>
+    </div>
+
+    <script>
+        const Height = 40;
+        document.addEventListener("DOMContentLoaded", () => {
+            renderCalendar();
+
+            // PDF download logic for the whole page
+            document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+                // Use the body or a main wrapper for the whole page
+                const element = document.body;
+                const opt = {
+                    margin:       0.2,
+                    filename:     'tournament_fullpage.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'in', format: 'a1', orientation: 'portrait' } // A1 for extra large
+                };
+                html2pdf().set(opt).from(element).save();
+            });
+        });
+        function renderCalendar(){
+            const bracketsData = fetchBrackets();
+            const matches = fetchMatches();
+
+            const container = document.getElementById("bracketContainer");
+            container.innerHTML = ""; // Clear previous content
+            // Tier 1
+            // Create tier containers in numeric order to enforce ordering:
+            const tier1Div = document.createElement("div");
+            tier1Div.classList.add("tier");
+  
+            const tier2Div = document.createElement("div");
+            tier2Div.classList.add("tier");
+  
+            const tier3Div = document.createElement("div");
+            tier3Div.classList.add("tier");
+  
+            const tier4Div = document.createElement("div");
+            tier4Div.classList.add("tier");
+  
+            const tier5Div = document.createElement("div");
+            tier5Div.classList.add("tier");
+
+            function createBracket(tierName, bracket) {
+                const title = document.createElement("h2");
+                title.textContent = tierName;
+
+                if (tierName.substring(0, 5) === 'Tier1') {
+                    tierDiv = tier1Div;
+                } else if (tierName.substring(0, 5) === 'Tier2') {
+                    tierDiv = tier2Div;
+                } else if (tierName.substring(0, 5) === 'Tier3') {
+                    tierDiv = tier3Div;
+                } else if (tierName.substring(0, 5) === 'Tier4') {
+                    tierDiv = tier4Div;
+                } else if (tierName.substring(0, 9) === 'NewbieCup') {
+                    tierDiv = tier5Div;
+                } else {
+                    console.error(`Unknown tier name: ${tierName}`);
+                    return;
+                }
+                tierDiv.appendChild(title);
+                const bracketContainer = document.createElement("div");
+                bracketContainer.classList.add("bracket-container");
+                let mar = 40;
+                let top = 0;
+                bracket.roundMatchIds.forEach((round, roundIndex) => {
+                    const roundDiv = document.createElement("div");
+                    roundDiv.classList.add("round");
+                    const roundTitle = document.createElement("h3");
+                    roundTitle.textContent = `Round ${roundIndex + 1}`;
+                    roundDiv.appendChild(roundTitle);
+                    round.forEach((matchId, matchIndex) => {
+                        const match = matches.find(m => m.id == matchId);
+                        const teamAFirst2 = match.teamAID ? match.teamAID.substring(0, 2) : '';
+                        const teamBFirst2 = match.teamBID ? match.teamBID.substring(0, 2) : '';
+                        if (match !== undefined){
+                            const matchDiv = document.createElement("div");
+                    
+                            if(match.nextMatch !== null){
+                                matchDiv.classList.add("match");
+                                matchDiv.style.marginBottom = `${mar}px`; // Only bottom margin
+                            }else{
+                                matchDiv.classList.add("champMatch")
+                                matchDiv.style.marginBottom = `100px`
+                            }
+                            if (matchIndex === 0) {
+                                matchDiv.style.marginTop = `${top}px`; // Extra top space for first child
+                            }
+                            const date = match.date ?? '';
+                            const status = match.status === false ? "To Be Played" : (match.winner ? `Winner: ${match.winner === match.teamAID ? teamAFirst2 : teamBFirst2}` : 'To Be Played');
+
+                            // Build HTML with the winner bolded
+                            const teamAHtml = (match.winner && match.winner === match.teamAID) ? `<strong style="color: #4fa7d1;">${teamAFirst2}</strong>` : teamAFirst2;
+                            const teamBHtml = (match.winner && match.winner === match.teamBID) ? `<strong style="color: #4fa7d1;">${teamBFirst2}</strong>` : teamBFirst2;
+                            const vsHtml = `${teamAHtml} vs ${teamBHtml}`;
+                            if (match.teamAID === match.teamBID && match.teamAID !== null) {
+                                matchDiv.innerHTML = `${teamAFirst2}`;
+                            } else {
+                                matchDiv.innerHTML = vsHtml;
+                            }
+                            showMatchinfo(matchDiv, match);
+                            roundDiv.appendChild(matchDiv);
+                            // create connecting lines
+                            if (matchIndex % 2 === 1 && match.nextMatch !== null) {
+                                const verticalLine = document.createElement("div");
+                                verticalLine.style.position = "absolute";
+                                verticalLine.style.left = 223 + "px";
+                                verticalLine.style.bottom = Height + "px"; 
+                                verticalLine.style.width = "2px";
+                                verticalLine.style.height = `${mar + 2 * Height+ 6}px`;
+                                verticalLine.classList.add("line-color");
+                                matchDiv.appendChild(verticalLine);
+                            }
+                        }
+                        
+                        
+                    });
+                    mar  = mar * 2 + Height * 2 + 3;
+                    top = mar/2;
+                    bracketContainer.appendChild(roundDiv);
+                });
+
+
+                tierDiv.appendChild(bracketContainer);
+            }
+
+            Object.entries(bracketsData).forEach(([tier, bracket]) => {
+                createBracket(tier, bracket);
+            });
+            // Append the tier containers to the main container in the desired numeric order:
+            container.style.display = "flex";
+            container.style.flexDirection = "column";
+            container.appendChild(tier5Div);
+            container.appendChild(tier2Div);
+            container.appendChild(tier3Div);
+            container.appendChild(tier4Div);
+            container.appendChild(tier1Div);
+        }
+    </script>
+</body>
+</html>
