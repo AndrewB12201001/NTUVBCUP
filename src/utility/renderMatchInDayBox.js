@@ -71,8 +71,13 @@ function createMatchDiv(match, dayDiv, matchesContainer, dateStr){
     // Parse the first two characters of team IDs
     const teamAFirst2 = match.teamAID ? match.teamAID.substring(0, 2) : '';
     const teamBFirst2 = match.teamBID ? match.teamBID.substring(0, 2) : '';
+    const teamAFirst3 = match.teamAID ? match.teamAID.substring(0, 3) : '';
     if(window.innerWidth <= 768) {
-        matchDiv.textContent = `${teamAFirst2} ${teamBFirst2}`;
+        if (teamAFirst2 === teamBFirst2) {
+            matchDiv.textContent = `${teamAFirst3}`;
+        } else {
+            matchDiv.textContent = `${teamAFirst2} ${teamBFirst2}`;
+        }
     }else if (match.teamAID === match.teamBID) {
         matchDiv.textContent = match.teamAID;
         matchDiv.style.background = '#888888'; // Highlight in dark grey for same team matches
