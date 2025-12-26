@@ -3,8 +3,16 @@ function showMatchinfo(matchDiv, match){
     matchDiv.addEventListener("click", () => {
         document.getElementById("popup-overlay").style.display = 'block';
         document.getElementById("popup").style.display = 'block';
+        
+        // Determine lock state for initial render
+        const isLocked = match.locked === true;
+        const lockIconClass = isLocked ? 'fa-lock' : 'fa-lock-open';
+
         document.getElementById('popup-content').innerHTML = `
-            <button id="close-popup" class="close-popup-button" style="position: absolute; top: 8px; right: 8px; font-size: 24px; background: transparent; border: none; cursor: pointer;">&times;</button>
+            <button id="close-popup" class="close-popup-button" style="position: absolute; top: 12px; right: 8px; font-size: 24px; background: transparent; border: none; cursor: pointer;">&times;</button>
+            <button id="toggle-lock" style="position: absolute; top: 18px; left: 8px; font-size: 18px; background: transparent; border: none; cursor: pointer; color: #555;" title="Toggle Lock">
+                <i class="fas ${lockIconClass}"></i>
+            </button>
             <h3 class="popup-title">${match.teamAID} vs ${match.teamBID}</h3>
             <div style="display: flex; justify-content: space-between; margin: 0 10px;">
                 <label class="group-label" style="font-weight: bold;">Group: ${match.group}</label>
@@ -44,6 +52,30 @@ function showMatchinfo(matchDiv, match){
                 <button id="delete-match" class="btn-secondary">UnDate</button>
             </div>
         `;
+
+        // Add Event Listener for Lock Toggle
+        document.getElementById('toggle-lock').addEventListener('click', function() {
+            match.locked = !match.locked;
+            
+            // Update Icon
+            const icon = this.querySelector('i');
+            icon.className = match.locked ? 'fas fa-lock' : 'fas fa-lock-open';
+            
+            // Update Delete Button Visibility
+            const deleteBtn = document.getElementById('delete-match');
+            if (deleteBtn) {
+                deleteBtn.style.display = match.locked ? 'none' : 'inline-block';
+            }
+
+            // Save to LocalStorage immediately
+            const matches = fetchMatches();
+            const matchIndex = matches.findIndex(m => m.id === match.id);
+            if (matchIndex !== -1) {
+                matches[matchIndex].locked = match.locked;
+                saveMatches(matches);
+            }
+        });
+
         window.currentMatchDate = match.date;
         setupOfficialDropdowns(match);
         
