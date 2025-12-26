@@ -870,3 +870,22 @@ function createGames(teamA, teamB, preliminary, group = null, boolNewbie=false, 
 
     return match;
 }
+
+// official recipt
+// Helper to get total adjustment from history
+function getAdjustmentData(officialData) {
+    // Handle legacy data (single number) vs new data (history array)
+    let history = officialData.adjustmentHistory || [];
+    
+    // If there is a legacy 'adjustment' number but no history, migrate it
+    if (officialData.adjustment !== undefined && officialData.adjustment !== 0 && history.length === 0) {
+        history.push({
+            amount: parseInt(officialData.adjustment),
+            note: "Legacy Adjustment",
+            date: new Date().toLocaleDateString()
+        });
+    }
+
+    const total = history.reduce((sum, item) => sum + (parseInt(item.amount) || 0), 0);
+    return { history, total };
+}
