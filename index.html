@@ -390,7 +390,9 @@
             color: #888;
             cursor: pointer;
         }
-
+        .phone-only{
+            display: none;
+        }
         /* Make it more responsive */
         @media (max-width: 768px) {
             .action-container {
@@ -450,6 +452,12 @@
             padding: 1px;
             border-radius: 1.5px;
             }
+            .phone-hidden {
+                display: none;
+            }
+            .phone-only {
+                display: block;
+            }
         }
 
 
@@ -502,7 +510,7 @@
     <h1>NTU Cup Admin</h1>
     <div class = "navigation">
         <div style="display: flex; gap: 15px;">
-            <a href="src/pages/sortMatchings.html" class="nav-link">
+            <a href="src/pages/sortMatchings.html" class="nav-link phone-hidden">
                 <i class="fas fa-sort"></i>
                 <span class="nav-text">Sort Matchings</span>
             </a>
@@ -518,6 +526,10 @@
                 <i class="fas fa-user-group"></i>
                 <span class="nav-text">Official Profiles</span>
             </a>
+            <a id="add-team-input" class="nav-link phone-only">
+                <i class="fas fa-bars"></i>
+                <span class="nav-text phone-hidden">Team input</span>
+            </a>
         </div>
         <div style="justify-content: space-between; display:flex; gap:5em; align-items:center;">
             <button class="action-btn" id="export-btn">
@@ -530,8 +542,8 @@
             </button>
         </div>
     </div>
-    <div class="navigation ntucup">
-        <h4> NTU CUP </h4>
+    <div class="navigation ntucup" id = "ntucup-area">
+        <h4 class="phone-hidden"> NTU CUP </h4>
         <a href="src/pages/inputPlayGroups.html" class="nav-link">
             <i class="fas fa-users"></i>
             Input Playgroups
@@ -541,8 +553,8 @@
             Team Profiles
         </a>
     </div>
-    <div class="navigation newbiecup">
-        <h4> Newbie Cup </h4>
+    <div class="navigation newbiecup" id = "newbiecup-area">
+        <h4 class="phone-hidden"> Newbie Cup </h4>
         <a href="src/pages/inputNoobCupTeams.html" class="nav-link">
             <i class="fas fa-users"></i>
             Input Newbie Teams
@@ -700,9 +712,17 @@
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'application/json';
+            
+            // FIX: Append to DOM to ensure the browser tracks events reliably
+            input.style.display = 'none';
+            document.body.appendChild(input);
+
             input.onchange = e => {
                 const file = e.target.files[0];
-                if (!file) return;
+                if (!file) {
+                    document.body.removeChild(input);
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     try {
@@ -714,11 +734,30 @@
                         location.reload();
                     } catch (err) {
                         alert('Invalid backup file.');
+                        document.body.removeChild(input);
                     }
                 };
                 reader.readAsText(file);
             };
             input.click();
+        });
+        document.getElementById("add-team-input").addEventListener("click", () => {
+            const ntucupContainer = document.querySelectorAll(".ntucup");
+            ntucupContainer.forEach(container => {
+                if (container.style.display === "none" || container.style.display === "") {
+                    container.style.display = "flex";
+                } else {
+                    container.style.display = "none";
+                }
+            });
+            const newbiecupContainer = document.querySelectorAll(".newbiecup");
+            newbiecupContainer.forEach(container => {
+                if (container.style.display === "none" || container.style.display === "") {
+                    container.style.display = "flex";
+                } else {
+                    container.style.display = "none";
+                }
+            });
         });
     </script>
 </body>
