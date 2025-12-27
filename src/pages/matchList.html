@@ -1185,18 +1185,25 @@
                     rankingGroups.second.push(groupTeams[1]);
                     rankingGroups.third.push(groupTeams[2]);
                 });
-                rankingGroups.first.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
-                rankingGroups.second.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
+                for(i = 0;i< rankingGroups.first.length; i++){
+                    for(j = i;j<rankingGroups.first.length; j++){
+                        if(rankingGroups.first[i].preliminaryScore < rankingGroups.first[j].preliminaryScore){
+                            // Swap
+                            [rankingGroups.first[i], rankingGroups.first[j]] = [rankingGroups.first[j], rankingGroups.first[i]];
+                            [rankingGroups.second[i], rankingGroups.second[j]] = [rankingGroups.second[j], rankingGroups.second[i]];
+                        }
+                    }
+                }
                 rankingGroups.third.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
                 // Creatematches
                 let rankingMatch1 = [
                     rankingGroups.first[0].teamID, rankingGroups.first[0].teamID,//seed
-                    rankingGroups.second[5].teamID, rankingGroups.second[4].teamID,
-                    rankingGroups.second[0].teamID, rankingGroups.first[4].teamID, 
+                    rankingGroups.second[2].teamID, rankingGroups.second[1].teamID,
+                    rankingGroups.second[5].teamID, rankingGroups.first[4].teamID, 
                     rankingGroups.first[3].teamID, rankingGroups.first[3].teamID,//seed
                     rankingGroups.first[2].teamID, rankingGroups.first[2].teamID,//seed
-                    rankingGroups.first[5].teamID, rankingGroups.second[1].teamID, 
-                    rankingGroups.second[3].teamID, rankingGroups.second[2].teamID, 
+                    rankingGroups.first[5].teamID, rankingGroups.second[4].teamID, 
+                    rankingGroups.second[3].teamID, rankingGroups.second[0].teamID, 
                     rankingGroups.first[1].teamID, rankingGroups.first[1].teamID,//seed
                 ];
                 let rankingMatch3 = [
@@ -1222,16 +1229,22 @@
                     firstSeed.push(...groupTeams.slice(0, 1));
                     secondSeed.push(...groupTeams.slice(1, 2));
                 });
-                firstSeed.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
-                secondSeed.sort((a, b) => b.preliminaryScore - a.preliminaryScore);
-                firstSeed.push(...secondSeed);
+                for(i = 0;i< firstSeed.length; i++){
+                    for(j = i;j<firstSeed.length; j++){
+                        if(firstSeed[i].preliminaryScore < firstSeed[j].preliminaryScore){
+                            // Swap
+                            [firstSeed[i], firstSeed[j]] = [firstSeed[j], firstSeed[i]];
+                            [secondSeed[i], secondSeed[j]] = [secondSeed[j], secondSeed[i]];
+                        }
+                    }
+                }
                 console.log('firstSeed: ', firstSeed);
                 console.log('secondSeed: ', secondSeed);
                 let playoffMatches = [
-                    firstSeed[0].teamID, firstSeed[7].teamID, 
-                    firstSeed[4].teamID, firstSeed[3].teamID, 
-                    firstSeed[2].teamID, firstSeed[5].teamID, 
-                    firstSeed[6].teamID, firstSeed[1].teamID
+                    firstSeed[0].teamID, secondSeed[2].teamID, 
+                    secondSeed[1].teamID, firstSeed[3].teamID, 
+                    firstSeed[2].teamID, secondSeed[0].teamID, 
+                    secondSeed[3].teamID, firstSeed[1].teamID
                 ];
                 createBracket(playoffMatches, 'Tier4Finals')
             }
