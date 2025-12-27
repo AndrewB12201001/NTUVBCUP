@@ -290,4 +290,9 @@
         background: #e08900;
     }
     /* End calendar match box colors */
+    /* pay per match */
+    .pay-card{
+        background: #2b2b2b;
+    }
+    
 }

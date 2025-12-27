@@ -78,6 +78,9 @@ function createMatchDiv(match, dayDiv, matchesContainer, dateStr){
         } else {
             matchDiv.textContent = `${teamAFirst2} ${teamBFirst2}`;
         }
+        if (match.locked) {
+            matchDiv.style.border = '2px solid black';
+        }
     }else if (match.teamAID === match.teamBID) {
         matchDiv.textContent = match.teamAID;
         matchDiv.style.background = '#888888'; // Highlight in dark grey for same team matches

@@ -97,6 +97,45 @@
             text-align: center;
             z-index: 1000;
         }
+        /* Pay per match */
+        .pay-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .pay-left {
+            display: flex;
+            align-items: center;
+        }
+        .pay-icon {
+            margin-right: 10px;
+            color: #3498db;
+        }
+        .pay-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .pay-label {
+            font-weight: 600;
+            color: #3498db;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .pay-input {
+            width: 100px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #e6e9ee;
+            text-align: center;
+            font-weight: 600;
+            color: #3498db;
+        }
     </style>
     <link rel="stylesheet" href="darkmode.css">
 </head>
@@ -107,10 +146,21 @@
             <i class="fas fa-arrow-left"></i>
             Back to Main Page
         </a>
-        <div style="background-color: rgb(159, 201, 251); border-radius: 10%; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-            <p>Current Pay Per Match</p>
-            <textarea id="pay-per-match" rows="1" style="width:80px;"></textarea>
-            <button onclick="savePayPerMatch()">Save</button>
+        <div class="pay-card">
+            <div class="pay-left">
+                <i class="fas fa-money-bill-wave pay-icon" aria-hidden="true"></i>
+                <div class="pay-info">
+                    <label for="pay-per-match" class="pay-label">Pay per match</label>
+                    <input id="pay-per-match" type="number" step="1" aria-label="Pay per match" placeholder="0" class="pay-input">
+                </div>
+            </div>
+
+            <div class="pay-actions">
+                <button onclick="savePayPerMatch()" class="save-pay-btn">
+                    <i class="fas fa-save save-icon" aria-hidden="true"></i>
+                    Save
+                </button>
+            </div>
         </div>
     </div>
     <h1>Official Profiles</h1>
