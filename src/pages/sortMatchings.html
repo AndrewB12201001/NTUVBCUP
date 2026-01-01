@@ -547,6 +547,22 @@
             border-radius: 8px;
             font-size: 14px;
         }
+        /* conti icon for Fridays */
+        .day-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .day-header .day-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .conti-icon {
+            height: 22px;
+            width: auto;
+            margin-left: 8px;
+        }
         @media (max-width: 768px) {
             .body{
                 padding: 0px;
@@ -927,9 +943,22 @@
                 dayBox.innerHTML = `
                     <div class="day-name phone-hidden">${date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
                     <div class="day-date phone-hidden">${formatDate(date)}</div>
+                    
                     <div class="day-matches phone-hidden"></div>
                 `;
-                
+                // show conti.png to the right when it's Friday (getDay() === 5)
+                const isFriday = date.getDay() === 5;
+                const contiHtml = isFriday ? `<img src="../assets/conti.png" class="conti-icon" alt="conti">` : '';
+                dayBox.innerHTML = `
+                    <div class="day-header">
+                        <div class="day-info">
+                            <div class="day-name phone-hidden">${date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                            <div class="day-date phone-hidden">${formatDate(date)}</div>
+                        </div>
+                        ${contiHtml}
+                    </div>
+                    <div class="day-matches phone-hidden"></div>
+                `;
                 dayBox.addEventListener('dragover', e => {
                     e.preventDefault();
                 });
