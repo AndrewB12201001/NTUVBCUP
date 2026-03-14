@@ -270,7 +270,7 @@
             Object.keys(groups).forEach(groupName => {
                 matchContent.innerHTML += `<h3>${groupName}</h3>`;
                 groups[groupName].forEach(match => {
-                    matchContent.innerHTML += `<p>${match.teamAID} vs ${match.teamBID} - Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}</p>`;
+                    matchContent.innerHTML += `<p>(${match.date ? match.date : 'No Date'}) ${match.teamAID} vs ${match.teamBID} - Score: ${match.set1.join(':')} | ${match.set2.join(':')} | ${match.set3.join(':')}</p>`;
                 });
             });
             document.getElementById("modal-overlay").style.display = "block";

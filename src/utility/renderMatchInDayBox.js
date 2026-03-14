@@ -225,24 +225,8 @@ function renderFilteredUndatedMatches(dateStr, searchText){
     matchList.innerHTML = ``; // Clear previous matches
     const matches = fetchMatches();
     const keywords = searchText.toLowerCase().trim().split(/\s+/); // Split by spaces
-    // add seperator
-    const starter = document.createElement("div");
-    starter.textContent = "Undated Matches";
-    starter.classList.add("match-item-separator");
-    matchList.appendChild(starter);
-    // undated match
-    const undatedMatches = matches.filter(match => {
-        const key = `${match.id}`;
-        return !match.date && !selectedMatchHerees.has(key);
-    });
-    const filteredUndatedMatches = undatedMatches.filter(m => 
-        ((m.teamAID !== m.teamBID) || (m.teamAID === null && m.teamBID === null)) &&
-        keywords.every(keyword => 
-            (m.teamAID || '').toLowerCase().includes(keyword) || 
-            (m.teamBID || '').toLowerCase().includes(keyword)
-        )
-    );
-
+    
+    // Get date info for filtering
     const date = new Date(dateStr);
     const dow = date.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
     const currentWeekStart = new Date(date);
@@ -263,9 +247,30 @@ function renderFilteredUndatedMatches(dateStr, searchText){
         return matchDate >= monday && matchDate <= friday;
     });
     const currentWeekTeams = new Set(currentWeekMatches.map(cm => cm.teamAID).concat(currentWeekMatches.map(cm => cm.teamBID)).flat());
+    
+    // undated match
+    const undatedMatches = matches.filter(match => {
+        const key = `${match.id}`;
+        return !match.date && !selectedMatchHerees.has(key);
+    });
+    const filteredUndatedMatches = undatedMatches.filter(m => 
+        ((m.teamAID !== m.teamBID) || (m.teamAID === null && m.teamBID === null)) &&
+        keywords.every(keyword => 
+            (m.teamAID || '').toLowerCase().includes(keyword) || 
+            (m.teamBID || '').toLowerCase().includes(keyword)
+        )
+    );
+    
+    // Calculate available/unavailable matches before rendering separator
     const filteredUndatedMatchesAvailable = filteredUndatedMatches.filter(m => m.availableDays.includes(dow) && !currentWeekTeams.has(m.teamAID) && !currentWeekTeams.has(m.teamBID));
     const availableIds = new Set(filteredUndatedMatchesAvailable.map(m => m.id));
     const filteredUndatedMatchesUnavailable = filteredUndatedMatches.filter(m => !availableIds.has(m.id));
+
+    // add separator
+    const starter = document.createElement("div");
+    starter.textContent = `Undated Matches (${filteredUndatedMatchesAvailable.length} + ${filteredUndatedMatchesUnavailable.length})`;
+    starter.classList.add("match-item-separator");
+    matchList.appendChild(starter);
     filteredUndatedMatchesAvailable.forEach(match => {
         const matchDiv = document.createElement("div");
         matchDiv.textContent = `${match.group}: ${match.teamAID} vs ${match.teamBID}`;
