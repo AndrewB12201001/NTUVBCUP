@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../utility/volleyball.png" type="image/png">
+    <title>Custom Bracket Creator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="darkmode.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        select, input {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .btn-primary { background-color: #4CAF50; }
+        .btn-primary:hover { background-color: #45a049; }
+        
+        .btn-secondary { background-color: #2196F3; }
+        .btn-secondary:hover { background-color: #1e88e5; }
+
+        .workspace {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Team Pool (Left Side) */
+        .team-pool-container {
+            width: 250px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .team-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #eee;
+            padding: 5px;
+        }
+
+        .draggable-team {
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 4px;
+            cursor: grab;
+            font-size: 14px;
+        }
+
+        .draggable-team:active {
+            cursor: grabbing;
+        }
+
+        .draggable-team.used {
+            opacity: 0.5;
+            background-color: #f5f5f5;
+            border-color: #ddd;
+            text-decoration: line-through;
+            pointer-events: none;
+        }
+
+        /* Bracket Area (Right Side) */
+        .bracket-area {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .round-one-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .match-pair {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 300px;
+            position: relative;
+        }
+
+        .match-pair::before {
+            content: "Match " attr(data-match-num);
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: #2196F3;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .drop-slot {
+            height: 40px;
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #888;
+            transition: 0.2s;
+        }
+
+        .drop-slot.drag-over {
+            background-color: #e8f5e9;
+            border-color: #4CAF50;
+        }
+
+        .drop-slot.filled {
+            border-style: solid;
+            border-color: #4CAF50;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .remove-team-btn {
+            cursor: pointer;
+            color: #f44336;
+            margin-left: 10px;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <script src="../utility/dataStorage.js"></script>
+
+    <div class="header">
+        <a href="../../index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <div class="controls">
+            <select id="tierSelect">
+                <option value="Tier1">Tier 1</option>
+                <option value="Tier2">Tier 2</option>
+                <option value="Tier3">Tier 3</option>
+                <option value="Tier4">Tier 4</option>
+                <option value="NewbieCup">Newbie Cup</option>
+            </select>
+            <input type="number" id="numSpots" placeholder="Number of Teams (e.g. 8)" min="2" value="8">
+            <button class="btn btn-secondary" onclick="initializeWorkspace()">Initialize Slots</button>
+            <button class="btn btn-primary" onclick="saveCustomBracket()">Save & Generate Bracket</button>
+        </div>
+    </div>
+
+    <div class="workspace">
+        <div class="team-pool-container">
+            <h3>Available Teams</h3>
+            <div id="teamList" class="team-list">
+                <!-- Teams will be populated here -->
+                <div style="padding:10px; color:#666;">Select Tier and Initialize to see teams.</div>
+            </div>
+        </div>
+
+        <div class="bracket-area">
+            <h3 style="text-align: center;">Round 1 Matchups (Drag Teams Here)</h3>
+            <div id="bracketSlots" class="round-one-container">
+                <!-- Slots will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDragTeam = null;
+
+        function initializeWorkspace() {
+            const tier = document.getElementById('tierSelect').value;
+            const numInput = parseInt(document.getElementById('numSpots').value);
+            
+            if (!numInput || numInput < 2) {
+                alert("Please enter at least 2 teams.");
+                return;
+            }
+
+            // 1. Calculate nearest power of 2
+            const powerOf2 = Math.pow(2, Math.ceil(Math.log2(numInput)));
+            if (powerOf2 !== numInput) {
+                alert(`Rounding up slots to ${powerOf2} to ensure a balanced bracket.`);
+                document.getElementById('numSpots').value = powerOf2;
+            }
+
+            renderTeamPool(tier);
+            renderSlots(powerOf2);
+        }
+
+        function renderTeamPool(tier) {
+            const list = document.getElementById('teamList');
+            list.innerHTML = '';
+
+            let teams = {};
+            if (tier === 'NewbieCup') {
+                teams = fetchNewbieTeams();
+            } else {
+                teams = fetchTeams();
+            }
+
+            // Filter teams by Tier string (e.g., "Tier1" matches "Tier1-A", "Tier1-B")
+            const filteredTeams = Object.values(teams).filter(t => 
+                t.preliminaryGroup && t.preliminaryGroup.startsWith(tier)
+            );
+
+            if (filteredTeams.length === 0) {
+                list.innerHTML = '<div style="padding:10px;">No teams found for this Tier.</div>';
+                return;
+            }
+
+            filteredTeams.forEach(team => {
+                const div = document.createElement('div');
+                div.className = 'draggable-team';
+                div.draggable = true;
+                div.textContent = team.teamID;
+                div.dataset.teamId = team.teamID;
+                
+                div.addEventListener('dragstart', (e) => {
+                    currentDragTeam = team.teamID;
+                    e.dataTransfer.setData('text/plain', team.teamID);
+                    div.classList.add('dragging');
+                });
+
+                div.addEventListener('dragend', () => {
+                    div.classList.remove('dragging');
+                    currentDragTeam = null;
+                });
+
+                list.appendChild(div);
+            });
+        }
+
+        function renderSlots(count) {
+            const container = document.getElementById('bracketSlots');
+            container.innerHTML = '';
+
+            const matchCount = count / 2;
+
+            for (let i = 0; i < matchCount; i++) {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'match-pair';
+                matchDiv.dataset.matchNum = i + 1;
+
+                // Slot A
+                const slotA = createDropSlot(i * 2);
+                // Slot B
+                const slotB = createDropSlot(i * 2 + 1);
+
+                matchDiv.appendChild(slotA);
+                matchDiv.appendChild(slotB);
+                container.appendChild(matchDiv);
+            }
+        }
+
+        function createDropSlot(index) {
+            const slot = document.createElement('div');
+            slot.className = 'drop-slot';
+            slot.dataset.index = index;
+            slot.textContent = 'Empty Slot';
+
+            slot.addEventListener('dragover', (e) => {
+                e.preventDefault(); // Allow drop
+                if (!slot.classList.contains('filled')) {
+                    slot.classList.add('drag-over');
+                }
+            });
+
+            slot.addEventListener('dragleave', () => {
+                slot.classList.remove('drag-over');
+            });
+
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                slot.classList.remove('drag-over');
+                const teamId = e.dataTransfer.getData('text/plain');
+                
+                if (teamId) {
+                    fillSlot(slot, teamId);
+                }
+            });
+
+            return slot;
+        }
+
+        function fillSlot(slot, teamId) {
+            // Check if team is already used elsewhere?
+            // For now, we allow moving, but visually we should mark the source list.
+            
+            slot.innerHTML = `
+                <span>${teamId}</span>
+                <i class="fas fa-times remove-team-btn" onclick="clearSlot(this)"></i>
+            `;
+            slot.classList.add('filled');
+            slot.dataset.teamId = teamId;
+
+            updateTeamPoolStatus();
+        }
+
+        function clearSlot(btn) {
+            const slot = btn.parentElement;
+            slot.innerHTML = 'Empty Slot';
+            slot.classList.remove('filled');
+            delete slot.dataset.teamId;
+            updateTeamPoolStatus();
+        }
+
+        function updateTeamPoolStatus() {
+            // Get all used team IDs
+            const usedTeams = Array.from(document.querySelectorAll('.drop-slot.filled'))
+                .map(slot => slot.dataset.teamId);
+
+            // Update sidebar
+            document.querySelectorAll('.draggable-team').forEach(div => {
+                if (usedTeams.includes(div.dataset.teamId)) {
+                    div.classList.add('used');
+                } else {
+                    div.classList.remove('used');
+                }
+            });
+        }
+
+        function saveCustomBracket() {
+            const tier = document.getElementById('tierSelect').value;
+            const slots = document.querySelectorAll('.drop-slot');
+            const teamArray = [];
+            let hasTeams = false;
+
+            slots.forEach(slot => {
+                if (slot.classList.contains('filled')) {
+                    teamArray.push(slot.dataset.teamId);
+                    hasTeams = true;
+                } else {
+                    teamArray.push(null); // Bye
+                }
+            });
+
+            if (!hasTeams) {
+                alert("Bracket is empty. Please place some teams.");
+                return;
+            }
+
+            const bracketName = prompt("Enter a name for this bracket:", `${tier}-Custom`);
+            if (!bracketName) return;
+
+            const isNewbie = (tier === 'NewbieCup');
+            
+            // Call the bracket generation logic
+            createBracket(teamArray, bracketName, isNewbie);
+            
+            alert("Bracket created successfully!");
+            window.location.href = 'visual.html'; // Redirect to visualizer
+        }
+
+        // --- Logic copied and adapted from matchList.html ---
+        function createBracket(teams, bracketName, boolNewbie = false) {
+            const matches = [];
+            const numRounds = Math.ceil(Math.log2(teams.length));
+            
+            // Track matches by round for easier referencing
+            const matchesByRound = [];
+            
+            // First round matches
+            let currentRound = [];
+            for (let i = 0; i < teams.length; i += 2) {
+                const match = createGames(
+                    teams[i],
+                    teams[i + 1] || null,
+                    false,
+                    `${bracketName}-Round1`,
+                    boolNewbie
+                );
+                currentRound.push(match);
+                matches.push(match);
+            }
+            matchesByRound.push(currentRound);
+            
+            // Create subsequent rounds
+            for (let round = 2; round <= numRounds; round++) {
+                const numMatchesInRound = Math.pow(2, numRounds - round);
+                const nextRound = [];
+                
+                for (let i = 0; i < numMatchesInRound; i++) {
+                    const match = createGames(
+                        null,
+                        null,
+                        false,
+                        `${bracketName}-Round${round}`,
+                        boolNewbie
+                    );
+                    nextRound.push(match);
+                    matches.push(match);
+                }
+                // Optional: 3rd place match logic could go here if needed
+                matchesByRound.push(nextRound);
+            }
+            
+            // Set up nextMatch references
+            for (let round = 0; round < numRounds - 1; round++) {
+                const currentRoundMatches = matchesByRound[round];
+                for (let i = 0; i < currentRoundMatches.length; i++) {
+                    const nextMatchIndex = Math.floor(i / 2);
+                    const nextMatch = matchesByRound[round + 1][nextMatchIndex];
+                    currentRoundMatches[i].nextMatch = nextMatch.id;
+                }
+            }
+            
+            // Save matches
+            const existingMatches = fetchMatches();
+            saveMatches([...existingMatches, ...matches]);
+            
+            // Save bracket structure
+            const bracketStructure = {
+                name: bracketName,
+                rounds: numRounds,
+                matchIds: matches.map(m => m.id),
+                roundMatchIds: matchesByRound.map(round => round.map(m => m.id))
+            };
+            const existingBrackets = fetchBrackets();
+            existingBrackets[bracketName] = bracketStructure;
+            saveBrackets(existingBrackets);
+            
+            console.log('Created bracket:', bracketStructure);
+            return matches;
+        }
+    </script>
+</body>
