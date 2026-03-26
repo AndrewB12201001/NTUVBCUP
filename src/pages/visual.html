@@ -3,15 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="../utility/volleyball.png" type="image/png">
+    <link rel="icon" href="volleyball.png" type="image/png">
     <title>Tournament Bracket</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="popup.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
             margin: 0px;
             background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        /* Scale wrapper: everything inside #bracketContainer will be scaled down 1/6 (≈0.1666667) */
+        /* width:600% compensates so the scaled content still fills the viewport horizontally */
+        #bracketContainer {
+            transform: scale(0.6);     /* 0.6 */
+            transform-origin: 0 0;            /* keep top-left as origin so layout stays predictable */
+            /* use block formatting context so internal fixed/absolute elements behave consistently */
+            display: block;
+            position: relative;
+        }
+        /* Popups and overlays must still cover the viewport; make them paint relative to the viewport */
+        /* We reset position for those inside the scaled wrapper so they behave like fixed elements */
+        #bracketContainer .popup,
+        #bracketContainer .popup-overlay,
+        #bracketContainer .popup-overlay.hidden,
+        #bracketContainer .popup.hidden {
+            position: fixed !important;
         }
         .topbar {
             display: flex;
@@ -27,13 +49,12 @@
             gap: 8px;
             text-decoration: none;
             color: #2c3e50;
-            padding: 10px 20px;
+            padding: 12px 24px;
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 120px;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .back-link:hover {
@@ -116,9 +137,6 @@
             height: 165%;
             background: black;
         }
-        .line-color{
-            background: black;
-        }
 
         .match, .champMatch {
             width: 160px;
@@ -127,8 +145,7 @@
             padding: 12px;
             margin: 40px 0; /* Controls spacing between matches */
             min-height: 60px;
-            font-size: 14px;
-            word-wrap: break-word;
+            font-size: 25px;
             white-space: pre-line;
             overflow-wrap: break-word;
             border-radius: 5px;
@@ -142,55 +159,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
-        /* Basic styles for the popup */
-        .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            z-index: 1000;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        .popup-title {
-            color: #2c3e50;
-            margin: 0 0 25px 0;
-            font-size: 1.5em;
-            text-align: center;
-        }
-
-        .match-container {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            background: #f9f9f9;
-        }
-
-        .scrollable-matches {
-            max-height: calc(8 * 40px); /* Assuming each match row is 40px tall */
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .popup-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-        }
 
         .btn-primary, .btn-secondary {
             flex: 1;
@@ -272,6 +240,20 @@
                 align-self: center;
                 width: 100%;
             }
+            .popup {
+                width: 80%;
+                padding: 20px;
+            }
+            .match .champMatch{
+                font-size: 12px;
+            }
+            #bracketContainer {
+                transform: scale(0.2);     /* 0.6 */
+                transform-origin: 0 0;            /* keep top-left as origin so layout stays predictable */
+                /* use block formatting context so internal fixed/absolute elements behave consistently */
+                display: block;
+                position: relative;
+            }
         }
 
         .btn-primary:hover {
@@ -290,13 +272,6 @@
             display: none;
         }
 
-        @media (max-width: 768px) {
-            .popup {
-                width: 95%;
-                padding: 20px;
-            }
-        }
-
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -307,50 +282,74 @@
             z-index: 999;
             display: none;
         }
-        
+        .line-color{
+            background: black;
+        }
+
+        /* Tab styles */
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-size: 32px;
+            font-weight: 500;
+            color: #333;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            margin-bottom: -2px;
+        }
+
+        .tab-button:hover {
+            background: #e0e0e0;
+        }
+
+        .tab-button.active {
+            background: #42bed3;
+            color: white;
+            border-bottom: 3px solid #31acc2;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+       
     </style>
-    <link rel="stylesheet" href="renderMatchInDayBox.css">
     <link rel="stylesheet" href="darkmode.css">
 </head>
 <body>
+    <a href="../../index.html" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Main Page
+    </a>
     <script src = '../utility/dataStorage.js'></script>
     <script src = '../utility/Matchinfo.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <div class="topbar">
-        <a href="../../index.html" class="back-link">
-            <i class="fas fa-arrow-left"></i>
-            Back to Main Page
-        </a>
         <a id="downloadPdfBtn" class="download-link">
             <i class="fas fa-file-pdf"></i> 
-            Download Bracket as PDF
+            <span class="nav-text">Download Bracket as PDF</span>
         </a>
     </div>
-        
-    </a>
-    <div><div>
     <h1>Tournament Bracket</h1>
     <div id="bracketContainer" class="bracket-container"></div>
     <!-- Popup structure -->
     <div class="popup-overlay hidden" id="popup-overlay"></div>
-    <div class="popup hidden" id="popup">
-        <div class="popup-content" id="popup-content"></div>
-    </div>
+    <div class="popup hidden" id="popup"></div>
 
     <script>
-        function updateViewport() {
-            const meta = document.querySelector('meta[name="viewport"]');
-            if (!meta) return;
-            const width = Math.max(window.innerWidth || 0, screen.width || 0);
-            if (width < 768) {
-                meta.setAttribute('content', 'width=device-width, initial-scale=0.2');
-            } else {
-                meta.setAttribute('content', 'width=device-width, initial-scale=1.0');
-            }
-        }
-        window.addEventListener('resize', updateViewport);
-        window.addEventListener('orientationchange', updateViewport);
-        updateViewport();
         const Height = 40;
         document.addEventListener("DOMContentLoaded", () => {
             renderCalendar();
@@ -375,115 +374,125 @@
 
             const container = document.getElementById("bracketContainer");
             container.innerHTML = ""; // Clear previous content
-            // Tier 1
-            // Create tier containers in numeric order to enforce ordering:
-            const tier1Div = document.createElement("div");
-            tier1Div.classList.add("tier");
-  
-            const tier2Div = document.createElement("div");
-            tier2Div.classList.add("tier");
-  
-            const tier3Div = document.createElement("div");
-            tier3Div.classList.add("tier");
-  
-            const tier4Div = document.createElement("div");
-            tier4Div.classList.add("tier");
-  
-            const tier5Div = document.createElement("div");
-            tier5Div.classList.add("tier");
+            
+            // Get all unique tier prefixes
+            const tierOrder = ['NewbieCup', 'Tier1', 'Tier2', 'Tier3', 'Tier4'];
+            const activeTiers = tierOrder.filter(tierPrefix => 
+                Object.keys(bracketsData).some(key => key.startsWith(tierPrefix))
+            );
 
-            function createBracket(tierName, bracket) {
-                const title = document.createElement("h2");
-                title.textContent = tierName;
+            // Create tab container
+            const tabContainer = document.createElement("div");
+            tabContainer.classList.add("tab-container");
 
-                if (tierName.substring(0, 5) === 'Tier1') {
-                    tierDiv = tier1Div;
-                } else if (tierName.substring(0, 5) === 'Tier2') {
-                    tierDiv = tier2Div;
-                } else if (tierName.substring(0, 5) === 'Tier3') {
-                    tierDiv = tier3Div;
-                } else if (tierName.substring(0, 5) === 'Tier4') {
-                    tierDiv = tier4Div;
-                } else if (tierName.substring(0, 9) === 'NewbieCup') {
-                    tierDiv = tier5Div;
-                } else {
-                    console.error(`Unknown tier name: ${tierName}`);
-                    return;
-                }
-                tierDiv.appendChild(title);
-                const bracketContainer = document.createElement("div");
-                bracketContainer.classList.add("bracket-container");
-                let mar = 40;
-                let top = 0;
-                bracket.roundMatchIds.forEach((round, roundIndex) => {
-                    const roundDiv = document.createElement("div");
-                    roundDiv.classList.add("round");
-                    const roundTitle = document.createElement("h3");
-                    roundTitle.textContent = `Round ${roundIndex + 1}`;
-                    roundDiv.appendChild(roundTitle);
-                    round.forEach((matchId, matchIndex) => {
-                        const match = matches.find(m => m.id == matchId);
-                        if (match !== undefined){
-                            const matchDiv = document.createElement("div");
+            // Create tab buttons for each tier
+            activeTiers.forEach((tier, index) => {
+                const button = document.createElement("button");
+                button.classList.add("tab-button");
+                if (index === 0) button.classList.add("active"); // First tab is active by default
+                button.textContent = tier;
+                button.dataset.tier = tier;
+                button.addEventListener("click", function() {
+                    // Remove active class from all buttons and contents
+                    document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+                    document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
                     
-                            if(match.nextMatch !== null){
-                                matchDiv.classList.add("match");
-                                matchDiv.style.marginBottom = `${mar}px`; // Only bottom margin
-                            }else{
-                                matchDiv.classList.add("champMatch")
-                                matchDiv.style.marginBottom = `100px`
-                            }
-                            if (matchIndex === 0) {
-                                matchDiv.style.marginTop = `${top}px`; // Extra top space for first child
-                            }
-                            const teamA = match.teamAID ?? 'TBD';
-                            const teamB = match.teamBID ?? 'TBD';
-                            const date = match.date ?? '';
-                            const status = match.status === false ? "To Be Played" : (match.winner ? `Winner: ${match.winner}` : 'To Be Played');
+                    // Add active class to clicked button and corresponding content
+                    this.classList.add("active");
+                    document.getElementById(`tab-${tier}`).classList.add("active");
+                });
+                tabContainer.appendChild(button);
+            });
 
-                            matchDiv.textContent = teamA !== teamB
-                                ? `${teamA} vs ${teamB}\n${date}\n${status}`
-                                : teamA;
+            container.appendChild(tabContainer);
+
+            // Create content for each tier
+            activeTiers.forEach((tier, index) => {
+                const tabContent = document.createElement("div");
+                tabContent.id = `tab-${tier}`;
+                tabContent.classList.add("tab-content");
+                if (index === 0) tabContent.classList.add("active"); // First tab content is active by default
+
+                // Get all brackets for this tier
+                const tiersForThisTier = Object.entries(bracketsData).filter(([key]) => key.startsWith(tier));
+
+                tiersForThisTier.forEach(([tierName, bracket]) => {
+                    const title = document.createElement("h2");
+                    title.textContent = tierName;
+                    tabContent.appendChild(title);
+
+                    const bracketContainer = document.createElement("div");
+                    bracketContainer.classList.add("bracket-container");
+                    let mar = 40;
+                    let top = 0;
+
+                    bracket.roundMatchIds.forEach((round, roundIndex) => {
+                        const roundDiv = document.createElement("div");
+                        roundDiv.classList.add("round");
+                        const roundTitle = document.createElement("h3");
+                        roundTitle.textContent = `Round ${roundIndex + 1}`;
+                        roundDiv.appendChild(roundTitle);
+
+                        round.forEach((matchId, matchIndex) => {
+                            const match = matches.find(m => m.id == matchId);
+                            const teamAFirst2 = match.teamAID ? match.teamAID.substring(0, 2) : '';
+                            const teamBFirst2 = match.teamBID ? match.teamBID.substring(0, 2) : '';
                             
-                                // Show the popup
-                            showMatchinfo(matchDiv, match);
+                            if (match !== undefined) {
+                                const matchDiv = document.createElement("div");
+                        
+                                if(match.nextMatch !== null){
+                                    matchDiv.classList.add("match");
+                                    matchDiv.style.marginBottom = `${mar}px`;
+                                } else {
+                                    matchDiv.classList.add("champMatch")
+                                    matchDiv.style.marginBottom = `100px`
+                                }
 
-                            roundDiv.appendChild(matchDiv);
-                            // create connecting lines
-                            if (matchIndex % 2 === 1 && match.nextMatch !== null) {
-                                const verticalLine = document.createElement("div");
-                                verticalLine.style.position = "absolute";
-                                verticalLine.style.left = 223 + "px";
-                                verticalLine.style.bottom = Height + "px"; 
-                                verticalLine.style.width = "2px";
-                                verticalLine.style.height = `${mar + 2 * Height+ 6}px`;
-                                verticalLine.classList.add("line-color");
-                                matchDiv.appendChild(verticalLine);
+                                if (matchIndex === 0) {
+                                    matchDiv.style.marginTop = `${top}px`;
+                                }
+
+                                const date = match.date ?? '';
+                                const status = match.status === false ? "To Be Played" : (match.winner ? `Winner: ${match.winner === match.teamAID ? teamAFirst2 : teamBFirst2}` : 'To Be Played');
+
+                                const teamAHtml = (match.winner && match.winner === match.teamAID) ? `<strong style="color: #4fa7d1;">${teamAFirst2}</strong>` : teamAFirst2;
+                                const teamBHtml = (match.winner && match.winner === match.teamBID) ? `<strong style="color: #4fa7d1;">${teamBFirst2}</strong>` : teamBFirst2;
+                                const vsHtml = `${teamAHtml} vs ${teamBHtml}`;
+
+                                if (match.teamAID === match.teamBID && match.teamAID !== null) {
+                                    matchDiv.innerHTML = `${teamAFirst2}`;
+                                } else {
+                                    matchDiv.innerHTML = vsHtml;
+                                }
+
+                                showMatchinfo(matchDiv, match);
+                                roundDiv.appendChild(matchDiv);
+
+                                // create connecting lines
+                                if (matchIndex % 2 === 1 && match.nextMatch !== null) {
+                                    const verticalLine = document.createElement("div");
+                                    verticalLine.style.position = "absolute";
+                                    verticalLine.style.left = 223 + "px";
+                                    verticalLine.style.bottom = Height + "px"; 
+                                    verticalLine.style.width = "2px";
+                                    verticalLine.style.height = `${mar + 2 * Height+ 6}px`;
+                                    verticalLine.classList.add("line-color");
+                                    matchDiv.appendChild(verticalLine);
+                                }
                             }
-                        }
-                        
-                        
+                        });
+
+                        mar = mar * 2 + Height * 2 + 3;
+                        top = mar / 2;
+                        bracketContainer.appendChild(roundDiv);
                     });
-                    mar  = mar * 2 + Height * 2 + 3;
-                    top = mar/2;
-                    bracketContainer.appendChild(roundDiv);
+
+                    tabContent.appendChild(bracketContainer);
                 });
 
-
-                tierDiv.appendChild(bracketContainer);
-            }
-
-            Object.entries(bracketsData).forEach(([tier, bracket]) => {
-                createBracket(tier, bracket);
+                container.appendChild(tabContent);
             });
-            // Append the tier containers to the main container in the desired numeric order:
-            container.style.display = "flex";
-            container.style.flexDirection = "column";
-            container.appendChild(tier5Div);
-            container.appendChild(tier2Div);
-            container.appendChild(tier3Div);
-            container.appendChild(tier4Div);
-            container.appendChild(tier1Div);
         }
     </script>
 </body>

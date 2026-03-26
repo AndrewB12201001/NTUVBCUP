@@ -1442,7 +1442,7 @@
                     saveMatches(matches);
                 } else {
                     console.warn('Match not found!');
-}
+                }
                 displayAssignedMatches();
                 renderUndatedMatches();
                 renderUndatedMatchCount();
@@ -1490,6 +1490,38 @@
         document.getElementById('sort-type').addEventListener('change', () => {
             renderUndatedMatches();
             renderUndatedMatchCount();
+        });
+
+        // Helper function to check if there are unsaved changes
+        function hasUnsavedChanges() {
+            for (let assignment of tempAssignments.values()) {
+                if (assignment.previouslyAssigned === false) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        let allowNavigation = false;
+
+        document.querySelector('.back-link').addEventListener('click', (e) => {
+            if (hasUnsavedChanges()) {
+                e.preventDefault();
+                const userConfirmed = confirm("Are you sure you want to leave this page? This will delete all unsaved progress.");
+                if (userConfirmed) {
+                    allowNavigation = true;
+                    window.location.href = '../../index.html';
+                }
+            }
+        });
+
+        // Add beforeunload event for browser close/refresh/navigation
+        window.addEventListener('beforeunload', (e) => {
+            if (!allowNavigation && hasUnsavedChanges()) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave this page? This will delete all unsaved progress.';
+                return 'You have unsaved changes. Are you sure you want to leave this page? This will delete all unsaved progress.';
+            }
         });
 
         // Initial render
