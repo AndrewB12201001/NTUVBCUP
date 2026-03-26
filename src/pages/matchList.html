@@ -1297,8 +1297,30 @@
                 console.log('loserMatch: ', loser9_12Match);
                 createBracket(loser9_12Match, 'Tier2Finals9-12');
             }
-        //三級 分組第一打1~6名排名賽，分組第二打7~12名排名賽，分組第三打13~18排名賽每個排名賽依據積分選兩個種子，積分第三高打積分第六，積分第四打第五。
-            // no need for generating losers
+        //三級 分組八強打完打5-8, 9-12。
+            if (Tier === 3) {
+                // Tier 3: brackets[rounder 1 ]losers
+                const Tier3Finalsbracket = brackets['Tier3Finals'];
+                const Tier3FinalsRound1 = Tier3Finalsbracket.roundMatchIds[1];
+                const loser5_8Match = [];
+                Tier3FinalsRound1.forEach((matchid) => {
+                    loser5_8Match.push(matches.find(m => m.id === matchid).loser);
+                });
+                console.log('loserMatch: ', loser5_8Match);
+                createBracket(loser5_8Match, 'Tier3Finals5-8');
+            }
+            if (Tier === 33){
+                const Tier3Finalsbracket = brackets['Tier3Finals'];
+                const Tier3FinalsRound2 = Tier3Finalsbracket.roundMatchIds[0];
+                const loser9_12Match = [];
+                Tier3FinalsRound2.forEach((matchid) => {
+                    if (matches.find(m => m.id === matchid).teamAID !== matches.find(m => m.id === matchid).teamBID){
+                        loser9_12Match.push(matches.find(m => m.id === matchid).loser);
+                    }
+                });
+                console.log('loserMatch: ', loser9_12Match);
+                createBracket(loser9_12Match, 'Tier3Finals9-12');
+            }
         //四級分組一打排名賽 奇數個分組一，積分最高的當種子，偶數個但不是2^n分組一，前N-2^[floor_function(log(2,N))]有優勢，N= 2^n for some n 就積分最高打積分最低的。
             // no need for generating losers
             console.log('matches generated');
@@ -1888,6 +1910,8 @@
                 const Tier1quarterFinalMatches = matches.filter(match => match.group === 'Tier1Finals-Round1');
                 const Tier2Round1FinalMatches = matches.filter(match => match.group === 'Tier2Finals-Round1' && match.teamAID !== match.teamBID);
                 const Tier2semiFinalMatches = matches.filter(match => match.group === 'Tier2Finals-Round2');
+                const Tier3Round1FinalMatches = matches.filter(match => match.group === 'Tier3Finals-Round1' && match.teamAID !== match.teamBID);
+                const Tier3semiFinalMatches = matches.filter(match => match.group === 'Tier3Finals-Round2');
                 // For Tier1, if quarterfinal (first round) finals are finished, show the 5-8 button
                 if (tier === "Tier1" && Tier1quarterFinalMatches.length === 4 && Tier1quarterFinalMatches.every(match => match.status === true)) {
                     showGenerateTier1LosersButton();
@@ -1896,9 +1920,17 @@
                 if (tier === "Tier2" && Tier2Round1FinalMatches.length === 4 && Tier2Round1FinalMatches.every(match => match.status === true)) {
                     showGenerateTier22LosersButton();
                 }
-                // ter2 semiFinals
+                // tier2 semiFinals
                 if (tier === "Tier2" && Tier2semiFinalMatches.length === 4 && Tier2semiFinalMatches.every(match => match.status === true)) {
                     showGenerateTier2LosersButton();
+                }
+                // tier3 quarterFinals
+                if (tier === "Tier3" && Tier3Round1FinalMatches.length === 4 && Tier3Round1FinalMatches.every(match => match.status === true)) {
+                    showGenerateTier33LosersButton();
+                }
+                // tier3 semiFinals
+                if (tier === "Tier3" && Tier3semiFinalMatches.length === 4 && Tier3semiFinalMatches.every(match => match.status === true)) {
+                    showGenerateTier3LosersButton();
                 }
             });
         }
@@ -1966,10 +1998,10 @@
         
         function showGenerateTier22LosersButton() {
             const container = document.getElementById("final-matches-container");
-            // Create the 5-8 generation button
+            // Create the 9-12 generation button
             const button = document.createElement("button");
             button.className = 'action-btn success';
-            button.textContent = "Generate Tier1 9-12 Bracket";
+            button.textContent = "Generate Tier2 9-12 Bracket";
             let firstClickKey = `Tier2 9-12 matches FirstClick`;
             let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
             if (!isFirstClick) button.style.backgroundColor = "#888";
@@ -1984,6 +2016,60 @@
                 } else {
                     if (confirm("Loser matches already generated. Generate again?")) {
                         generateFinalLoserMatches(22);
+                    }
+                }
+            });
+            container.appendChild(button);
+
+        }
+
+        function showGenerateTier3LosersButton() {
+            const container = document.getElementById("final-matches-container");
+            // Create the 5-8 generation button
+            const button = document.createElement("button");
+            button.className = 'action-btn success';
+            button.textContent = "Generate Tier3 5-8 Bracket";
+            let firstClickKey = `Tier3 5-8 matches FirstClick`;
+            let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+            if (!isFirstClick) button.style.backgroundColor = "#888";
+            button.addEventListener("click", () => {
+                let firstClickKey = `Tier3 5-8 matches FirstClick`;
+                let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+                if (isFirstClick) {
+                    saveFirstClick(firstClickKey, "false");
+                    isFirstClick = false;
+                    generateFinalLoserMatches(3);
+                    alert("Tier3 5-8 matches generated");
+                } else {
+                    if (confirm("Loser matches already generated. Generate again?")) {
+                        generateFinalLoserMatches(3);
+                    }
+                }
+            });
+            container.appendChild(button);
+
+        }
+        
+        function showGenerateTier33LosersButton() {
+            const container = document.getElementById("final-matches-container");
+            // Create the 9-12 generation button
+            const button = document.createElement("button");
+            button.className = 'action-btn success';
+            button.textContent = "Generate Tier3 9-12 Bracket";
+            let firstClickKey = `Tier3 9-12 matches FirstClick`;
+            let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+            if (!isFirstClick) button.style.backgroundColor = "#888";
+            button.addEventListener("click", () => {
+                let firstClickKey = `Tier3 9-12 matches FirstClick`;
+                let isFirstClick = fetchFirstClick(firstClickKey) !== "false";
+                if (isFirstClick) {
+                    saveFirstClick(firstClickKey, "false");
+                    isFirstClick = false;
+                    generateFinalLoserMatches(33);
+                    alert("Tier3 9-12 matches generated");
+                } else {
+                    if (confirm("Loser matches already generated. Generate again?")) {
+                        generateFinalLoserMatches(33);
                     }
                 }
             });
