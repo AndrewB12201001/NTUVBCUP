@@ -276,7 +276,18 @@
         .hidden {
             display: none;
         }
-
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 10001;
+            max-width: 500px;
+            width: 90%;
+        }
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -337,6 +348,7 @@
         }
        
     </style>
+    <link rel="stylesheet" href="popup.css">
     <link rel="stylesheet" href="darkmode.css">
 </head>
 <body>
@@ -357,7 +369,9 @@
     <div id="bracketContainer" class="bracket-container"></div>
     <!-- Popup structure -->
     <div class="popup-overlay hidden" id="popup-overlay"></div>
-    <div class="popup hidden" id="popup"></div>
+    <div class="popup hidden" id="popup">
+        <div class="popup-content" id="popup-content"></div>
+    </div>
 
     <script>
         const Height = 40;
