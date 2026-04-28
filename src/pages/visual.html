@@ -247,12 +247,17 @@
             .match .champMatch{
                 font-size: 12px;
             }
-            #bracketContainer {
-                transform: scale(0.2);     /* 0.6 */
-                transform-origin: 0 0;            /* keep top-left as origin so layout stays predictable */
-                /* use block formatting context so internal fixed/absolute elements behave consistently */
-                display: block;
-                position: relative;
+            /* Mobile tab styles */
+            .tab-container {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tab-button {
+                font-size: 14px;
+                padding: 10px 16px;
+                flex-shrink: 0;
             }
         }
 
@@ -291,8 +296,11 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             border-bottom: 2px solid #ddd;
+            width: 100%;
+            overflow-x: auto;
+            box-sizing: border-box;
         }
 
         .tab-button {
@@ -306,6 +314,8 @@
             border-radius: 8px 8px 0 0;
             transition: all 0.3s ease;
             margin-bottom: -2px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .tab-button:hover {
