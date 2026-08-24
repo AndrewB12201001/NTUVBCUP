@@ -6,142 +6,13 @@
     <link rel="icon" href="../utility/volleyball.png" type="image/png">
     <title>Official Profiles</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f4f4f9;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 90px; /* Space so last row is not hidden behind fixed save bar */
-        }
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        th {
-            background: #2c3e50;
-            color: white;
-        }
-        button {
-            padding: 8px 12px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .edit-btn {
-            background: #f39c12;
-            color: white;
-        }
-        .match-btn {
-            background: #3498db;
-            color: white;
-        }
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #2c3e50;
-            padding: 12px 24px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            font-weight: 500;
-            margin-bottom: 20px;
-        }
-        .back-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            min-width: 300px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            border-radius: 10px;
-        }
-        .fixed-save-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 15px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-            z-index: 1000;
-        }
-        /* Pay per match */
-        .pay-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            gap: 10px;
-        }
-        .pay-left {
-            display: flex;
-            align-items: center;
-        }
-        .pay-icon {
-            margin-right: 10px;
-            color: #3498db;
-        }
-        .pay-info {
-            display: flex;
-            flex-direction: column;
-        }
-        .pay-label {
-            font-weight: 600;
-            color: #3498db;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        .pay-input {
-            width: 100px;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: 1px solid #e6e9ee;
-            text-align: center;
-            font-weight: 600;
-            color: #3498db;
-        }
-    </style>
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="OfficialProfiles.css">
     <link rel="stylesheet" href="darkmode.css">
 </head>
-<body>
+<body class="page table-page official-profiles-page">
     <script src="../utility/dataStorage.js"></script>
-    <div style=" display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="official-toolbar">
         <a href="../../index.html" class="back-link">
             <i class="fas fa-arrow-left"></i>
             Back to Main Page
@@ -190,21 +61,21 @@
     </div>
 
     <!-- NEW: Adjustment Modal -->
-    <div class="modal" id="adjustment-modal" style="min-width: 400px;">
+    <div class="modal adjustment-modal" id="adjustment-modal">
         <h2 id="adj-modal-title">Adjust Payment</h2>
-        <div style="margin-bottom: 15px; display: flex; gap: 10px; flex-direction: column;">
+        <div class="adjustment-form">
             <label>Enter Adjustment:</label>
-            <input type="number" id="adj-input-amount" placeholder="Amount (e.g. 100 or -50)" style="padding: 8px;">
-            <input type="text" id="adj-input-note" placeholder="Note (e.g. Bonus, Penalty)" style="padding: 8px;">
+            <input type="number" id="adj-input-amount" placeholder="Amount (e.g. 100 or -50)">
+            <input type="text" id="adj-input-note" placeholder="Note (e.g. Bonus, Penalty)">
             <button class="edit-btn" onclick="addNewAdjustment()">Add Adjustment</button>
         </div>
         
         <h3>Past Adjustments</h3>
-        <div id="adj-history-content" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+        <div id="adj-history-content" class="adjustment-history">
             <!-- History items will go here -->
         </div>
         
-        <div style="text-align: right;">
+        <div class="modal-actions">
             <strong>Total Adjustment: <span id="adj-total-display">0</span></strong>
         </div>
         <br>
@@ -213,7 +84,7 @@
 
     <div class="fixed-save-bar">
         <button id="save-all-official" class="save-all-button">Save All Changes</button>
-        <button id="cashout-all" class="save-all-button" style="background-color: #e74c3c; margin-left: 10px;">Cashout All</button>
+        <button id="cashout-all" class="save-all-button cashout-button">Cashout All</button>
     </div>
     <script>
         // Global variable to track which official is currently being edited in the modal
@@ -261,7 +132,7 @@
                     <td contenteditable="true">${availableDays}</td>
                     <td>${matchCount}</td>
                     <td>
-                        <button class="edit-btn" style="background-color: #6c757d;" onclick="openAdjustmentModal('${officialName}')">
+                        <button class="edit-btn adjustment-button" onclick="openAdjustmentModal('${officialName}')">
                             ${totalAdjustment > 0 ? '+' : ''}${totalAdjustment}
                         </button>
                     </td>
@@ -297,11 +168,10 @@
             container.innerHTML = "";
 
             if (history.length === 0) {
-                container.innerHTML = "<p style='color:#888; text-align:center;'>No past adjustments.</p>";
+                container.innerHTML = '<p class="empty-adjustments">No past adjustments.</p>';
             } else {
                 const ul = document.createElement("ul");
-                ul.style.listStyle = "none";
-                ul.style.padding = "0";
+                ul.className = "adjustment-list";
                 
                 // Show newest first
                 [...history].reverse().forEach((item, index) => {
@@ -309,21 +179,18 @@
                     const originalIndex = history.length - 1 - index;
                     
                     const li = document.createElement("li");
-                    li.style.borderBottom = "1px solid #eee";
-                    li.style.padding = "8px 0";
-                    li.style.display = "flex";
-                    li.style.justifyContent = "space-between";
-                    li.style.alignItems = "center";
+                    li.className = "adjustment-item";
+                    const amountClass = item.amount >= 0 ? "positive" : "negative";
                     
                     li.innerHTML = `
                         <div>
-                            <span style="font-weight:bold; color: ${item.amount >= 0 ? 'green' : 'red'}">
+                            <span class="adjustment-amount ${amountClass}">
                                 ${item.amount > 0 ? '+' : ''}${item.amount}
                             </span>
-                            <span style="color: #555; margin-left: 10px;">${item.note || '-'}</span>
-                            <div style="font-size: 0.8em; color: #999;">${item.date || ''}</div>
+                            <span class="adjustment-note">${item.note || '-'}</span>
+                            <div class="adjustment-date">${item.date || ''}</div>
                         </div>
-                        <button onclick="deleteAdjustment(${originalIndex})" style="background:#ff4444; color:white; padding:2px 6px; font-size:0.8em;">X</button>
+                        <button class="delete-adjustment" onclick="deleteAdjustment(${originalIndex})">X</button>
                     `;
                     ul.appendChild(li);
                 });

@@ -721,11 +721,15 @@ function prepareTeamID(teamID) {
     return teamID.trim();
 }
 
-function updateTeamID(originalTeamID, newTeamID) {
-    // -------------------------
-    // Update Teams
-    // -------------------------
-    const teams = fetchTeams();
+function getTeamStorage(boolNewbie = false) {
+    return boolNewbie
+        ? { fetch: fetchNewbieTeams, save: saveNewbieTeams }
+        : { fetch: fetchTeams, save: saveTeams };
+}
+
+function updateTeamID(originalTeamID, newTeamID, boolNewbie = false) {
+    const teamStorage = getTeamStorage(boolNewbie);
+    const teams = teamStorage.fetch();
     if (!(originalTeamID in teams)) {
         console.error(`Team "${originalTeamID}" not found.`);
         return;
@@ -734,7 +738,7 @@ function updateTeamID(originalTeamID, newTeamID) {
         console.error(`Team "${newTeamID}" already exists.`);
         return;
     }
-    // Update the team record in teams object.
+
     const newTeams = {};
     Object.keys(teams).forEach(key => {
         if (key === originalTeamID) {
@@ -745,32 +749,22 @@ function updateTeamID(originalTeamID, newTeamID) {
             newTeams[key] = teams[key];
         }
     });
-    saveTeams(newTeams);
+    teamStorage.save(newTeams);
 
-    // -------------------------
-    // Update teamData (each tier)
-    // -------------------------
     const teamData = fetchTeamData();
-    // For each tier (e.g., "Tier1-input"), update any occurrence of the original teamID.
     for (const tier in teamData) {
-        // Split the tier string into an array of team names.
         const teamList = teamData[tier].split('\n');
-        // Map each name: if it matches the original (after trimming), update it.
         const updatedList = teamList.map(name => {
             if (prepareTeamID(name) === prepareTeamID(originalTeamID)) {
                 return newTeamID;
             }
             return name;
         });
-        // Rejoin the list and update the tier value.
         teamData[tier] = updatedList.join('\n');
     }
     console.log("teamData", teamData);
     saveTeamData(teamData);
 
-    // -------------------------
-    // Update Matches (teamAID and teamBID)
-    // -------------------------
     const matches = fetchMatches();
     matches.forEach(match => {
         if (match.teamAID === originalTeamID) {

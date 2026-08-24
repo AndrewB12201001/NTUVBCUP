@@ -6,626 +6,13 @@
     <link rel="icon" href="../utility/volleyball.png" type="image/png">
     <title>Sort Matchings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="sortMatchings.css">
     <link rel="stylesheet" href="popup.css">
-    <style>
-        body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-        background-color: #f4f4f9;
-        }
-
-        .team-selector {
-            margin: 20px 0;
-        }
-
-        .navigation-buttons {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            display: flex;
-            gap: 10px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 200px;
-            margin: 10px 0;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .match-list {
-            width: 100%;
-            padding: 10px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            max-height: 300px;  /* Limit height of match list */
-            overflow-y: auto;   /* Add scroll for overflow */
-        }
-
-        .match-box {
-            background: white;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            user-select: none;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .match-box-sameweek {
-            background: rgb(217, 215, 215);
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            user-select: none;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .match-box:hover {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            translate: 0 -2px;
-        }
-
-        .match-box-sameweek:hover {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            translate: 0 -2px;
-        }
-
-        .match-box.dragging {
-            opacity: 0.5;
-        }
-
-        .match-box-sameweek.dragging {
-            opacity: 0.5;
-        }
-
-        .calendar {
-            width: 100%;
-            padding: 10px;
-            background: #f5f5f5;
-            border-radius: 8px;
-        }
-
-        .calendar-nav {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        #week-view {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-        }
-        #week-view-phone {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-        }
-
-        .day-box {
-            min-height: 200px;
-            background: white;
-            padding: 10px;
-            border-radius: 4px;
-        }
-
-        .day-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .day-date {
-            color: #888;
-            font-size: 0.8em;
-            margin-bottom: 10px;
-        }
-
-        .day-matches {
-            min-height: 150px;
-        }
-
-        .tier-section {
-            margin: 10px 0;
-        }
-
-        .tier-title {
-            font-weight: bold;
-            margin: 5px 0;
-        }
-
-        .matches-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-            padding: 5px;
-        }
-
-
-        .assigned-match {
-            background: #e0e0e0;
-            padding: 5px;
-            margin: 2px 0;
-            border-radius: 3px;
-            font-size: 0.9em;
-            cursor: pointer;
-            user-select: none;
-            position: relative; /* Added to enable proper positioning of the lock icon */
-        }
-        .past-assigned-match{
-            background: #bbbaba;
-            padding: 5px;
-            margin: 2px 0;
-            border-radius: 3px;
-            font-size: 0.9em;
-            cursor: pointer;
-            user-select: none;
-            position: relative; /* Added to enable proper positioning of the lock icon */
-        }
-        
-
-        .assigned-match:hover {
-            background: #d0d0d0;
-            translate: 0 -2px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .past-assigned-match:hover {
-            background: #a3a2a2;
-            translate: 0 -2px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .assigned-match.dragging {
-            opacity: 0.5;
-        }
-        .past-assigned-match.dragging {
-            opacity: 0.5;
-        }
-
-        .day-matches {
-            min-height: 150px;
-            padding: 5px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: white;
-        }
-
-        .action-btn.primary {
-            background: #4CAF50;
-        }
-
-        .action-btn.success {
-            background: #2196F3;
-        }
-
-        .action-btn.danger {
-            background: #f44336;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .btn-primary, .btn-secondary {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        
-        .btn-primary {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background: #d5d5d5;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-        
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #2c3e50;
-            padding: 12px 24px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .back-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .calendar-controls {
-            display: flex;
-            gap: 12px;
-            margin: 20px 0;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 0 12px;
-            flex-wrap: wrap;
-        }
-
-
-        .nav-btn, .save-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            color: white;
-        }
-
-        .nav-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            background: #2196F3;
-        }
-
-        .nav-btn:hover {
-            background: #1e88e5;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .nav-btn-week {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .nav-btn-week:hover {
-            background: #646464;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .save-btn {
-            background: #4CAF50;
-        }
-
-        .save-btn:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .input-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        h3 {
-            text-align: center;
-            font-size: 1.5em;
-        }
-
-        .instructions {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .instructions p {
-            margin: 5px 0;
-            color: #495057;
-        }
-
-        .instructions pre {
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
-            font-family: monospace;
-            white-space: pre-wrap;
-        }
-
-        .batch-textarea {
-            width: 90%;
-            padding: 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 14px;
-            margin-bottom: 15px;
-            resize: vertical;
-            transition: border-color 0.3s ease;
-        }
-
-        .batch-textarea:focus {
-            border-color: #4CAF50;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-        }
-
-        .process-button {
-            width: 100%;
-            padding: 12px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .process-button:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .process-result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: monospace;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .result-item {
-            padding: 8px;
-            margin: 4px 0;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .result-item.success {
-            background: #d4edda;
-        }
-
-        .result-item.error {
-            background: #f8d7da;
-        }
-
-
-        .copy-button {
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .team-selector {
-            background: white;
-            border-radius: 24px;
-            font-size: 18px;
-            box-shadow: 0 2px 8px rgba(76,175,80,0.08);
-            transition: border-color 0.3s, box-shadow 0.3s;
-            outline: none;
-        }
-        .finished {
-            background: #888888;
-            color: black;
-        }
-        .finishecd:hover {
-            background: #777777;
-            color: black;
-        }
-        .unfinished{
-            background: #f39c12;
-        }
-        .unfinished:hover{
-            background: #e08e0b;
-        }
-        .locked {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            color: #555;
-            right: 5px;
-            left: auto;
-        }
-        .phone-only {
-            display: none;
-        }
-        .sort-hidden {
-            display:none;
-        }
-        .popup-overlay-holiday{
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1001;
-            display: none;
-        }
-        .announcement-content {
-            width: 90%;
-            height: 300px;
-            margin-top: 10px;
-            padding: 10px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 14px;
-        }
-        .copy-feedback {
-            display: none;
-            margin-left: 10px;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        /* conti icon for Fridays */
-        .day-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-        .day-header .day-info {
-            display: flex;
-            flex-direction: column;
-        }
-        .conti-icon {
-            height: 22px;
-            width: auto;
-            margin-left: 8px;
-        }
-        @media (max-width: 768px) {
-            .body{
-                padding: 0px;
-            }
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .action-btn, .back-link {
-                justify-content: center;
-            }
-
-            .nav-btn, .save-btn {
-                justify-content: center;
-            }
-            .nav-text{
-                display: none;
-            }
-            .phone-hidden {
-                display: none;
-            }
-            .phone-only {
-                display: block;
-            }
-            .calendar {
-                padding: 4px;
-            }
-            .day-box {
-                padding: 5px;
-            }
-            .calendar-nav {
-                margin-bottom: 0px;
-            }
-            .input-container {
-                border-radius: 8px;
-            }
-            .h3 {
-                font-size: 0.9em;
-            }
-            .announcement-content {
-                height: 150px;
-                font-size: 12px;
-            }
-            .popup-holiday {
-                box-sizing: border-box;
-                width: min(50%, 300px);
-                padding: 20px;
-            }
-        }
-    </style>
     <link rel="stylesheet" href="renderMatchInDayBox.css">
     <link rel="stylesheet" href="darkmode.css">
-    <style>
-        .available {
-            background-color: lightgreen;
-        }
-
-        .unavailable {
-            background-color: lightcoral;
-        }
-    </style>
 </head>
-<body>
+<body class="page sort-matchings-page">
     <script src = '../utility/dataStorage.js'></script>
     <script src = '../utility/renderMatchInDayBox.js'></script>
     <script src = '../utility/Matchinfo.js'></script>
@@ -733,6 +120,10 @@
                         <i class="fas fa-save"></i>
                         <span class="nav-text">Save Assignments</span>
                     </button>
+                    <button id="auto-sort" class="save-btn phone-hidden">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        <span class="nav-text">Auto Sort</span>
+                    </button>
                     <button id="fb-announcement" class="nav-btn">
                         <i class="fas fa-sync"></i>
                         <span class="nav-text">FB Announcement Generator</span>
@@ -750,8 +141,8 @@
     </div>
 
     <!-- Add a new popup for announcements (place it anywhere near your other popups) -->
-    <div class="popup-overlay" id="announcement-popup-overlay" style="display:none;"></div>
-    <div class="popup" id="announcement-popup" style="display:none;">
+    <div class="popup-overlay" id="announcement-popup-overlay"></div>
+    <div class="popup" id="announcement-popup">
         <div class="input-container">
             <h3>FB Announcement</h3>
             <div>
@@ -927,9 +318,137 @@
         let currentWeekStart = new Date();
         currentWeekStart.setHours(0, 0, 0, 0); // Reset to midnight
         currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 8);
+        const WEEKDAY_NUMBERS = [1, 2, 3, 4, 5];
+        const AUTO_SORT_MATCHES_PER_DAY = 3;
+        const DEFAULT_AVAILABLE_DAYS = [1, 2, 3, 4, 5];
+        const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
         let selectedMatch = null;
+        let selectedDayFilter = null;
         let tempAssignments = new Map();
         let firstRender = true;
+
+        function getDateKey(date) {
+            return date.getFullYear() +
+                '-' + String(date.getMonth() + 1).padStart(2, '0') +
+                '-' + String(date.getDate()).padStart(2, '0');
+        }
+
+        function getWeekDate(dayNumber) {
+            const date = new Date(currentWeekStart);
+            date.setDate(currentWeekStart.getDate() + dayNumber - 1);
+            return date;
+        }
+
+        function getWeekDayNumber(date) {
+            const dayIndex = Math.floor((date - currentWeekStart) / (1000 * 60 * 60 * 24));
+            return dayIndex + 1;
+        }
+
+        function getMatchKey(match) {
+            return `${match.id}`;
+        }
+
+        function normalizeAvailableDays(match) {
+            const availableDays = Array.isArray(match.availableDays) && match.availableDays.length > 0
+                ? match.availableDays
+                : DEFAULT_AVAILABLE_DAYS;
+            return availableDays.map(day => Number(day));
+        }
+
+        function isMatchAvailableOnDay(match, dayNumber) {
+            return normalizeAvailableDays(match).includes(Number(dayNumber));
+        }
+
+        function getMatchTeams(match) {
+            return [match.teamAID, match.teamBID].filter(Boolean);
+        }
+
+        function getMatchDivision(match) {
+            return match.group?.split('-')[0] || match.group || 'Unassigned';
+        }
+
+        function isRealTeamMatch(match) {
+            return match.teamAID && match.teamBID && match.teamAID !== match.teamBID;
+        }
+
+        function isAssignmentInCurrentWeek(assignment) {
+            const dayNumber = getWeekDayNumber(assignment.date);
+            return dayNumber >= 1 && dayNumber <= 7;
+        }
+
+        function getAssignmentsForDay(dayNumber) {
+            return Array.from(tempAssignments.values()).filter(assignment =>
+                getWeekDayNumber(assignment.date) === Number(dayNumber)
+            );
+        }
+
+        function getAssignedTeamIdsForWeek() {
+            const teamIds = new Set();
+            tempAssignments.forEach(assignment => {
+                if (!isAssignmentInCurrentWeek(assignment)) return;
+                getMatchTeams(assignment.match).forEach(teamId => teamIds.add(teamId));
+            });
+            return teamIds;
+        }
+
+        function getAssignedDivisionsForDay(dayNumber) {
+            return new Set(getAssignmentsForDay(dayNumber).map(assignment => getMatchDivision(assignment.match)));
+        }
+
+        function hasWeeklyTeamConflict(match, assignedTeamIds) {
+            return getMatchTeams(match).some(teamId => assignedTeamIds.has(teamId));
+        }
+
+        function getUnassignedMatches() {
+            return fetchMatches().filter(match => {
+                const key = getMatchKey(match);
+                return !match.date && !tempAssignments.has(key) && (match.teamAID !== match.teamBID || match.teamAID === null);
+            });
+        }
+
+        function getAutoSortCandidatesForDay(dayNumber) {
+            const assignedTeamIds = getAssignedTeamIdsForWeek();
+            return getUnassignedMatches().filter(match =>
+                isRealTeamMatch(match) &&
+                isMatchAvailableOnDay(match, dayNumber) &&
+                !hasWeeklyTeamConflict(match, assignedTeamIds)
+            );
+        }
+
+        function chooseAutoSortMatch(dayNumber, candidates) {
+            const dayDivisions = getAssignedDivisionsForDay(dayNumber);
+            return [...candidates].sort((matchA, matchB) => {
+                const matchAHasNewDivision = dayDivisions.has(getMatchDivision(matchA)) ? 1 : 0;
+                const matchBHasNewDivision = dayDivisions.has(getMatchDivision(matchB)) ? 1 : 0;
+                if (matchAHasNewDivision !== matchBHasNewDivision) return matchAHasNewDivision - matchBHasNewDivision;
+
+                const matchAAvailability = normalizeAvailableDays(matchA).length;
+                const matchBAvailability = normalizeAvailableDays(matchB).length;
+                if (matchAAvailability !== matchBAvailability) return matchAAvailability - matchBAvailability;
+
+                return String(matchA.group || '').localeCompare(String(matchB.group || '')) || matchA.id - matchB.id;
+            })[0];
+        }
+
+        function addTemporaryAssignment(match, date, previouslyAssigned = false) {
+            tempAssignments.set(getMatchKey(match), {
+                match: match,
+                date: new Date(date),
+                previouslyAssigned: previouslyAssigned
+            });
+        }
+
+        function selectDayFilter(dayNumber, date) {
+            if (!WEEKDAY_NUMBERS.includes(dayNumber)) return;
+            selectedDayFilter = {
+                dayNumber: dayNumber,
+                dateKey: getDateKey(date)
+            };
+            document.querySelectorAll('.day-box').forEach((box, index) => {
+                box.classList.toggle('selected-day', index + 1 === dayNumber);
+            });
+            renderUndatedMatches();
+        }
 
 
         function updateWeekView() {
@@ -940,6 +459,9 @@
                 date.setDate(date.getDate() + i);
                 const dayBox = document.createElement('div');
                 dayBox.className = 'day-box phone-hidden';
+                if (selectedDayFilter?.dateKey === getDateKey(date)) {
+                    dayBox.classList.add('selected-day');
+                }
                 dayBox.innerHTML = `
                     <div class="day-name phone-hidden">${date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
                     <div class="day-date phone-hidden">${formatDate(date)}</div>
@@ -969,6 +491,9 @@
                         const dayOfWeek = i + 1;
                         handleMatchDrop(selectedMatch, dayOfWeek, date);
                     }
+                });
+                dayBox.addEventListener('click', () => {
+                    selectDayFilter(i + 1, date);
                 });
                 
                 weekView.appendChild(dayBox);
@@ -1014,12 +539,7 @@
 
         function handleMatchDrop(match, dayOfWeek, date) {
             if (dayOfWeek <= 7) { // Only allow drops on weekdays
-                const key = `${match.id}`;
-                tempAssignments.set(key, {
-                    match: match,
-                    date: date,
-                    previouslyAssigned: false
-                });
+                addTemporaryAssignment(match, date, false);
                 //console.log("matchDrop", match);
                 //console.log('tampMatchDate', date)
                 displayAssignedMatches();
@@ -1039,12 +559,7 @@
                     const dayIndex = Math.floor((date - currentWeekStart) / (1000 * 60 * 60 * 24));
 
                     if (dayIndex >= 0 && dayIndex < 7) {
-                        const key = `${match.id}`;
-                        tempAssignments.set(key, {
-                        match: match,
-                        date: date,
-                        previouslyAssigned: true
-                        });
+                        addTemporaryAssignment(match, date, true);
                     }   
                 });
                 firstRender = false;
@@ -1093,8 +608,8 @@
                             selectedMatch = assignment.match;
                             matchDiv.classList.add('dragging');
                             // Remove the current assignment when starting to drag
-                            tempAssignments.delete(key);
-                        });
+                        tempAssignments.delete(key);
+                    });
                         
                         matchDiv.addEventListener('dragend', () => {
                             matchDiv.classList.remove('dragging');
@@ -1112,7 +627,8 @@
                         matchDiv.classList.add('dragging');
                     });
                 
-                    matchDiv.addEventListener('click', () => {
+                    matchDiv.addEventListener('click', (event) => {
+                        event.stopPropagation();
                         highlightAvailableDays(assignment.match);
                     });
                     
@@ -1122,13 +638,14 @@
         }
 
         function renderUndatedMatches() {
-            const matches = fetchMatches();
-            const undatedMatches = matches.filter(match => {
-                const key = `${match.id}`;
-                return !match.date && !tempAssignments.has(key) && (match.teamAID !== match.teamBID || match.teamAID === null);
-            });
+            const undatedMatches = getUnassignedMatches();
             const container = document.getElementById('undated-matches');
             container.innerHTML = '';
+
+            if (selectedDayFilter) {
+                renderAvailableMatchesForDay(container, undatedMatches, selectedDayFilter.dayNumber);
+                return;
+            }
             
             const sortType = document.getElementById('sort-type').value;
             //console.log('Sort type:', sortType); // Debug log
@@ -1159,9 +676,7 @@
                 });
             } else if (sortType === 'day') { // Make sure this matches your select option value
                 //console.log('Sorting by day'); // Debug log
-                const dayMatches = {
-                    'Monday': [], 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': []
-                };
+                const dayMatches = Object.fromEntries(DAY_NAMES.map(dayName => [dayName, []]));
                 
                 //console.log('Undated matches:', undatedMatches); // Debug log
                 
@@ -1169,12 +684,10 @@
                     //console.log('Processing match:', match); // Debug log
                     //log('Available days:', match.availableDays); // Debug log
                     
-                    if (match.availableDays) {
-                        match.availableDays.forEach(day => {
-                            const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][day-1];
-                            if (dayName) dayMatches[dayName].push(match);
-                        });
-                    }
+                    normalizeAvailableDays(match).forEach(day => {
+                        const dayName = DAY_NAMES[day-1];
+                        if (dayName) dayMatches[dayName].push(match);
+                    });
                 });
                 
                 //console.log('Day matches:', dayMatches); // Debug log
@@ -1197,6 +710,30 @@
                 });
             }
 
+        }
+
+        function renderAvailableMatchesForDay(container, matches, dayNumber) {
+            const dayName = DAY_NAMES[dayNumber - 1];
+            const availableMatches = matches.filter(match =>
+                isMatchAvailableOnDay(match, dayNumber) &&
+                (match.teamAID !== match.teamBID || match.teamAID === null)
+            );
+            const section = document.createElement('div');
+            section.className = 'tier-section';
+            section.innerHTML = `<div class="tier-title">Available on ${dayName} (${availableMatches.length})</div>`;
+
+            const matchesGrid = document.createElement('div');
+            matchesGrid.className = 'matches-grid';
+            availableMatches
+                .sort((matchA, matchB) =>
+                    getMatchDivision(matchA).localeCompare(getMatchDivision(matchB)) || matchA.id - matchB.id
+                )
+                .forEach(match => {
+                    matchesGrid.appendChild(createMatchBox(match));
+                });
+
+            section.appendChild(matchesGrid);
+            container.appendChild(section);
         }
 
         function createMatchBox(match) {
@@ -1249,7 +786,7 @@
                 if (index < 5) { // Only process weekdays
                     const dayNumber = index + 1;
                     // Convert availableDays to numbers if they're strings
-                    const availableDays = match.availableDays?.map(day => Number(day)) || [];
+                    const availableDays = normalizeAvailableDays(match);
                     //console.log('Checking day:', dayNumber, 'Available:', availableDays); // Debug log
                     
                     if (availableDays.includes(dayNumber)) {
@@ -1287,6 +824,7 @@
         document.getElementById('prev-week').addEventListener('click', () => {
             currentWeekStart.setDate(currentWeekStart.getDate() - 7);
             firstRender = true;
+            selectedDayFilter = null;
             updateWeekView();
             updateWeekViewPhone();
         });
@@ -1294,33 +832,54 @@
         document.getElementById('next-week').addEventListener('click', () => {
             currentWeekStart.setDate(currentWeekStart.getDate() + 7);
             firstRender = true;
+            selectedDayFilter = null;
             updateWeekView();
             updateWeekViewPhone();
         });
 
-        document.getElementById('sort-type').addEventListener('click', function() {
-            const button = this;
-            const textSpan = button.querySelector('.toggle-text');
-            const icon = button.querySelector('i');
-            
-            // Toggle between tier and day sort
-            if (button.classList.contains('day-sort')) {
-                // Switch to tier sort
-                button.classList.remove('day-sort');
-                textSpan.textContent = 'Sort by Tier';
-                icon.className = 'fas fa-layer-group';
-                button.value = 'tier';
-            } else {
-                // Switch to day sort
-                button.classList.add('day-sort');
-                textSpan.textContent = 'Sort by Day';
-                icon.className = 'fas fa-calendar-day';
-                button.value = 'day';
+        function autoSortWeekMatches() {
+            displayAssignedMatches();
+            let addedCount = 0;
+            let madeProgress = true;
+
+            while (madeProgress) {
+                madeProgress = false;
+                const dayOptions = WEEKDAY_NUMBERS.map(dayNumber => {
+                    const assignedCount = getAssignmentsForDay(dayNumber).length;
+                    const remainingSlots = AUTO_SORT_MATCHES_PER_DAY - assignedCount;
+                    const candidates = remainingSlots > 0 ? getAutoSortCandidatesForDay(dayNumber) : [];
+                    return {
+                        dayNumber: dayNumber,
+                        assignedCount: assignedCount,
+                        remainingSlots: remainingSlots,
+                        candidates: candidates
+                    };
+                })
+                .filter(dayOption => dayOption.remainingSlots > 0 && dayOption.candidates.length > 0)
+                .sort((dayA, dayB) =>
+                    dayA.candidates.length - dayB.candidates.length ||
+                    dayA.assignedCount - dayB.assignedCount ||
+                    dayA.dayNumber - dayB.dayNumber
+                );
+
+                if (dayOptions.length === 0) break;
+
+                const nextDay = dayOptions[0];
+                const match = chooseAutoSortMatch(nextDay.dayNumber, nextDay.candidates);
+                if (!match) break;
+
+                addTemporaryAssignment(match, getWeekDate(nextDay.dayNumber), false);
+                addedCount++;
+                madeProgress = true;
             }
-            
-            // Trigger your existing sort function
-            updateDisplay(); // or whatever function you use to update the display
-        });
+
+            selectedDayFilter = null;
+            updateWeekView();
+            renderUndatedMatchCount();
+            alert(`Auto sort added ${addedCount} matches.`);
+        }
+
+        document.getElementById('auto-sort').addEventListener('click', autoSortWeekMatches);
 
         document.getElementById('save-assignments').addEventListener('click', () => {
             const matches = fetchMatches();
@@ -1488,6 +1047,7 @@
 
         // Add this after your select element or in your initialization code
         document.getElementById('sort-type').addEventListener('change', () => {
+            selectedDayFilter = null;
             renderUndatedMatches();
             renderUndatedMatchCount();
         });
