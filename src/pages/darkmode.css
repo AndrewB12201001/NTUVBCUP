@@ -101,6 +101,22 @@
     .nav-link:hover {
         background: #3a3a3a;
     }
+    .team-controls-menu {
+        background: #242424;
+        border-color: #555;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.9);
+    }
+    .team-controls-menu .navigation {
+        background: #242424;
+    }
+    .team-controls-menu .nav-link {
+        background: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+    .team-controls-menu .nav-link:hover {
+        background: #3a3a3a;
+    }
     .action-btn {
         background: #2d2d2d;
         color: #e0e0e0;
