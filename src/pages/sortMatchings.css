@@ -307,11 +307,11 @@
     margin-left: 8px;
 }
 
-.available {
+.day-box.available {
     background-color: lightgreen;
 }
 
-.unavailable {
+.day-box.unavailable {
     background-color: lightcoral;
 }
 

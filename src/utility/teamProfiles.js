@@ -97,7 +97,6 @@ function getTeamRows(config, teams) {
         } else {
             cells.push(
                 createTeamCell(team.availableDays, true),
-                createTeamCell(team.availableNights, true),
                 createTeamCell(team.teamName || "N/A", true)
             );
         }
@@ -139,8 +138,7 @@ function saveTeamProfileRow(config, oldTeamID, button) {
         teams[currentID].teamName = row.cells[5].innerText.trim();
     } else {
         teams[currentID].availableDays = parseNumberList(row.cells[1].innerText);
-        teams[currentID].availableNights = parseNumberList(row.cells[2].innerText);
-        teams[currentID].teamName = row.cells[3].innerText.trim();
+        teams[currentID].teamName = row.cells[2].innerText.trim();
     }
 
     config.saveTeams(teams);

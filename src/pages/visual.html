@@ -54,6 +54,7 @@
         });
         function renderCalendar(){
             const bracketsData = fetchBrackets();
+            const customTournaments = fetchCustomTournaments();
             const matches = fetchMatches();
 
             const container = document.getElementById("bracketContainer");
@@ -64,119 +65,190 @@
             const activeTiers = tierOrder.filter(tierPrefix => 
                 Object.keys(bracketsData).some(key => key.startsWith(tierPrefix))
             );
+            const customTournamentEntries = Object.entries(customTournaments);
 
             // Create tab container
             const tabContainer = document.createElement("div");
             tabContainer.classList.add("tab-container");
 
-            // Create tab buttons for each tier
-            activeTiers.forEach((tier, index) => {
+            function activateTab(tabId) {
+                document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+                document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
+
+                document.querySelector(`[data-tab-id="${tabId}"]`)?.classList.add("active");
+                document.getElementById(tabId)?.classList.add("active");
+            }
+
+            function createTabButton(label, tabId, isActive = false) {
                 const button = document.createElement("button");
                 button.classList.add("tab-button");
-                if (index === 0) button.classList.add("active"); // First tab is active by default
-                button.textContent = tier;
-                button.dataset.tier = tier;
+                if (isActive) button.classList.add("active");
+                button.textContent = label;
+                button.dataset.tabId = tabId;
                 button.addEventListener("click", function() {
-                    // Remove active class from all buttons and contents
-                    document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-                    document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
-                    
-                    // Add active class to clicked button and corresponding content
-                    this.classList.add("active");
-                    document.getElementById(`tab-${tier}`).classList.add("active");
+                    activateTab(tabId);
                 });
-                tabContainer.appendChild(button);
+                return button;
+            }
+
+            function getMatchById(matchId, customOnly = false) {
+                return matches.find(match =>
+                    String(match.id) === String(matchId) && (!customOnly || match.custom)
+                );
+            }
+
+            function getTeamLabel(match, teamID) {
+                if (!teamID) return "";
+                return match.custom ? String(teamID) : String(teamID).substring(0, 2);
+            }
+
+            function renderMatchDiv(roundDiv, match, matchIndex, mar, top) {
+                const teamAName = getTeamLabel(match, match.teamAID);
+                const teamBName = getTeamLabel(match, match.teamBID);
+                const matchDiv = document.createElement("div");
+        
+                if(match.nextMatch !== null){
+                    matchDiv.classList.add("match");
+                    matchDiv.style.marginBottom = `${mar}px`;
+                } else {
+                    matchDiv.classList.add("champMatch")
+                    matchDiv.style.marginBottom = `100px`
+                }
+
+                if (matchIndex === 0) {
+                    matchDiv.style.marginTop = `${top}px`;
+                }
+
+                const teamAHtml = (match.winner && match.winner === match.teamAID) ? `<span class="match-winner">${teamAName}</span>` : teamAName;
+                const teamBHtml = (match.winner && match.winner === match.teamBID) ? `<span class="match-winner">${teamBName}</span>` : teamBName;
+                const vsHtml = `${teamAHtml} vs ${teamBHtml}`;
+
+                if (match.teamAID === match.teamBID && match.teamAID !== null) {
+                    matchDiv.innerHTML = teamAName;
+                } else {
+                    matchDiv.innerHTML = vsHtml;
+                }
+
+                showMatchinfo(matchDiv, match);
+                roundDiv.appendChild(matchDiv);
+
+                // create connecting lines
+                if (matchIndex % 2 === 1 && match.nextMatch !== null) {
+                    const verticalLine = document.createElement("div");
+                    verticalLine.style.position = "absolute";
+                    verticalLine.style.left = 223 + "px";
+                    verticalLine.style.bottom = Height + "px"; 
+                    verticalLine.style.width = "2px";
+                    verticalLine.style.height = `${mar + 2 * Height+ 6}px`;
+                    verticalLine.classList.add("line-color");
+                    matchDiv.appendChild(verticalLine);
+                }
+            }
+
+            function renderEliminationBracket(tabContent, titleText, bracket, customOnly = false) {
+                const title = document.createElement("h2");
+                title.textContent = titleText;
+                tabContent.appendChild(title);
+
+                const bracketContainer = document.createElement("div");
+                bracketContainer.classList.add("bracket-container");
+                let mar = 40;
+                let top = 0;
+
+                bracket.roundMatchIds.forEach((round, roundIndex) => {
+                    const roundDiv = document.createElement("div");
+                    roundDiv.classList.add("round");
+                    const roundTitle = document.createElement("h3");
+                    roundTitle.textContent = `Round ${roundIndex + 1}`;
+                    roundDiv.appendChild(roundTitle);
+
+                    round.forEach((matchId, matchIndex) => {
+                        const match = getMatchById(matchId, customOnly);
+                        if (match !== undefined) {
+                            renderMatchDiv(roundDiv, match, matchIndex, mar, top);
+                        }
+                    });
+
+                    mar = mar * 2 + Height * 2 + 3;
+                    top = mar / 2;
+                    bracketContainer.appendChild(roundDiv);
+                });
+
+                tabContent.appendChild(bracketContainer);
+            }
+
+            function renderRobinTournament(tabContent, tournament) {
+                const title = document.createElement("h2");
+                title.textContent = tournament.name;
+                tabContent.appendChild(title);
+
+                const robinContainer = document.createElement("div");
+                robinContainer.classList.add("bracket-container", "custom-robin-container");
+
+                const roundDiv = document.createElement("div");
+                roundDiv.classList.add("round");
+                const roundTitle = document.createElement("h3");
+                roundTitle.textContent = "Robin Matches";
+                roundDiv.appendChild(roundTitle);
+
+                tournament.matchIds.forEach((matchId, matchIndex) => {
+                    const match = getMatchById(matchId, true);
+                    if (match !== undefined) {
+                        renderMatchDiv(roundDiv, match, matchIndex, 20, 0);
+                    }
+                });
+
+                robinContainer.appendChild(roundDiv);
+                tabContent.appendChild(robinContainer);
+            }
+
+            const hasCustomTournaments = customTournamentEntries.length > 0;
+            const firstActiveTabId = activeTiers.length > 0 ? `tab-${activeTiers[0]}` : "tab-custom";
+
+            // Create tab buttons for each tier
+            activeTiers.forEach((tier) => {
+                tabContainer.appendChild(createTabButton(tier, `tab-${tier}`, `tab-${tier}` === firstActiveTabId));
             });
+
+            if (hasCustomTournaments) {
+                tabContainer.appendChild(createTabButton("Custom", "tab-custom", firstActiveTabId === "tab-custom"));
+            }
 
             container.appendChild(tabContainer);
 
             // Create content for each tier
-            activeTiers.forEach((tier, index) => {
+            activeTiers.forEach((tier) => {
                 const tabContent = document.createElement("div");
                 tabContent.id = `tab-${tier}`;
                 tabContent.classList.add("tab-content");
-                if (index === 0) tabContent.classList.add("active"); // First tab content is active by default
+                if (`tab-${tier}` === firstActiveTabId) tabContent.classList.add("active");
 
                 // Get all brackets for this tier
                 const tiersForThisTier = Object.entries(bracketsData).filter(([key]) => key.startsWith(tier));
 
                 tiersForThisTier.forEach(([tierName, bracket]) => {
-                    const title = document.createElement("h2");
-                    title.textContent = tierName;
-                    tabContent.appendChild(title);
-
-                    const bracketContainer = document.createElement("div");
-                    bracketContainer.classList.add("bracket-container");
-                    let mar = 40;
-                    let top = 0;
-
-                    bracket.roundMatchIds.forEach((round, roundIndex) => {
-                        const roundDiv = document.createElement("div");
-                        roundDiv.classList.add("round");
-                        const roundTitle = document.createElement("h3");
-                        roundTitle.textContent = `Round ${roundIndex + 1}`;
-                        roundDiv.appendChild(roundTitle);
-
-                        round.forEach((matchId, matchIndex) => {
-                            const match = matches.find(m => m.id == matchId);
-                            const teamAFirst2 = match.teamAID ? match.teamAID.substring(0, 2) : '';
-                            const teamBFirst2 = match.teamBID ? match.teamBID.substring(0, 2) : '';
-                            
-                            if (match !== undefined) {
-                                const matchDiv = document.createElement("div");
-                        
-                                if(match.nextMatch !== null){
-                                    matchDiv.classList.add("match");
-                                    matchDiv.style.marginBottom = `${mar}px`;
-                                } else {
-                                    matchDiv.classList.add("champMatch")
-                                    matchDiv.style.marginBottom = `100px`
-                                }
-
-                                if (matchIndex === 0) {
-                                    matchDiv.style.marginTop = `${top}px`;
-                                }
-
-                                const date = match.date ?? '';
-                                const status = match.status === false ? "To Be Played" : (match.winner ? `Winner: ${match.winner === match.teamAID ? teamAFirst2 : teamBFirst2}` : 'To Be Played');
-
-                                const teamAHtml = (match.winner && match.winner === match.teamAID) ? `<span class="match-winner">${teamAFirst2}</span>` : teamAFirst2;
-                                const teamBHtml = (match.winner && match.winner === match.teamBID) ? `<span class="match-winner">${teamBFirst2}</span>` : teamBFirst2;
-                                const vsHtml = `${teamAHtml} vs ${teamBHtml}`;
-
-                                if (match.teamAID === match.teamBID && match.teamAID !== null) {
-                                    matchDiv.innerHTML = `${teamAFirst2}`;
-                                } else {
-                                    matchDiv.innerHTML = vsHtml;
-                                }
-
-                                showMatchinfo(matchDiv, match);
-                                roundDiv.appendChild(matchDiv);
-
-                                // create connecting lines
-                                if (matchIndex % 2 === 1 && match.nextMatch !== null) {
-                                    const verticalLine = document.createElement("div");
-                                    verticalLine.style.position = "absolute";
-                                    verticalLine.style.left = 223 + "px";
-                                    verticalLine.style.bottom = Height + "px"; 
-                                    verticalLine.style.width = "2px";
-                                    verticalLine.style.height = `${mar + 2 * Height+ 6}px`;
-                                    verticalLine.classList.add("line-color");
-                                    matchDiv.appendChild(verticalLine);
-                                }
-                            }
-                        });
-
-                        mar = mar * 2 + Height * 2 + 3;
-                        top = mar / 2;
-                        bracketContainer.appendChild(roundDiv);
-                    });
-
-                    tabContent.appendChild(bracketContainer);
+                    renderEliminationBracket(tabContent, tierName, bracket);
                 });
 
                 container.appendChild(tabContent);
             });
+
+            if (hasCustomTournaments) {
+                const customTabContent = document.createElement("div");
+                customTabContent.id = "tab-custom";
+                customTabContent.classList.add("tab-content");
+                if (firstActiveTabId === "tab-custom") customTabContent.classList.add("active");
+
+                customTournamentEntries.forEach(([, tournament]) => {
+                    if (tournament.type === "elimination" && Array.isArray(tournament.roundMatchIds)) {
+                        renderEliminationBracket(customTabContent, tournament.name, tournament, true);
+                    } else if (tournament.type === "robin" && Array.isArray(tournament.matchIds)) {
+                        renderRobinTournament(customTabContent, tournament);
+                    }
+                });
+
+                container.appendChild(customTabContent);
+            }
         }
     </script>
 </body>

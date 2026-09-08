@@ -562,6 +562,17 @@
             Newbie Team Profiles
         </a>
     </div>
+    <div class="navigation customteam" id="customteam-area">
+        <h4 class="phone-hidden"> Custom Team </h4>
+        <a href="src/pages/customTeams.html" class="nav-link">
+            <i class="fas fa-user-plus"></i>
+            Add Custom Team
+        </a>
+        <a href="src/pages/customTournament.html" class="nav-link">
+            <i class="fas fa-diagram-project"></i>
+            Create Custom Tournament
+        </a>
+    </div>
     <!-- Popup structure -->
     <div class="popup-overlay hidden" id="popup-overlay"></div>
     <div class="popup hidden" id="popup">
@@ -750,6 +761,14 @@
             });
             const newbiecupContainer = document.querySelectorAll(".newbiecup");
             newbiecupContainer.forEach(container => {
+                if (container.style.display === "none" || container.style.display === "") {
+                    container.style.display = "flex";
+                } else {
+                    container.style.display = "none";
+                }
+            });
+            const customTeamContainer = document.querySelectorAll(".customteam");
+            customTeamContainer.forEach(container => {
                 if (container.style.display === "none" || container.style.display === "") {
                     container.style.display = "flex";
                 } else {

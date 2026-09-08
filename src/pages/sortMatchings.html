@@ -193,8 +193,8 @@
                             `;
                             // Update matches involving this team
                             Object.values(matches).forEach((match, index) => {
-                                if (match.teamAID === teamId || match.teamBID === teamId) {
-                                    matches[index].availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, teams);
+                                if (!match.newbie && !match.custom && (match.teamAID === teamId || match.teamBID === teamId)) {
+                                    matches[index].availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, false, false);
                                 }
                             });
                             
@@ -272,13 +272,13 @@
                             `;
                             // Update matches involving this team
                             Object.values(matches).forEach((match, index) => {
-                                if (match.teamAID === teamId || match.teamBID === teamId) {
-                                    matches[index].availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, teams);
+                                if (match.newbie && !match.custom && (match.teamAID === teamId || match.teamBID === teamId)) {
+                                    matches[index].availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, true, false);
                                 }
                             });
                             
                             // Save both teams and matches
-                            saveTeams(teams);
+                            saveNewbieTeams(teams);
                             saveMatches(matches);
                         } else {
                             resultItem.classList.add('error');
@@ -348,10 +348,24 @@
             return `${match.id}`;
         }
 
+        function calculateStoredMatchAvailableDays(match) {
+            return calculateMatchAvailableDays(
+                match.teamAID,
+                match.teamBID,
+                Boolean(match.newbie),
+                Boolean(match.custom)
+            );
+        }
+
         function normalizeAvailableDays(match) {
-            const availableDays = Array.isArray(match.availableDays) && match.availableDays.length > 0
-                ? match.availableDays
-                : DEFAULT_AVAILABLE_DAYS;
+            if (match.custom) {
+                return calculateStoredMatchAvailableDays(match).map(day => Number(day));
+            }
+
+            const availableDays =
+                Array.isArray(match.availableDays) && match.availableDays.length > 0
+                    ? match.availableDays
+                    : DEFAULT_AVAILABLE_DAYS;
             return availableDays.map(day => Number(day));
         }
 
@@ -922,7 +936,13 @@
         document.getElementById('fb-announcement').addEventListener('click', () => {
             let teams = fetchTeams();
             let teamsNewbie = fetchNewbieTeams();
+            let teamsCustom = fetchCustomTeams();
             let announcementText = "[臺大盃公告]\n**本週臺大盃賽程**\n";
+
+            function getAnnouncementTeamName(match, teamID) {
+                const teamSource = match.custom ? teamsCustom : match.newbie ? teamsNewbie : teams;
+                return teamSource[teamID]?.teamName || teamID;
+            }
 
             // Build a map dateString -> array of assignments
             const dayAssignments = {};
@@ -963,8 +983,8 @@
                         announcementText += `${assignment.match.teamAID}\n`;
                         return; // Skip further processing for "假日"
                     }
-                    const teamAName = assignment.match.newbie ? teamsNewbie[assignment.match.teamAID]?.teamName || assignment.match.teamAID : teams[assignment.match.teamAID]?.teamName || assignment.match.teamAID;
-                    const teamBName = assignment.match.newbie ? teamsNewbie[assignment.match.teamBID]?.teamName || assignment.match.teamBID : teams[assignment.match.teamBID]?.teamName || assignment.match.teamBID;
+                    const teamAName = getAnnouncementTeamName(assignment.match, assignment.match.teamAID);
+                    const teamBName = getAnnouncementTeamName(assignment.match, assignment.match.teamBID);
                     announcementText += `場${matchNumberToChinese(index + 1)} (${matchTier}) ${teamAName} vs ${teamBName}\n`;
                 });
             });
@@ -1014,6 +1034,7 @@
             if (userConfirmed) {
                 const teams = fetchTeams();
                 const teamsNewbie = fetchNewbieTeams();
+                const teamsCustom = fetchCustomTeams();
                 //console.log("Teams before reset:", teams); // Debug log
                 
                 Object.keys(teams).forEach(teamId => {
@@ -1022,6 +1043,10 @@
                 
                 Object.keys(teamsNewbie).forEach(teamId => {
                     teamsNewbie[teamId].availableDays = null;
+                });
+
+                Object.keys(teamsCustom).forEach(teamId => {
+                    teamsCustom[teamId].availableDays = null;
                 });
                 //console.log("Teams after reset:", teams); // Debug log
                 
@@ -1034,6 +1059,7 @@
                 // Save both teams and matches
                 saveTeams(teams);
                 saveNewbieTeams(teamsNewbie);
+                saveCustomTeams(teamsCustom);
                 saveMatches(matches);
                 
                 alert('All teams availability has been reset successfully!');

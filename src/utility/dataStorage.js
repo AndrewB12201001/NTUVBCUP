@@ -94,7 +94,37 @@ function fetchFirstClick(firstClickKey){
     const isFirstClick = localStorage.getItem(firstClickKey) || false;
     return isFirstClick;
 }
+
+function fetchCustomTeams(){
+    return fetchStoredJSON("customTeams", {});
+}
+
+function fetchCustomMatches(){
+    return fetchStoredJSON("customMatches", []);
+}
+
+function fetchCustomTournaments(){
+    return fetchStoredJSON("customTournaments", {});
+}
+
+function fetchCustomGameIDCounter(){
+    return Number(localStorage.getItem("customGameIDCounter") || 0);
+}
 // Save data
+
+function fetchStoredJSON(key, fallbackValue) {
+    const storedValue = localStorage.getItem(key);
+    if (!storedValue) {
+        localStorage.setItem(key, JSON.stringify(fallbackValue));
+        return fallbackValue;
+    }
+    try {
+        return JSON.parse(storedValue);
+    } catch (error) {
+        console.error(`Error parsing ${key} JSON:`, error);
+        return fallbackValue;
+    }
+}
 
 function saveMatches(matches) {
     try {
@@ -156,6 +186,28 @@ function saveGameIDCounter(gameIDCounter){
 
 function saveFirstClick(firstClickKey, state){
     localStorage.setItem(firstClickKey, state);
+}
+
+function saveCustomTeams(teams){
+    localStorage.setItem("customTeams", JSON.stringify(teams));
+}
+
+function saveCustomMatches(matches){
+    localStorage.setItem("customMatches", JSON.stringify(matches));
+}
+
+function saveCustomTournaments(tournaments){
+    localStorage.setItem("customTournaments", JSON.stringify(tournaments));
+}
+
+function saveCustomGameIDCounter(gameIDCounter){
+    localStorage.setItem("customGameIDCounter", JSON.stringify(gameIDCounter));
+}
+
+function generateCustomGameID() {
+    const nextID = fetchCustomGameIDCounter() + 1;
+    saveCustomGameIDCounter(nextID);
+    return nextID;
 }
 
 // 標記比賽已開始
@@ -327,8 +379,8 @@ function calculateAvailableDays(unavailableDays) {
 }
 
 // Add this new function to calculate intersection of available days
-function calculateMatchAvailableDays(teamA, teamB, boolNewbie = false) {
-    const teams = boolNewbie ? fetchNewbieTeams() : fetchTeams();
+function calculateMatchAvailableDays(teamA, teamB, boolNewbie = false, boolCustom = false) {
+    const teams = boolCustom ? fetchCustomTeams() : boolNewbie ? fetchNewbieTeams() : fetchTeams();
     // Check if both teams exist and have availableDays
     if (!teams[teamA] || !teams[teamB]) {
         if(!teams[teamA] && !teams[teamB]){
@@ -444,7 +496,7 @@ function saveMatches(matches){
             const previousTeamAID = matches[index].teamAID;
             const previousTeamBID = matches[index].teamBID;
             match = updateMatchWinner(match);
-            match.availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, match.newbie);
+            match.availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, match.newbie, match.custom);
             // update brackets
             console.log(matches[index].status);
             if (matches[index].status) {

@@ -105,6 +105,14 @@
     font-weight: bold;
 }
 
+.custom-robin-container .champMatch {
+    margin-bottom: 24px !important;
+}
+
+.custom-robin-container .champMatch::before {
+    display: none;
+}
+
 .bracket-page .btn-secondary {
     background: red;
     color: #fff;

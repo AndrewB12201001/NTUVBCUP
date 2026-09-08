@@ -254,15 +254,40 @@
     }
     .match-list-title-row,
     .official-toolbar,
-    .pay-info {
+    .pay-info,
+    .custom-panel,
+    .custom-team-card,
+    .custom-bracket-match,
+    .custom-match-preview {
         color: #e0e0e0;
     }
     .pay-input,
     .match-date-input,
-    .announcement-content {
+    .announcement-content,
+    .custom-field input,
+    .custom-field textarea,
+    .custom-field select {
         background: #2d2d2d;
         color: #e0e0e0;
         border-color: #555;
+    }
+    .tag-chip {
+        background: #1f3a6d;
+        color: #dfe8ff;
+    }
+    .checkbox-pill,
+    .filter-option,
+    .custom-stage,
+    .team-slot {
+        background: #242424;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+    .team-slot.is-filled,
+    .robin-team {
+        background: #234d2a;
+        color: #d4edda;
+        border-color: #2f6d38;
     }
     .input-container {
         box-shadow: 0 2px 10px rgba(0,0,0,0.9);

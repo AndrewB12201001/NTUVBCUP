@@ -28,6 +28,10 @@ Availability arrays use weekday numbers:
 | `brackets` | `{ [bracketName]: Bracket }` | Bracket metadata used by the visual bracket page and finals generation. |
 | `officialStats` | `{ [officialName]: OfficialStats }` | Official assignment counts, availability, and payment adjustment history. |
 | `gameIDCounter` | `number` | Last generated match ID. Incremented before creating a new game. |
+| `customTeams` | `{ [teamID]: CustomTeam }` | General-purpose teams for custom tournaments. Separate from NTU Cup and Newbie Cup teams. |
+| `customMatches` | `CustomMatch[]` | Legacy custom match storage. Current custom tournament games are appended to `matches`. |
+| `customTournaments` | `{ [tournamentID]: CustomTournament }` | Saved custom tournament metadata and match ID groupings. |
+| `customGameIDCounter` | `number` | Legacy custom match ID counter. Current custom tournament games use `gameIDCounter`. |
 
 ## State and Control Keys
 
@@ -85,6 +89,62 @@ Stored inside `teams`.
 | `preliminaryGroup` | `string` | Group label, such as `Tier1-A`. |
 | `availableDays` | `number[]` | Weekdays this team can play. |
 | `teamName` | `string` | Longer display/team name used in announcements. |
+
+### `CustomTeam`
+
+Stored inside `customTeams`.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `teamID` | `string` | Custom team key. |
+| `games` | `number[]` | Custom match IDs involving this team. |
+| `tags` | `string[]` | General-purpose labels used for filtering and tournament creation. The custom team form splits tags on spaces, commas, or newlines. |
+| `availableDays` | `number[]` | Weekdays this team can play. |
+| `teamName` | `string` | Longer display/team name. Defaults to `teamID`. |
+
+### `CustomMatch`
+
+Stored inside `matches` for current custom tournament builds. Older backups may still contain this shape inside legacy `customMatches`.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id` | `number` | Unique custom match ID. |
+| `teamAID` | `string \| null` | Team ID for side A. Later bracket rounds start as null. |
+| `teamBID` | `string \| null` | Team ID for side B. Later bracket rounds start as null. |
+| `set1`, `set2`, `set3` | `[number, number]` | Scores. |
+| `winner` | `string \| null` | Winning team ID when scores are later entered. |
+| `loser` | `string \| null` | Losing team ID when scores are later entered. |
+| `status` | `boolean` | Whether the match is finished. |
+| `nextMatch` | `number \| null` | Next custom match that receives the winner for elimination brackets. |
+| `loserNextMatch` | `number \| null` | Placement match that receives the loser near the end of elimination brackets. |
+| `preliminary` | `boolean` | Always false for custom matches saved to the shared match list. |
+| `newbie` | `boolean` | Always false for custom matches saved to the shared match list. |
+| `tournamentID` | `string` | Parent custom tournament ID. |
+| `group` | `string` | Custom group label, such as `Fall Open-Round1` or `Fall Open-Robin1`. |
+| `round` | `number \| null` | Round number. |
+| `availableDays` | `number[]` | Intersection of both teams' available weekdays. |
+| `official` | `string` | Reserved for future official assignment. |
+| `date` | `string \| null` | Reserved for future scheduling. |
+| `locked` | `boolean` | Reserved for future locking. |
+| `custom` | `boolean` | Always true for custom matches. |
+
+### `CustomTournament`
+
+Stored inside `customTournaments`.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id` | `string` | Slug-like tournament ID derived from the tournament name. |
+| `name` | `string` | User-entered tournament name. |
+| `type` | `"elimination" \| "robin"` | Tournament generation mode. |
+| `matchIds` | `number[]` | Shared `matches` IDs created for this tournament. |
+| `roundMatchIds` | `number[][]` | Present for elimination brackets. Custom match IDs grouped by round. |
+| `teamIds` | `string[]` | Present for robin tournaments. Teams included in the robin round. |
+| `size` | `number` | Present for elimination brackets. Bracket size, always a power of two. |
+| `rounds` | `number` | Present for elimination brackets. Number of bracket rounds. |
+| `teamCount` | `number` | Present for robin tournaments. Required number of teams; can be any integer of at least 2. |
+| `repeatCount` | `number` | Present for robin tournaments. Number of complete robin cycles. |
+| `createdAt` | `string` | ISO timestamp when saved. |
 
 ### `NewbieTeam`
 
@@ -162,6 +222,10 @@ When missing, helpers initialize or default these keys:
 | `fetchNewbieStarted()` | `newbieStarted` | `false` |
 | `fetchGameIDCounter()` | `gameIDCounter` | `0` |
 | `fetchFirstClick(key)` | dynamic first-click key | `false` when absent |
+| `fetchCustomTeams()` | `customTeams` | `{}` |
+| `fetchCustomMatches()` | `customMatches` | `[]`; legacy only for older custom tournament data |
+| `fetchCustomTournaments()` | `customTournaments` | `{}` |
+| `fetchCustomGameIDCounter()` | `customGameIDCounter` | `0`; legacy only |
 
 ## Backup and Restore Notes
 
