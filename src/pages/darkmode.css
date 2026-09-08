@@ -1,4 +1,17 @@
 @media (prefers-color-scheme: dark) {
+    :root {
+        --color-page: #1a1a1a;
+        --color-surface: #2d2d2d;
+        --color-surface-muted: #242424;
+        --color-border: #555;
+        --color-border-strong: #666;
+        --color-text: #e0e0e0;
+        --color-text-muted: #ccc;
+        --shadow-sm: 0 2px 5px rgba(0,0,0,0.5);
+        --shadow-md: 0 4px 10px rgba(0,0,0,0.7);
+        --shadow-lg: 0 5px 20px rgba(0,0,0,0.9);
+    }
+
     body {
         background-color: #1a1a1a;
         color: #e0e0e0;
@@ -86,6 +99,22 @@
         color: #e0e0e0;
     }
     .nav-link:hover {
+        background: #3a3a3a;
+    }
+    .team-controls-menu {
+        background: #242424;
+        border-color: #555;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.9);
+    }
+    .team-controls-menu .navigation {
+        background: #242424;
+    }
+    .team-controls-menu .nav-link {
+        background: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+    .team-controls-menu .nav-link:hover {
         background: #3a3a3a;
     }
     .action-btn {
@@ -176,7 +205,9 @@
         color: #e0e0e0;
     }
 
-    .page-header {
+    .page-header,
+    .page-card,
+    .pay-card {
         background: #1e1e1e;
     }
     .tier-form {
@@ -209,8 +240,72 @@
     .scrolling-list {
         background: #2d2d2d;
     }
-    .input-container {
+    .input-container,
+    .instructions,
+    .instructions pre,
+    .adjustment-history,
+    .official-toolbar,
+    .tab-container,
+    .tab-button {
         background: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+    .instructions p,
+    .adjustment-note,
+    .adjustment-date,
+    .empty-adjustments {
+        color: #ccc;
+    }
+    .tab-button:hover {
+        background: #3a3a3a;
+    }
+    .tab-button.active {
+        background: #277f8f;
+        color: #fff;
+        border-bottom-color: #31acc2;
+    }
+    .adjustment-item {
+        border-bottom-color: #444;
+    }
+    .match-list-title-row,
+    .official-toolbar,
+    .pay-info,
+    .custom-panel,
+    .custom-team-card,
+    .custom-bracket-match,
+    .custom-match-preview {
+        color: #e0e0e0;
+    }
+    .pay-input,
+    .match-date-input,
+    .announcement-content,
+    .custom-field input,
+    .custom-field textarea,
+    .custom-field select {
+        background: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+    .tag-chip {
+        background: #1f3a6d;
+        color: #dfe8ff;
+    }
+    .checkbox-pill,
+    .filter-option,
+    .custom-stage,
+    .team-slot {
+        background: #242424;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+    .team-slot.is-filled,
+    .robin-team {
+        background: #234d2a;
+        color: #d4edda;
+        border-color: #2f6d38;
+    }
+    .input-container {
         box-shadow: 0 2px 10px rgba(0,0,0,0.9);
     }
     /* Lines connecting matches in the bracket */
@@ -290,9 +385,4 @@
         background: #e08900;
     }
     /* End calendar match box colors */
-    /* pay per match */
-    .pay-card{
-        background: #2b2b2b;
-    }
-    
 }

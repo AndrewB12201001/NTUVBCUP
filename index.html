@@ -42,6 +42,65 @@
             font-size: 1.2em;
         }
 
+        .team-controls {
+            position: relative;
+        }
+
+        .team-controls summary {
+            list-style: none;
+            cursor: pointer;
+        }
+
+        .team-controls summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .team-controls-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: grid;
+            gap: 12px;
+            width: min(320px, calc(100vw - 32px));
+            max-width: calc(100vw - 32px);
+            padding: 14px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .team-controls-menu .navigation {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding: 8px;
+            background: #fff;
+            border-radius: 8px;
+        }
+
+        .team-controls-menu h4 {
+            margin: 0 0 2px;
+        }
+
+        .team-controls-menu .nav-link {
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            margin: 2px 0;
+            padding: 8px 10px;
+            justify-content: flex-start;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: none;
+            overflow-wrap: anywhere;
+            white-space: normal;
+        }
+
         /* Basic styles for the popup */
         .popup {
             position: fixed;
@@ -473,7 +532,6 @@
             font-size: 0.6em;
             margin: 0 15px 0 0;
             align-self: center;
-            color: #2c3e50;
         }
         .finished {
             background: #888888;
@@ -524,10 +582,47 @@
                 <i class="fas fa-user-group"></i>
                 <span class="nav-text">Official Profiles</span>
             </a>
-            <a id="add-team-input" class="nav-link phone-only">
-                <i class="fas fa-bars"></i>
-                <span class="nav-text phone-hidden">Team input</span>
-            </a>
+            <details class="team-controls">
+                <summary class="nav-link">
+                    <i class="fas fa-users-gear"></i>
+                    Team controls
+                </summary>
+                <div class="team-controls-menu">
+                    <div class="navigation ntucup" id="ntucup-area">
+                        <h4>NTU CUP</h4>
+                        <a href="src/pages/inputPlayGroups.html" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            Input Playgroups
+                        </a>
+                        <a href="src/pages/teamProfiles_v2.html" class="nav-link">
+                            <i class="fas fa-user-group"></i>
+                            Team Profiles
+                        </a>
+                    </div>
+                    <div class="navigation newbiecup" id="newbiecup-area">
+                        <h4>Newbie Cup</h4>
+                        <a href="src/pages/inputNoobCupTeams.html" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            Input Newbie Teams
+                        </a>
+                        <a href="src/pages/teamProfiles_Newbie.html" class="nav-link">
+                            <i class="fas fa-user-group"></i>
+                            Newbie Team Profiles
+                        </a>
+                    </div>
+                    <div class="navigation customteam" id="customteam-area">
+                        <h4>Custom Team</h4>
+                        <a href="src/pages/customTeams.html" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            Add Custom Team
+                        </a>
+                        <a href="src/pages/customTournament.html" class="nav-link">
+                            <i class="fas fa-diagram-project"></i>
+                            Create Custom Tournament
+                        </a>
+                    </div>
+                </div>
+            </details>
         </div>
         <div style="justify-content: space-between; display:flex; gap:5em; align-items:center;">
             <button class="action-btn" id="export-btn">
@@ -539,28 +634,6 @@
                 Upload
             </button>
         </div>
-    </div>
-    <div class="navigation ntucup" id = "ntucup-area">
-        <h4 class="phone-hidden"> NTU CUP </h4>
-        <a href="src/pages/inputPlayGroups.html" class="nav-link">
-            <i class="fas fa-users"></i>
-            Input Playgroups
-        </a>
-        <a href="src/pages/teamProfiles_v2.html" class="nav-link">
-            <i class="fas fa-user-group"></i>
-            Team Profiles
-        </a>
-    </div>
-    <div class="navigation newbiecup" id = "newbiecup-area">
-        <h4 class="phone-hidden"> Newbie Cup </h4>
-        <a href="src/pages/inputNoobCupTeams.html" class="nav-link">
-            <i class="fas fa-users"></i>
-            Input Newbie Teams
-        </a>
-        <a href="src/pages/teamProfiles_Newbie.html" class="nav-link">
-            <i class="fas fa-user-group"></i>
-            Newbie Team Profiles
-        </a>
     </div>
     <!-- Popup structure -->
     <div class="popup-overlay hidden" id="popup-overlay"></div>
@@ -684,6 +757,13 @@
             renderCalendar();
         });
 
+        const teamControls = document.querySelector('.team-controls');
+        document.addEventListener('click', event => {
+            if (teamControls?.open && !teamControls.contains(event.target)) {
+                teamControls.removeAttribute('open');
+            }
+        });
+
         // Initialize calendar
         document.addEventListener('DOMContentLoaded', () => {
             renderCalendar();
@@ -738,24 +818,6 @@
                 reader.readAsText(file);
             };
             input.click();
-        });
-        document.getElementById("add-team-input").addEventListener("click", () => {
-            const ntucupContainer = document.querySelectorAll(".ntucup");
-            ntucupContainer.forEach(container => {
-                if (container.style.display === "none" || container.style.display === "") {
-                    container.style.display = "flex";
-                } else {
-                    container.style.display = "none";
-                }
-            });
-            const newbiecupContainer = document.querySelectorAll(".newbiecup");
-            newbiecupContainer.forEach(container => {
-                if (container.style.display === "none" || container.style.display === "") {
-                    container.style.display = "flex";
-                } else {
-                    container.style.display = "none";
-                }
-            });
         });
     </script>
 </body>

@@ -94,7 +94,37 @@ function fetchFirstClick(firstClickKey){
     const isFirstClick = localStorage.getItem(firstClickKey) || false;
     return isFirstClick;
 }
+
+function fetchCustomTeams(){
+    return fetchStoredJSON("customTeams", {});
+}
+
+function fetchCustomMatches(){
+    return fetchStoredJSON("customMatches", []);
+}
+
+function fetchCustomTournaments(){
+    return fetchStoredJSON("customTournaments", {});
+}
+
+function fetchCustomGameIDCounter(){
+    return Number(localStorage.getItem("customGameIDCounter") || 0);
+}
 // Save data
+
+function fetchStoredJSON(key, fallbackValue) {
+    const storedValue = localStorage.getItem(key);
+    if (!storedValue) {
+        localStorage.setItem(key, JSON.stringify(fallbackValue));
+        return fallbackValue;
+    }
+    try {
+        return JSON.parse(storedValue);
+    } catch (error) {
+        console.error(`Error parsing ${key} JSON:`, error);
+        return fallbackValue;
+    }
+}
 
 function saveMatches(matches) {
     try {
@@ -156,6 +186,28 @@ function saveGameIDCounter(gameIDCounter){
 
 function saveFirstClick(firstClickKey, state){
     localStorage.setItem(firstClickKey, state);
+}
+
+function saveCustomTeams(teams){
+    localStorage.setItem("customTeams", JSON.stringify(teams));
+}
+
+function saveCustomMatches(matches){
+    localStorage.setItem("customMatches", JSON.stringify(matches));
+}
+
+function saveCustomTournaments(tournaments){
+    localStorage.setItem("customTournaments", JSON.stringify(tournaments));
+}
+
+function saveCustomGameIDCounter(gameIDCounter){
+    localStorage.setItem("customGameIDCounter", JSON.stringify(gameIDCounter));
+}
+
+function generateCustomGameID() {
+    const nextID = fetchCustomGameIDCounter() + 1;
+    saveCustomGameIDCounter(nextID);
+    return nextID;
 }
 
 // 標記比賽已開始
@@ -327,8 +379,8 @@ function calculateAvailableDays(unavailableDays) {
 }
 
 // Add this new function to calculate intersection of available days
-function calculateMatchAvailableDays(teamA, teamB, boolNewbie = false) {
-    const teams = boolNewbie ? fetchNewbieTeams() : fetchTeams();
+function calculateMatchAvailableDays(teamA, teamB, boolNewbie = false, boolCustom = false) {
+    const teams = boolCustom ? fetchCustomTeams() : boolNewbie ? fetchNewbieTeams() : fetchTeams();
     // Check if both teams exist and have availableDays
     if (!teams[teamA] || !teams[teamB]) {
         if(!teams[teamA] && !teams[teamB]){
@@ -444,7 +496,7 @@ function saveMatches(matches){
             const previousTeamAID = matches[index].teamAID;
             const previousTeamBID = matches[index].teamBID;
             match = updateMatchWinner(match);
-            match.availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, match.newbie);
+            match.availableDays = calculateMatchAvailableDays(match.teamAID, match.teamBID, match.newbie, match.custom);
             // update brackets
             console.log(matches[index].status);
             if (matches[index].status) {
@@ -721,11 +773,15 @@ function prepareTeamID(teamID) {
     return teamID.trim();
 }
 
-function updateTeamID(originalTeamID, newTeamID) {
-    // -------------------------
-    // Update Teams
-    // -------------------------
-    const teams = fetchTeams();
+function getTeamStorage(boolNewbie = false) {
+    return boolNewbie
+        ? { fetch: fetchNewbieTeams, save: saveNewbieTeams }
+        : { fetch: fetchTeams, save: saveTeams };
+}
+
+function updateTeamID(originalTeamID, newTeamID, boolNewbie = false) {
+    const teamStorage = getTeamStorage(boolNewbie);
+    const teams = teamStorage.fetch();
     if (!(originalTeamID in teams)) {
         console.error(`Team "${originalTeamID}" not found.`);
         return;
@@ -734,7 +790,7 @@ function updateTeamID(originalTeamID, newTeamID) {
         console.error(`Team "${newTeamID}" already exists.`);
         return;
     }
-    // Update the team record in teams object.
+
     const newTeams = {};
     Object.keys(teams).forEach(key => {
         if (key === originalTeamID) {
@@ -745,32 +801,22 @@ function updateTeamID(originalTeamID, newTeamID) {
             newTeams[key] = teams[key];
         }
     });
-    saveTeams(newTeams);
+    teamStorage.save(newTeams);
 
-    // -------------------------
-    // Update teamData (each tier)
-    // -------------------------
     const teamData = fetchTeamData();
-    // For each tier (e.g., "Tier1-input"), update any occurrence of the original teamID.
     for (const tier in teamData) {
-        // Split the tier string into an array of team names.
         const teamList = teamData[tier].split('\n');
-        // Map each name: if it matches the original (after trimming), update it.
         const updatedList = teamList.map(name => {
             if (prepareTeamID(name) === prepareTeamID(originalTeamID)) {
                 return newTeamID;
             }
             return name;
         });
-        // Rejoin the list and update the tier value.
         teamData[tier] = updatedList.join('\n');
     }
     console.log("teamData", teamData);
     saveTeamData(teamData);
 
-    // -------------------------
-    // Update Matches (teamAID and teamBID)
-    // -------------------------
     const matches = fetchMatches();
     matches.forEach(match => {
         if (match.teamAID === originalTeamID) {
