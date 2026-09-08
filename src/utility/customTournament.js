@@ -484,7 +484,14 @@ function initializeCustomTournamentPage() {
 
     function renderTeamList() {
         const filters = getFilters();
-        const teams = getCustomTeamList().filter(team => customTeamMatchesFilters(team, filters));
+        const stagedTeams = state.staged?.type === "robin"
+            ? new Set(state.staged.teams)
+            : state.staged?.type === "elimination"
+                ? new Set(state.staged.slots.filter(Boolean))
+                : new Set();
+        const teams = getCustomTeamList()
+            .filter(team => !stagedTeams.has(team.teamID))
+            .filter(team => customTeamMatchesFilters(team, filters));
         elements.teamList.innerHTML = teams.map(team => `
             <div class="custom-team-card" draggable="true" data-team-id="${team.teamID}">
                 <strong>${team.teamID}</strong>
@@ -612,6 +619,7 @@ function initializeCustomTournamentPage() {
                 state.staged = stage;
             }
             setStatus("Game creation is staged. Nothing is saved yet.");
+            renderTeamList();
             renderStage();
             return true;
         } catch (error) {
@@ -668,6 +676,7 @@ function initializeCustomTournamentPage() {
         const duplicateIndex = state.staged.slots.indexOf(teamID);
         if (duplicateIndex !== -1) state.staged.slots[duplicateIndex] = null;
         state.staged.slots[slotIndex] = teamID;
+        renderTeamList();
         renderStage();
     }
 
@@ -678,6 +687,7 @@ function initializeCustomTournamentPage() {
         }
         if (!state.staged.teams.includes(teamID)) {
             state.staged.teams.push(teamID);
+            renderTeamList();
             renderStage();
         }
     }
@@ -710,6 +720,7 @@ function initializeCustomTournamentPage() {
         const removeButton = event.target.closest("button[data-remove-team]");
         if (!removeButton || !state.staged || state.staged.type !== "robin") return;
         state.staged.teams = state.staged.teams.filter(teamID => teamID !== removeButton.dataset.removeTeam);
+        renderTeamList();
         renderStage();
     });
 

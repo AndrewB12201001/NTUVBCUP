@@ -156,6 +156,7 @@
 
 .custom-stage {
     display: flex;
+    align-items: stretch;
     gap: 36px;
     min-height: 280px;
     overflow: auto;
@@ -202,12 +203,30 @@
     font-weight: 600;
 }
 
-.robin-roster,
+.robin-roster {
+    flex: 1 1 0;
+    min-width: min(320px, 100%);
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    min-height: 100%;
+    padding: 16px;
+    border: 2px dashed var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
 .robin-pairs {
+    flex: 0 1 420px;
     min-width: 260px;
     display: grid;
     gap: 10px;
     align-content: start;
+}
+
+.robin-roster h3,
+.robin-pairs h3 {
+    margin: 0;
 }
 
 .robin-team-list {
@@ -234,6 +253,17 @@
 .empty-stage,
 .custom-builder-status {
     color: var(--color-text-muted);
+}
+
+.drop-hint {
+    display: grid;
+    place-items: center;
+    min-height: 180px;
+    margin: 0;
+    padding: 20px;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    text-align: center;
 }
 
 .custom-match-preview {
