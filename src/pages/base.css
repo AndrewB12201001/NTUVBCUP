@@ -2,12 +2,14 @@
     --color-page: #f4f4f9;
     --color-surface: #fff;
     --color-surface-muted: #f5f5f5;
+    --color-bracket-container: #e9e9ee;
+    --color-bracket-border: #555;
     --color-border: #ddd;
     --color-border-strong: #ccc;
     --color-text: #2c3e50;
     --color-text-muted: #666;
-    --color-primary: #4CAF50;
-    --color-primary-hover: #45a049;
+    --color-primary: #6f9b68;
+    --color-primary-hover: #5f8b59;
     --color-info: #2196F3;
     --color-info-hover: #1e88e5;
     --color-warning: #f39c12;
@@ -104,7 +106,7 @@ input {
 }
 
 .table-page th {
-    background: var(--color-text);
+    background: #1f2933;
     color: #fff;
 }
 

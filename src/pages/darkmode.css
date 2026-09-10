@@ -3,6 +3,8 @@
         --color-page: #1a1a1a;
         --color-surface: #2d2d2d;
         --color-surface-muted: #242424;
+        --color-bracket-container: #242424;
+        --color-bracket-border: #ccc;
         --color-border: #555;
         --color-border-strong: #666;
         --color-text: #e0e0e0;
@@ -149,8 +151,8 @@
     table {
         background: #2d2d2d;
     }
-    th {
-        background: #1f1f1f;
+    .table-page th {
+        background: #161616;
         color: #e0e0e0;
     }
     td {
@@ -250,6 +252,13 @@
         background: #2d2d2d;
         color: #e0e0e0;
         border-color: #555;
+    }
+    .official-profiles-page .official-toolbar {
+        background: var(--color-page);
+    }
+    thead th {
+        background: #161616;
+        color: #f5f5f5;
     }
     .instructions p,
     .adjustment-note,

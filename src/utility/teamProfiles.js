@@ -86,10 +86,13 @@ function getTeamRows(config, teams) {
         ];
 
         if (config.showPreliminaryData) {
-            const rankColor = isPreliminaryMatchesFinished(teamID) ? "background-color:limegreen;" : "";
+            const preliminaryRank = getTeamRank(team);
+            const rankStatusIcon = isPreliminaryMatchesFinished(teamID)
+                ? ' <i class="fas fa-circle-check preliminary-qualified-icon" title="Preliminary requirement met" aria-label="Preliminary requirement met"></i>'
+                : "";
             cells.push(
                 createTeamCell(team.preliminaryGroup),
-                createTeamCell(getTeamRank(team), false, rankColor),
+                createTeamCell(`${preliminaryRank}${rankStatusIcon}`),
                 createTeamCell(team.preliminaryScore),
                 createTeamCell(team.availableDays, true),
                 createTeamCell(team.teamName || "N/A", true)

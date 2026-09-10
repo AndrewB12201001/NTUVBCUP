@@ -22,6 +22,8 @@
     </a>
     <h1>Sort Matchings</h1>
     <div id = 'matches-left'></div>
+    
+    <!-- Temporarily disabled: batch availability controls are not currently needed.
     <div class="action-buttons phone-hidden">
         <button id="batch-input-newbie" class="action-btn primary phone-hidden">
             <i class="fas fa-list"></i>
@@ -36,6 +38,8 @@
             Reset All Teams Availability
         </button>
     </div>
+    -->
+    
 
     <!-- Popup structure for match info -->
     <div class="popup-overlay hidden" id="popup-overlay"></div>
@@ -155,13 +159,14 @@
 
     <script>
         // Utility functions
-
-        document.getElementById('batch-input').addEventListener('click', () => {
+        
+        ///
+        document.getElementById('batch-input')?.addEventListener('click', () => {
             document.getElementById('batch-popup-overlay').style.display = 'block';
             document.getElementById('batch-popup').style.display = 'block';
         });
-
-        document.getElementById('processBatchInput').addEventListener('click', () => {
+        ///
+        document.getElementById('processBatchInput')?.addEventListener('click', () => {
             let teams = fetchTeams();
             const matches = fetchMatches();
             const input = document.getElementById('batchInput').value;
@@ -228,19 +233,19 @@
             renderUndatedMatchCount();
         });
 
-        document.getElementById('batch-popup-overlay').addEventListener('click', () => {
+        document.getElementById('batch-popup-overlay')?.addEventListener('click', () => {
             document.getElementById('batch-popup-overlay').style.display = 'none';
             document.getElementById('batch-popup').style.display = 'none';
         });
 
         // Newbie Batch Input Implementation
 
-        document.getElementById('batch-input-newbie').addEventListener('click', () => {
+        document.getElementById('batch-input-newbie')?.addEventListener('click', () => {
             document.getElementById('batch-popup-overlay-newbie').style.display = 'block';
             document.getElementById('batch-popup-newbie').style.display = 'block';
         });
 
-        document.getElementById('processBatchInputNewbie').addEventListener('click', () => {
+        document.getElementById('processBatchInputNewbie')?.addEventListener('click', () => {
             let teams = fetchNewbieTeams();
             const matches = fetchMatches();
             const input = document.getElementById('batchInputNewbie').value;
@@ -1028,7 +1033,7 @@
             }
         });
 
-        document.getElementById('reset-availability').addEventListener('click', () => {
+        document.getElementById('reset-availability')?.addEventListener('click', () => {
             const userConfirmed = confirm("Are you sure you want to reset all teams' availability? This will set all teams to be available on all weekdays.");
             
             if (userConfirmed) {
