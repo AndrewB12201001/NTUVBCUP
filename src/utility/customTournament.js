@@ -223,8 +223,10 @@ function createRoundRobinPairs(teamIDs, repeatCount) {
 }
 
 function buildEliminationTournament(stage) {
-    if (stage.slots.some(slot => !slot)) {
-        throw new Error("Fill every first-round bracket slot before saving.");
+    for (let slotIndex = 0; slotIndex < stage.slots.length; slotIndex += 2) {
+        if (!stage.slots[slotIndex] && !stage.slots[slotIndex + 1]) {
+            throw new Error("Add at least one team to every first-round match before saving.");
+        }
     }
 
     const tournamentID = getCustomTournamentID(stage.name);
@@ -237,8 +239,10 @@ function buildEliminationTournament(stage) {
         const roundMatches = [];
         for (let matchIndex = 0; matchIndex < matchCount; matchIndex++) {
             const slotIndex = matchIndex * 2;
-            const teamAID = roundIndex === 1 ? stage.slots[slotIndex] : null;
-            const teamBID = roundIndex === 1 ? stage.slots[slotIndex + 1] : null;
+            const slotTeamAID = stage.slots[slotIndex];
+            const slotTeamBID = stage.slots[slotIndex + 1];
+            const teamAID = roundIndex === 1 ? slotTeamAID || slotTeamBID : null;
+            const teamBID = roundIndex === 1 ? slotTeamBID || slotTeamAID : null;
             const match = createCustomMatchRecord(nextMatchID(), teamAID, teamBID, `${stage.name}-Round${roundIndex}`, tournamentID, roundIndex);
             roundMatches.push(match);
             matches.push(match);
