@@ -543,22 +543,49 @@
         .indexpage-hidden {
             display: none;
         }
+        #sync-status {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #e7edf5;
+            color: #34445c;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        #sync-status[data-state="success"] {
+            background: #dff4e6;
+            color: #176b3a;
+        }
+        #sync-status[data-state="warning"] {
+            background: #fff0c7;
+            color: #775400;
+        }
+        #sync-status[data-state="error"] {
+            background: #fde1e4;
+            color: #9c1f2d;
+        }
     </style>
 
     <!-- Add Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="src/pages/renderMatchInDayBox.css">
     <link rel="stylesheet" href="src/pages/darkmode.css">
+    <script>document.documentElement.classList.add('admin-auth-pending');</script>
+    <style>html.admin-auth-pending body { visibility: hidden; }</style>
+    <script defer src="src/utility/runtime-config.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.min.js"></script>
+    <script defer src="src/utility/auth-gate.js" data-login-url="login.html"></script>
+    <script defer src="src/utility/admin-backend.js"></script>
 </head>
 <body>
     <script>
-        (function(){
+        document.addEventListener('DOMContentLoaded', async function () {
             try {
+                await window.ntucupBackendReady;
                 if(!localStorage.getItem('teamData')) {
                     window.location.href = 'src/pages/inputPlayGroups.html';
                 }
             } catch(e) { console.error('Redirect check failed', e); }
-        })();
+        });
     </script>
     <script src = 'src/utility/dataStorage.js'></script>
     <script src = 'src/utility/Matchinfo.js'></script>
@@ -624,7 +651,12 @@
                 </div>
             </details>
         </div>
-        <div style="justify-content: space-between; display:flex; gap:5em; align-items:center;">
+        <div style="justify-content: space-between; display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+            <span id="sync-status" role="status" aria-live="polite">Connecting…</span>
+            <button class="action-btn" id="publish-now-btn">
+                <i class="fas fa-cloud-arrow-up"></i>
+                Publish now
+            </button>
             <button class="action-btn" id="export-btn">
                 <i class="fas fa-download"></i>
                 Download
@@ -632,6 +664,10 @@
             <button class="action-btn" id="import-btn">
                 <i class="fas fa-file-import"></i>
                 Upload
+            </button>
+            <button class="action-btn" id="sign-out-btn" data-login-url="login.html">
+                <i class="fas fa-right-from-bracket"></i>
+                Sign out
             </button>
         </div>
     </div>
@@ -770,11 +806,7 @@
         });
 
         document.getElementById('export-btn').addEventListener('click', function() {
-            const data = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                data[key] = localStorage.getItem(key);
-            }
+            const data = window.ntucupBackend.readSnapshotFromStorage();
             const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -805,9 +837,8 @@
                 reader.onload = function(event) {
                     try {
                         const data = JSON.parse(event.target.result);
-                        for (const key in data) {
-                            localStorage.setItem(key, data[key]);
-                        }
+                        window.ntucupBackend.importSnapshot(data);
+                        window.ntucupBackend.markDirty();
                         alert('Data imported!');
                         location.reload();
                     } catch (err) {
