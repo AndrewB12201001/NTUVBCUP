@@ -1,5 +1,18 @@
 # NTUVBCUP deployment
 
+## No custom domain is required
+
+Cloudflare Pages assigns an HTTPS `pages.dev` address to each project. A useful
+initial naming scheme is:
+
+- admin: `ntuvbcup-admin.pages.dev`
+- public results: `ntucup-results.pages.dev`
+
+Use the exact URLs Cloudflare assigns if either project name is unavailable.
+The admin `pages.dev` URL becomes the Supabase Auth Site URL, and its exact
+`/login.html` URL must be added to the Supabase redirect allowlist. A custom
+domain can be attached later without changing the database architecture.
+
 ## Current Supabase integration branch
 
 The `fulldeploywithlogin` branch changes the organizer from a browser-only
@@ -15,7 +28,9 @@ decision. `_routes.json` limits Function invocations to `/api/*`, leaving static
 assets on the normal Pages path.
 
 Apply `supabase/migrations/202609220001_shared_tournament_snapshot.sql`, create
-the first Auth user, add its UUID to `public.admin_users`, and configure the
+the first user under Supabase **Authentication → Users**, and add that Auth
+user's UUID—not a username—to `public.admin_users`. The email-based insertion
+query in `README.md` avoids manually copying the UUID. Then configure the
 following Cloudflare Pages build variables before deploying this branch:
 
 | Variable | Value |

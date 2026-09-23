@@ -16,12 +16,31 @@ Build the static deployment with `npm run build`, then preview with
 1. Create a Supabase project and run
    `supabase/migrations/202609220001_shared_tournament_snapshot.sql` in its SQL
    editor.
-2. Create the administrator in Supabase Authentication, copy that user's UUID,
-   then run this in the SQL editor:
+2. In Supabase, open **Authentication → Users** and create or invite the
+   administrator using their email address. The administrator must be an Auth
+   user before they can be allowlisted. Then run this in the SQL editor,
+   replacing the example email with that Auth user's exact email:
 
    ```sql
    insert into public.admin_users (user_id)
-   values ('THE-AUTH-USER-UUID');
+   select id
+   from auth.users
+   where lower(email) = lower('your-admin-email@example.com')
+   on conflict (user_id) do nothing
+   returning user_id;
+   ```
+
+   The returned value should look like
+   `123e4567-e89b-12d3-a456-426614174000`. A username such as
+   `ANDREW_IS_ALIVE` is not a UUID and cannot be used here. If the query returns
+   no row, create the Auth user first or check that the email matches.
+
+   Verify the allowlist with:
+
+   ```sql
+   select au.user_id, u.email
+   from public.admin_users au
+   join auth.users u on u.id = au.user_id;
    ```
 3. In the admin Cloudflare Pages project, configure these build variables:
    `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and optionally
