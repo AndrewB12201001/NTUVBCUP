@@ -1,64 +1,8 @@
 # NTUVBCUP deployment
 
-## No custom domain is required
-
-Cloudflare Pages assigns an HTTPS `pages.dev` address to each project. A useful
-initial naming scheme is:
-
-- admin: `ntuvbcup-admin.pages.dev`
-- public results: `ntucup-results.pages.dev`
-
-Use the exact URLs Cloudflare assigns if either project name is unavailable.
-The admin `pages.dev` URL becomes the Supabase Auth Site URL, and its exact
-`/login.html` URL must be added to the Supabase redirect allowlist. A custom
-domain can be attached later without changing the database architecture.
-
-## Current Supabase integration branch
-
-The `fulldeploywithlogin` branch changes the organizer from a browser-only
-deployment into an authenticated Cloudflare Pages frontend backed by Supabase.
-The existing JSON/localStorage structure remains as a browser cache and import
-format; the authoritative public copy is the `tournament_snapshots` row in
-Supabase.
-
-Authenticated writes go through the Cloudflare Pages Function at
-`/api/publish`. The Function performs payload validation and forwards the
-signed-in user's Supabase token; Supabase RLS then makes the final authorization
-decision. `_routes.json` limits Function invocations to `/api/*`, leaving static
-assets on the normal Pages path.
-
-Apply `supabase/migrations/202609220001_shared_tournament_snapshot.sql`, create
-the first user under Supabase **Authentication → Users**, and add that Auth
-user's UUID—not a username—to `public.admin_users`. The email-based insertion
-query in `README.md` avoids manually copying the UUID. Then configure the
-following Cloudflare Pages build variables before deploying this branch:
-
-| Variable | Value |
-| --- | --- |
-| `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_PUBLISHABLE_KEY` | Browser-safe publishable/anon key |
-| `NTUCUP_TOURNAMENT_SLUG` | Optional; defaults to `ntu-cup` |
-
-Also add the deployed admin `/login.html` URL to Supabase Auth's allowed
-redirect URLs. The service-role key must never be stored in Cloudflare frontend
-variables or committed to either repository.
-
-The administrator must review their existing browser data and press **Publish
-now** once. That explicit first publish prevents an empty cloud project from
-overwriting the organizer's established local tournament. Subsequent saves are
-debounced and published automatically. A newer remote timestamp stops an older
-browser from silently overwriting it.
-
-The public results frontend is the `supabase-integration` branch in the sibling
-`ntucup` repository. Deploy it as a separate Cloudflare Pages project using the
-same three variables. Its build no longer includes the old JSON backup and its
-Supabase role receives public read access only.
-
 ## Stage 1: static Cloudflare Pages site
 
-The older `main` release remains a browser-local scheduling tool. The Supabase
-integration described above replaces that limitation when its migration and
-runtime configuration are deployed.
+This release remains a browser-local scheduling tool. Publishing it does not publish the organizer's scores or synchronize visitors. GitHub deployments update code only.
 
 ### Local validation
 
