@@ -12,8 +12,7 @@
         "customTournaments", "customGameIDCounter", "gamesStarted",
         "newbieStarted", "payPerMatch", "initialized"
     ]);
-
-    let publishTimer = null;
+    
     let publishInFlight = null;
 
     function isTournamentKey(key) {
@@ -163,11 +162,6 @@
 
     function queuePublish() {
         markDirty();
-        if (localStorage.getItem(REMOTE_ENABLED_KEY) !== "true") return;
-        window.clearTimeout(publishTimer);
-        publishTimer = window.setTimeout(() => {
-            publishSnapshot().catch(error => console.error("Automatic publish failed:", error));
-        }, 1200);
     }
 
     window.ntucupBackend = {
