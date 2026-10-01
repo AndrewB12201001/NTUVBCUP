@@ -207,6 +207,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         const publishButton = document.getElementById("publish-now-btn");
+        const syncButton = document.getElementById("sync-cloud-btn");
         publishButton?.addEventListener("click", async function () {
             const replacingUnlinkedCloudCopy = localStorage.getItem(REMOTE_UPDATED_KEY) === null;
             if (replacingUnlinkedCloudCopy) {
@@ -216,12 +217,52 @@
                 if (!confirmed) return;
             }
             publishButton.disabled = true;
+            if (syncButton) syncButton.disabled = true;
             try {
                 await publishSnapshot({ force: replacingUnlinkedCloudCopy });
             } catch (error) {
                 window.alert(error.message || "Unable to publish tournament results.");
             } finally {
                 publishButton.disabled = false;
+                if (syncButton) syncButton.disabled = false;
+            }
+        });
+
+        syncButton?.addEventListener("click", async function () {
+            const confirmed = window.confirm(
+                "Sync with Cloud? All local changes that have not been published, including unsaved edits, will be discarded and replaced with the latest cloud data. This cannot be undone."
+            );
+            if (!confirmed) return;
+
+            syncButton.disabled = true;
+            if (publishButton) publishButton.disabled = true;
+            try {
+                await window.ntucupBackendReady;
+                if (publishInFlight) await publishInFlight;
+                setSyncStatus("Syncing with cloud…", "working");
+                const { client } = await window.ntucupAuthReady;
+                const remote = await fetchRemoteSnapshot(client);
+                if (!remote) throw new Error("No cloud copy exists yet. Local data has been kept.");
+                validateSnapshot(remote.payload);
+
+                const previousKeys = Object.keys(readSnapshotFromStorage());
+                importSnapshot(remote.payload);
+                for (const key of previousKeys) {
+                    if (!Object.prototype.hasOwnProperty.call(remote.payload, key)) {
+                        localStorage.removeItem(key);
+                    }
+                }
+                localStorage.setItem(REMOTE_UPDATED_KEY, remote.updated_at);
+                localStorage.setItem(REMOTE_ENABLED_KEY, "true");
+                localStorage.removeItem(DIRTY_KEY);
+                setSyncStatus("Synced with cloud", "success");
+                window.location.reload();
+            } catch (error) {
+                setSyncStatus(error.message || "Cloud sync failed", "error");
+                window.alert(error.message || "Unable to sync with cloud.");
+            } finally {
+                syncButton.disabled = false;
+                if (publishButton) publishButton.disabled = false;
             }
         });
 
