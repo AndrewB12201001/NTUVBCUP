@@ -116,6 +116,16 @@ function notifyTournamentDataChanged() {
     window.ntucupBackend?.queuePublish();
 }
 
+// Compare stored strings without calling fetch helpers that may save defaults.
+function saveTournamentValue(key, value) {
+    const newValue = String(value);
+    const oldValue = localStorage.getItem(key);
+    if (oldValue === newValue) return false;
+    localStorage.setItem(key, newValue);
+    notifyTournamentDataChanged();
+    return true;
+}
+
 function fetchStoredJSON(key, fallbackValue) {
     const storedValue = localStorage.getItem(key);
     if (!storedValue) {
@@ -133,8 +143,7 @@ function fetchStoredJSON(key, fallbackValue) {
 function saveMatches(matches) {
     try {
         const matchesJSON = JSON.stringify(matches);
-        localStorage.setItem("matches", matchesJSON);
-        notifyTournamentDataChanged();
+        saveTournamentValue("matches", matchesJSON);
     } catch (error) {
         console.error("Error saving matches:", error);
     }
@@ -143,8 +152,7 @@ function saveMatches(matches) {
 function saveTeams(teams){
     try {
         const teamsJSON = JSON.stringify(teams);
-        localStorage.setItem("teams", teamsJSON);
-        notifyTournamentDataChanged();
+        saveTournamentValue("teams", teamsJSON);
     } catch (error) {
         console.error("Error saving teams:", error);
     }
@@ -153,8 +161,7 @@ function saveTeams(teams){
 function saveNewbieTeams(teams){
     try {
         const teamsJSON = JSON.stringify(teams);
-        localStorage.setItem("newbieTeams", teamsJSON);
-        notifyTournamentDataChanged();
+        saveTournamentValue("newbieTeams", teamsJSON);
     } catch (error) {
         console.error("Error saving teams:", error);
     }
@@ -163,8 +170,7 @@ function saveNewbieTeams(teams){
 function saveTeamData(teamData){
     try {
         const teamDataJSON = JSON.stringify(teamData);
-        localStorage.setItem("teamData", teamDataJSON);
-        notifyTournamentDataChanged();
+        saveTournamentValue("teamData", teamDataJSON);
     } catch (error) {
         console.error("Error saving teamData:", error);
     }
@@ -173,51 +179,43 @@ function saveTeamData(teamData){
 function saveOfficialStats(officialStats){
     try {
         const officialsJSON = JSON.stringify(officialStats);
-        localStorage.setItem("officialStats", officialsJSON);
-        notifyTournamentDataChanged();
+        saveTournamentValue("officialStats", officialsJSON);
     } catch (error) {
         console.error("Error saving officials:", error);
     }
 }
 
 function saveBrackets(existingBrackets){
-    localStorage.setItem('brackets', JSON.stringify(existingBrackets));
-    notifyTournamentDataChanged();
+    saveTournamentValue('brackets', JSON.stringify(existingBrackets));
 }
 
 function saveGameIDCounter(gameIDCounter){
     try {
         const gameIDCounterJSON = JSON.stringify(gameIDCounter);
-        localStorage.setItem("gameIDCounter", gameIDCounterJSON);
-        notifyTournamentDataChanged();
+        saveTournamentValue("gameIDCounter", gameIDCounterJSON);
     } catch (error) {
         console.error("Error saving gameIDCounter:", error);
     }
 }
 
 function saveFirstClick(firstClickKey, state){
-    localStorage.setItem(firstClickKey, state);
-    notifyTournamentDataChanged();
+    saveTournamentValue(firstClickKey, state);
 }
 
 function saveCustomTeams(teams){
-    localStorage.setItem("customTeams", JSON.stringify(teams));
-    notifyTournamentDataChanged();
+    saveTournamentValue("customTeams", JSON.stringify(teams));
 }
 
 function saveCustomMatches(matches){
-    localStorage.setItem("customMatches", JSON.stringify(matches));
-    notifyTournamentDataChanged();
+    saveTournamentValue("customMatches", JSON.stringify(matches));
 }
 
 function saveCustomTournaments(tournaments){
-    localStorage.setItem("customTournaments", JSON.stringify(tournaments));
-    notifyTournamentDataChanged();
+    saveTournamentValue("customTournaments", JSON.stringify(tournaments));
 }
 
 function saveCustomGameIDCounter(gameIDCounter){
-    localStorage.setItem("customGameIDCounter", JSON.stringify(gameIDCounter));
-    notifyTournamentDataChanged();
+    saveTournamentValue("customGameIDCounter", JSON.stringify(gameIDCounter));
 }
 
 function generateCustomGameID() {
@@ -228,13 +226,11 @@ function generateCustomGameID() {
 
 // 標記比賽已開始
 function markGamesStarted(state) {
-    localStorage.setItem('gamesStarted', state);
-    notifyTournamentDataChanged();
+    saveTournamentValue('gamesStarted', state);
 }
 
 function markNewbieStarted(state) {
-    localStorage.setItem('newbieStarted', state);
-    notifyTournamentDataChanged();
+    saveTournamentValue('newbieStarted', state);
 }
 
 function wipeEverything(){
@@ -250,6 +246,7 @@ function wipeEverything(){
             ].includes(key) || key.endsWith("FirstClick")
         )) tournamentKeys.push(key);
     }
+    if (tournamentKeys.length === 0) return;
     tournamentKeys.forEach(key => localStorage.removeItem(key));
     notifyTournamentDataChanged();
 }
@@ -793,8 +790,7 @@ function saveMatches(matches){
         saveTeams(teams);
         saveNewbieTeams(newbieTeams);
         const matchesJSON = JSON.stringify(matches);
-        localStorage.setItem("matches", matchesJSON);
-        notifyTournamentDataChanged();
+        saveTournamentValue("matches", matchesJSON);
         
     } while (updated === true);
     recalculateOfficialStats(matches);
@@ -874,8 +870,7 @@ function loadPayPerMatch() {
 // Save pay per match to localStorage
 function savePayPerMatch() {
     const pay = document.getElementById('pay-per-match').value.trim();
-    localStorage.setItem('payPerMatch', pay);
-    notifyTournamentDataChanged();
+    if (!saveTournamentValue('payPerMatch', pay)) return;
     alert('Pay per match saved.');
     location.reload(); // Reload to update current payment
 }
